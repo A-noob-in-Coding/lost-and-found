@@ -103,15 +103,14 @@ export const authenticateUserService = async(rollNo,password) =>{
 export const changePasswordService = async(email,password) =>{
   try{
     const result = doesUserExist(email)
-    console.log("result is " + result)
     if(result){
+      const newPass =  await hashPassword(password)
       const query = 'Update "User" set password = $1 where email = $2';
-      await pool.query(query,[password,email])
+      await pool.query(query,[newPass,email])
       return
     } 
     else{
-
-      throw new Error("User already exist");
+      throw new Error("User does not exist");
     }
   }
   catch(error){
