@@ -4,6 +4,8 @@ import nodemailer from 'nodemailer';
 
 export const sendOTPEmail = async (email, otp) => {
   try {
+    console.log('EMAIL_USER:', process.env.EMAIL_USER);
+console.log('EMAIL_PASS:', process.env.EMAIL_PASS);
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       throw new Error('Email credentials not configured in environment variables');
     }
