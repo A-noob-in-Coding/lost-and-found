@@ -21,5 +21,24 @@ export const addLostCommentService = async(rollNo,lPostID,comment)=>{
     console.log("error while posting lost comment in user Service : ",error.message);
     throw new Error(error.message);
   }
+}
 
+export const deleteLostCommentService = async(rollNo,lcommentID)=>{
+  try{
+    const query = 'DELETE FROM lostpostcomment WHERE l_comment_id = $1 AND rollno = $2;'
+    await pool.query(query,[lcommentID,rollNo]);
+  }catch(error){
+    console.log("error while deleting lost comment ", error.message)
+    throw new Error(error.message)
+  }
+}
+
+export const deleteFoundCommentService = async(rollNo,fcommentID)=>{
+  try{
+    const query = 'DELETE FROM foundpostcomment WHERE f_comment_id = $1 AND rollno = $2;'
+    await pool.query(query,[fcommentID,rollNo]);
+  }catch(error){
+    console.log("error while deleting found comment ", error.message)
+    throw new Error(error.message)
+  }
 }

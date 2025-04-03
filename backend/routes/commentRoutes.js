@@ -1,8 +1,9 @@
 import express from "express"
-import { addFoundComment, addLostComment } from "../controllers/commentController.js"
+import { addFoundComment, addLostComment, deleteFoundComment, deleteLostComment } from "../controllers/commentController.js"
 const commentRoutes = express.Router()
 
 commentRoutes.post('/addlostcomment',addLostComment)
 commentRoutes.post('/addfoundcomment',addFoundComment)
-
+commentRoutes.delete('/deletelostcomment',deleteLostComment)
+commentRoutes.delete('/deletefoundcomment',deleteFoundComment)
 export default commentRoutes
