@@ -5,7 +5,7 @@ import nodemailer from 'nodemailer';
 export const sendOTPEmail = async (email, otp) => {
   try {
     console.log('EMAIL_USER:', process.env.EMAIL_USER);
-console.log('EMAIL_PASS:', process.env.EMAIL_PASS);
+    console.log('EMAIL_PASS:', process.env.EMAIL_PASS);
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       throw new Error('Email credentials not configured in environment variables');
     }
@@ -46,34 +46,48 @@ console.log('EMAIL_PASS:', process.env.EMAIL_PASS);
 
 // Updated to match otp table structure with rollno instead of email
 export const storeOTP = async (email, otp) => {
+  const client = await pool.connect();
   try {
-    console.log(email,otp)
-    await pool.query(
-      `INSERT INTO otp (email, otp, expires_at, is_verified) VALUES ($1, $2, NOW() + INTERVAL '5 minutes', false) ON CONFLICT (email) DO UPDATE SET otp = $2, expires_at = NOW() + INTERVAL '5 minutes', is_verified = false`, [email, otp]
+    console.log(email, otp);
+    await client.query('BEGIN');
+    await client.query(
+      `INSERT INTO otp (email, otp, expires_at, is_verified) VALUES ($1, $2, NOW() + INTERVAL '5 minutes', false) ON CONFLICT (email) DO UPDATE SET otp = $2, expires_at = NOW() + INTERVAL '5 minutes', is_verified = false`,
+      [email, otp]
     );
+    await client.query('COMMIT');
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Error storing OTP:', error);
     throw new Error('Failed to store OTP');
+  } finally {
+    client.release();
   }
 };
 
 export const verifyOTPService = async (email, otp) => {
+  const client = await pool.connect();
   try {
-    const result = await pool.query(
+    await client.query('BEGIN');
+    const result = await client.query(
       `SELECT * FROM otp WHERE email = $1 AND otp = $2 AND expires_at > NOW()`,
       [email, otp]
     );
 
     if (result.rows.length === 0) {
+      await client.query('ROLLBACK');
       return { success: false, message: 'Invalid or expired OTP' };
     }
 
     // Delete OTP after successful verification
-    await pool.query(`DELETE FROM otp WHERE email = $1`, [email]);
+    await client.query(`DELETE FROM otp WHERE email = $1`, [email]);
+    await client.query('COMMIT');
 
     return { success: true, message: 'OTP verified successfully. Account activated.' };
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Error verifying OTP:', error);
     throw new Error('Error verifying OTP');
+  } finally {
+    client.release();
   }
 };

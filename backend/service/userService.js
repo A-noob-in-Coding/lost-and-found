@@ -9,20 +9,26 @@ export const hashPassword = async (password) =>{
 
 
 export const registerUserService = async (rollNo, email, name, password, image_url) => {
+  const client = await pool.connect(); // Get a client from the pool
   try {
+    await client.query('BEGIN'); // Start transaction
+
     const hashedPassword = await hashPassword(password);
     const query = 'INSERT INTO "User" (rollNo, email, name, password, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *';
-    const result = await pool.query(query, [rollNo, email, name, hashedPassword, image_url]);
+    const result = await client.query(query, [rollNo, email, name, hashedPassword, image_url]);
 
-    // Check if result and result.rows exist before trying to access it
     if (result && result.rows) {
+      await client.query('COMMIT'); // Commit transaction
       return result.rows[0].password; // return the first row (new user)
     } else {
       throw new Error('Failed to create user');
     }
   } catch (error) {
+    await client.query('ROLLBACK'); // Rollback transaction on error
     console.error('Error registering user:', error);
     throw new Error(error.message);
+  } finally {
+    client.release(); // Release the client back to the pool
   }
 };
 

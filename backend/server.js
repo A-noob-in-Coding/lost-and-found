@@ -2,9 +2,10 @@ import express, { json } from 'express';
 import cors from 'cors';
 const app = express();
 import uploadRoutes from './routes/upload.js';
-import userRouter from './routes/userRoutes.js';
 import otpRouter from './routes/otpRoutes.js';
-import postRouter from "./routes/postRoutes.js";
+import userPostRouter from './routes/userPostRoutes.js';
+import adminPostRouter from './routes/adminPostRoutes.js';
+import userRouter from './routes/userRoutes.js';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -15,7 +16,8 @@ app.use(express.json());
 app.use('/upload', uploadRoutes);
 app.use('/api/users',userRouter);
 app.use('/api/otp',otpRouter);
-app.use("/api/posts", postRouter);
+app.use('/api/user/posts', userPostRouter); 
+app.use('/api/admin/posts', adminPostRouter);
 
 app.get('/', (req, res) => {
   res.send('Express PostgreSQL Cloudinary API is running');

@@ -33,39 +33,6 @@ export const createLostPostService = async (rollno, title, location, description
   }
 };
 
-export const createFoundPostService = async (rollno, title, location, description, image_url, category_id) => {
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-
-    // Insert into the `item` table
-    const itemQuery = `
-      INSERT INTO item (category_id, image_url, description, title, location)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING item_id
-    `;
-    const itemResult = await client.query(itemQuery, [category_id, image_url, description, title, location]);
-    const itemId = itemResult.rows[0].item_id;
-
-    // Insert into the `foundpost` table
-    const foundPostQuery = `
-      INSERT INTO foundpost (rollno, created_at, item_id)
-      VALUES ($1, NOW(), $2)
-      RETURNING *
-    `;
-    const foundPostResult = await client.query(foundPostQuery, [rollno, itemId]);
-
-    await client.query("COMMIT");
-    return foundPostResult.rows[0];
-  } catch (error) {
-    await client.query("ROLLBACK");
-    console.error("Error creating found post:", error);
-    throw new Error("Failed to create found post");
-  } finally {
-    client.release();
-  }
-};
-
 export const getLostPostService = async (postId) => {
   const client = await pool.connect();
   try {
@@ -132,6 +99,40 @@ export const deleteLostPostService = async (postId) => {
     client.release();
   }
 };
+
+export const createFoundPostService = async (rollno, title, location, description, image_url, category_id) => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    // Insert into the `item` table
+    const itemQuery = `
+      INSERT INTO item (category_id, image_url, description, title, location)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING item_id
+    `;
+    const itemResult = await client.query(itemQuery, [category_id, image_url, description, title, location]);
+    const itemId = itemResult.rows[0].item_id;
+
+    // Insert into the `foundpost` table
+    const foundPostQuery = `
+      INSERT INTO foundpost (rollno, created_at, item_id)
+      VALUES ($1, NOW(), $2)
+      RETURNING *
+    `;
+    const foundPostResult = await client.query(foundPostQuery, [rollno, itemId]);
+
+    await client.query("COMMIT");
+    return foundPostResult.rows[0];
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Error creating found post:", error);
+    throw new Error("Failed to create found post");
+  } finally {
+    client.release();
+  }
+};
+
 
 export const getFoundPostService = async (postId) => {
   const client = await pool.connect();

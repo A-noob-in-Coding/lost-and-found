@@ -1,4 +1,4 @@
-import { sendOTPController,verifyOTPController } from "../controller/otpController.js";
+import { sendOTPController,verifyOTPController } from "../controllers/otpController.js";
 import express from "express";
 
 const otpRouter = express.Router();
