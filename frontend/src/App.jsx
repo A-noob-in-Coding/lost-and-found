@@ -1,30 +1,26 @@
-import { useState } from 'react'
-
-import ReactDOM from 'react-dom/client';
+// import { useState } from 'react'
 import './index.css';
-import Login from './login';
-import Feed from './feed';
+// import Login from './login';
+import Feed from './pages/feedPage';
+import Login from './pages/loginPage';
+import { Route, Routes } from 'react-router-dom';
+import Register from './pages/registerPage';
+import AboutUs from './pages/aboutUs';
+import ContactUs from './pages/contactUs';
+import HowItWorks from './pages/howItWorks';
 function App() {
-  const [currentPage, setCurrentPage] = useState('feed'); // Change the initial state to 'feed'
-  
-  const navigateToFeed = () => {
-    setCurrentPage('feed');
-  };
   
   return (
-    <>
-        {currentPage === 'feed' &&
-          <Feed />
-        }
-      {
-        currentPage === 'login' &&
-          <Login onLoginSuccess={navigateToFeed} />
-        }
-      
-      /* {currentPage === 'login' && <Login onLoginSuccess={navigateToFeed} />}
-      {currentPage === 'feed' && <Feed />} */
- 
-    </>
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/feed" element={<Feed />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register/>} />
+      <Route path="*" element={<Login />} />
+      <Route path='/aboutUs' element={<AboutUs/>}/>
+      <Route path='/howItWorks' element={<HowItWorks/>}/>
+      <Route path='/contact' element={<ContactUs/>}/>
+    </Routes>
   );
 }
 
