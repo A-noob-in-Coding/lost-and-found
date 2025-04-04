@@ -7,15 +7,20 @@ import {
   userDeleteFoundPost,
   userGetFoundPost,
 } from "../controllers/postController.js";
+import upload from "../config/mutler.js";
 
 const router = express.Router();
 
+
 // Lost post routes for users
+router.post('/lost', upload.single("image"), userCreateLostPost);
 router.post("/lost", userCreateLostPost);
 router.get("/lost/:postId", userGetLostPost);
 router.delete("/lost/:postId", userDeleteLostPost);
+// This line is critical: `upload.single("image")` must be before the controller
 
 // Found post routes for users
+router.post('/found', upload.single("image"), userCreateFoundPost);
 router.post("/found", userCreateFoundPost);
 router.get("/found/:postId", userGetFoundPost);
 router.delete("/found/:postId", userDeleteFoundPost);

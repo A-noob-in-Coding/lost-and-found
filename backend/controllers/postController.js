@@ -9,19 +9,42 @@ import {
   deleteFoundPostService,
 } from "../service/postService.js";
 
+const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_FILE_SIZE = 3 * 1024 * 1024; // 5MB
+
+
 // User Controllers
+
 // Create a lost post
 export const userCreateLostPost = async (req, res) => {
-  const { rollno, title, location, description, image_url, category_id } = req.body;
-
-  if (!rollno || !title || !location || !description || !image_url || !category_id) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-
   try {
-    const lostPost = await createLostPostService(rollno, title, location, description, image_url, category_id);
+    const { rollno, title, location, description, category_id } = req.body;
+    let imageFile = req.file; // Get uploaded image from multer
+
+    if (!rollno || !title || !location || !description || !category_id) {
+      return res.status(400).json({ message: "All fields including image are required" });
+    }
+
+    if(!imageFile){
+      imageFile = null;
+    }
+
+    // Validate image file type
+    if (imageFile &&!ALLOWED_FILE_TYPES.includes(imageFile.mimetype)) {
+      return res.status(400).json({ message: "Invalid file type. Only JPEG, PNG, and WEBP are allowed." });
+    }
+
+    // Validate file size
+    if (imageFile && imageFile.size > MAX_FILE_SIZE) {
+      return res.status(400).json({ message: "File size exceeds the 3MB limit." });
+    }
+
+    // Save post in database with image URL
+    const lostPost = await createLostPostService(rollno, title, location, description, imageFile, category_id);
+
     return res.status(201).json({ message: "Lost post created successfully", lostPost });
   } catch (error) {
+    console.error("Error creating lost post:", error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -55,16 +78,35 @@ export const userGetLostPost = async (req, res) => {
 
 // Create a found post
 export const userCreateFoundPost = async (req, res) => {
-  const { rollno, title, location, description, image_url, category_id } = req.body;
-
-  if (!rollno || !title || !location || !description || !image_url || !category_id) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-
   try {
-    const foundPost = await createFoundPostService(rollno, title, location, description, image_url, category_id);
-    return res.status(201).json({ message: "Found post created successfully", foundPost });
+    const { rollno, title, location, description, category_id } = req.body;
+    let imageFile = req.file; // Get uploaded image from multer
+
+    if(!imageFile){
+      imageFile = null
+    }
+
+    if (!rollno || !title || !location || !description || !category_id) {
+      return res.status(400).json({ message: "All fields including image are required" });
+    }
+
+
+    // Validate image file type
+    if (imageFile &&!ALLOWED_FILE_TYPES.includes(imageFile.mimetype)) {
+      return res.status(400).json({ message: "Invalid file type. Only JPEG, PNG, and WEBP are allowed." });
+    }
+
+    // Validate file size
+    if (imageFile && imageFile.size > MAX_FILE_SIZE) {
+      return res.status(400).json({ message: "File size exceeds the 3MB limit." });
+    }
+
+    // Save post in database with image URL
+    const lostPost = await createFoundPostService(rollno, title, location, description, imageFile, category_id);
+
+    return res.status(201).json({ message: "Found post created successfully", lostPost });
   } catch (error) {
+    console.error("Error creating found post:", error);
     return res.status(500).json({ message: error.message });
   }
 };
