@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import BackgroundTypography from "../components/backgroundTypography.jsx";
+import Footer from "../utilities/footer.jsx";
 
 export default function HowItWorks() {
   const navigate = useNavigate();
@@ -123,6 +124,7 @@ export default function HowItWorks() {
           </div>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 }

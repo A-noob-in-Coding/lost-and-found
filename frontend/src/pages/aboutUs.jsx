@@ -1,7 +1,7 @@
 import React from "react";
 import BackgroundTypography from "../components/backgroundTypography.jsx";
 import { useNavigate } from "react-router-dom";
-
+import Footer from "../utilities/footer.jsx";
 export default function AboutUs() {
   const navigate = useNavigate();
   return (
@@ -104,6 +104,7 @@ export default function AboutUs() {
           </button>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 }
