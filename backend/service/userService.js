@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt'
 import pool from "../config/db.js"
+import { uploadToCloudinary } from '../config/cloudinary.js';
 
 export const hashPassword = async (password) =>{
   const saltRound = 10;
@@ -8,10 +9,14 @@ export const hashPassword = async (password) =>{
 }
 
 
-export const registerUserService = async (rollNo, email, name, password, image_url) => {
+export const registerUserService = async (rollNo, email, name, password, image) => {
   const client = await pool.connect(); // Get a client from the pool
   try {
     await client.query('BEGIN'); // Start transaction
+    let image_url = ""
+    if(image){
+      image_url = await uploadToCloudinary(image)
+    }
 
     const hashedPassword = await hashPassword(password);
     const query = 'INSERT INTO "User" (rollNo, email, name, password, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *';
