@@ -1,8 +1,22 @@
 import { useState } from "react";
 import { FaTimes } from "react-icons/fa";
-export default function ForgotPassword({ setShowForgotPassword }) {
+
+export default function ForgotPassword({
+  setShowForgotPassword,
+  setShowOtpPage, // Receive the function to show OTP page
+}) {
   const [isLoading, setIsLoading] = useState(false);
-  const handleResetPassword = () => {};
+
+  const handleResetPassword = () => {
+    setIsLoading(true);
+    // Simulate an API call or validation
+    setTimeout(() => {
+      setIsLoading(false);
+      setShowForgotPassword(false); // Hide the Forgot Password modal
+      setShowOtpPage(true); // Show the OTP page
+    }, 1000); // Simulate a delay
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-white shadow-2xl rounded-xl p-6 max-w-md w-full">

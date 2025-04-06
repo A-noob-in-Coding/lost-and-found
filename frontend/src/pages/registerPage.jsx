@@ -1,25 +1,10 @@
 import React, { useState } from "react";
-
-// import LoginForm from "../components/loginForm.jsx"
 import BackgroundTypography from "../components/backgroundTypography.jsx";
-// import ForgotPassword from '../components/forgotPassword.jsx';
 import RegisterForm from "../components/registerForm.jsx";
+import OtpPage from "../components/otpPage.jsx"; 
+
 export const Register = () => {
-  const [rollNo, setRollNo] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const handleRegister = (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      // Instead of showing stats, navigate to the feed page
-      if (onLoginSuccess) {
-        onLoginSuccess();
-      }
-    }, 1500);
-  };
+  const [showOtpPage, setShowOtpPage] = useState(false); // State to show OTP page
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -39,7 +24,14 @@ export const Register = () => {
             <p className="text-gray-500 text-center mb-8">
               Reconnect with your belongings
             </p>
-            <RegisterForm setShowForgotPassword={setShowForgotPassword} />
+            {!showOtpPage && (
+              <RegisterForm setShowOtpPage={setShowOtpPage} />
+            )}
+            {showOtpPage && (
+              <OtpPage
+                setShowOtpPage={setShowOtpPage} // Pass function to hide OTP page if needed
+              />
+            )}
             <div className="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
               © 2025 FAST NUCES Lost & Found System
             </div>

@@ -3,22 +3,13 @@ import React, { useState } from "react";
 import LoginForm from "../components/loginForm.jsx";
 import BackgroundTypography from "../components/backgroundTypography.jsx";
 import ForgotPassword from "../components/forgotPassword.jsx";
+import OtpPage from "../components/otpPage.jsx";
+import ChangePassword from "../components/changePassword.jsx"; // Import ChangePassword component
+
 export const Login = ({ onLoginSuccess }) => {
-  const [rollNo, setRollNo] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const handleLogin = (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      // Instead of showing stats, navigate to the feed page
-      if (onLoginSuccess) {
-        onLoginSuccess();
-      }
-    }, 1500);
-  };
+  const [showOtpPage, setShowOtpPage] = useState(false); // State to show OTP page
+  const [showChangePassword, setShowChangePassword] = useState(false); // State to show ChangePassword page
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -38,7 +29,20 @@ export const Login = ({ onLoginSuccess }) => {
             <p className="text-gray-500 text-center mb-8">
               Reconnect with your belongings
             </p>
-            <LoginForm setShowForgotPassword={setShowForgotPassword} />
+            {!showOtpPage && !showChangePassword && (
+              <LoginForm setShowForgotPassword={setShowForgotPassword} />
+            )}
+            {showOtpPage && !showChangePassword && (
+              <OtpPage
+                setShowChangePassword={setShowChangePassword}
+                setShowOtpPage={setShowOtpPage}
+              />
+            )}
+            {showChangePassword && (
+              <ChangePassword
+                setShowChangePassword={setShowChangePassword}
+              />
+            )}
             <div className="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
               © 2025 FAST NUCES Lost & Found System
             </div>
@@ -47,7 +51,10 @@ export const Login = ({ onLoginSuccess }) => {
       </div>
       {/* Forgot Password Modal */}
       {showForgotPassword && (
-        <ForgotPassword setShowForgotPassword={setShowForgotPassword} />
+        <ForgotPassword
+          setShowForgotPassword={setShowForgotPassword}
+          setShowOtpPage={setShowOtpPage} // Pass function to show OTP page
+        />
       )}
     </div>
   );

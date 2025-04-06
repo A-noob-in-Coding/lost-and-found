@@ -1,9 +1,8 @@
-// src/components/RegisterForm.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Toast from "../utilities/toast.jsx";
 
-export default function RegisterForm() {
+export default function RegisterForm({ setShowOtpPage }) {
   const [isLoading, setIsLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState(""); // State for toast message
   const [toastType, setToastType] = useState(""); // State for toast type ('success' or 'error')
@@ -25,7 +24,7 @@ export default function RegisterForm() {
         setToastType("success");
         setShowToast(true);
         setIsLoading(false); // Reset loading state after registration process completes
-        navigate("/login"); // Redirect to login page after successful registration
+        setShowOtpPage(true); // Show OTP page after successful registration
       } else {
         // Example of failure response
         setToastMessage("Registration failed. Please try again.");
