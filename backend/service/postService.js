@@ -1,6 +1,46 @@
 import { deleteFromCloudinary, uploadToCloudinary } from "../config/cloudinary.js";
 import pool from "../config/db.js";
 
+
+export const getLostPostService = async () => {
+  const client = await pool.connect();
+  try {
+    const query = `
+    SELECT lp.lpost_id, lp.rollno, lp.created_at, i.item_id, i.title, i.description, i.image_url, i.location, c.category
+FROM lostpost lp
+JOIN item i ON lp.item_id = i.item_id
+JOIN category c ON i.category_id = c.category_id
+ORDER BY lp.created_at DESC
+    `;
+    const result = await client.query(query);
+    return result.rows;
+  } catch (error) {
+    console.error("Database connection error:", error);
+    throw new Error("Failed to fetch lost posts");
+  } finally {
+    client.release();
+  }
+};
+
+export const getFoundPostService = async () => {
+  const client = await pool.connect();
+  try {
+    const query = `
+     SELECT fp.f_post_id, fp.rollno, fp.created_at, i.item_id, i.title, i.description, i.image_url, i.location, c.category
+FROM foundpost fp
+JOIN item i ON fp.item_id = i.item_id
+JOIN category c ON i.category_id = c.category_id
+ORDER BY fp.created_at DESC
+    `;
+    const result = await client.query(query);
+    return result.rows;
+  } catch (error) {
+    console.error("Database connection error:", error);
+    throw new Error("Failed to fetch found posts");
+  } finally {
+    client.release();
+  }
+};
 // Missing function that should be added to retrieve the image URL
 export const getImageUrlLostPost = async (postId) => {
   try {
@@ -10,14 +50,14 @@ export const getImageUrlLostPost = async (postId) => {
       JOIN lostpost lp ON i.item_id = lp.item_id
       WHERE lp.lpost_id = $1
     `;
-    
+
     const result = await pool.query(query, [postId]);
-    
+
     if (result.rows.length === 0 || !result.rows[0].image_url) {
       console.warn("No image URL found for post ID:", postId);
       return null;
     }
-    
+
     return result.rows[0].image_url;
   } catch (error) {
     console.error("Error fetching image URL:", error);
@@ -33,14 +73,14 @@ const getImageUrlFoundPost = async (postID) => {
       JOIN foundpost fp ON i.item_id = fp.item_id
       WHERE fp.fpost_id = $1
     `;
-    
+
     const result = await pool.query(query, [postId]);
-    
+
     if (result.rows.length === 0 || !result.rows[0].image_url) {
       console.warn("No image URL found for post ID:", postId);
       return null;
     }
-    
+
     return result.rows[0].image_url;
   } catch (error) {
     console.error("Error fetching image URL:", error);
@@ -53,7 +93,7 @@ export const createLostPostService = async (rollno, title, location, description
   const client = await pool.connect();
   try {
     let image_url = ""
-    if(image){
+    if (image) {
       image_url = await uploadToCloudinary(image)
     }
     await client.query("BEGIN");
@@ -86,23 +126,6 @@ export const createLostPostService = async (rollno, title, location, description
   }
 };
 
-export const getLostPostService = async (postId) => {
-  const client = await pool.connect();
-  try {
-    const query = `
-      SELECT * FROM lostpost
-      INNER JOIN item ON lostpost.item_id = item.item_id
-      WHERE lostpost.lpost_id = $1
-    `;
-    const result = await client.query(query, [postId]);
-    return result.rows[0];
-  } catch (error) {
-    console.error("Error fetching lost post:", error);
-    throw new Error("Failed to fetch lost post");
-  } finally {
-    client.release();
-  }
-};
 
 export const updateLostPostService = async (postId, title, location, description, image_url, category_id) => {
   const client = await pool.connect();
@@ -130,26 +153,26 @@ export const updateLostPostService = async (postId, title, location, description
 // Improved deleteLostPostService
 export const deleteLostPostService = async (postId) => {
   const client = await pool.connect();
-  
+
   try {
     await client.query("BEGIN");
-    
+
     // Get the image URL first
     const img_url = await getImageUrlLostPost(postId);
     console.log("Image URL for deletion:", img_url);
-    
+
     // Try to delete from Cloudinary, but continue even if it fails
     if (img_url) {
       const cloudinaryResult = await deleteFromCloudinary(img_url);
       console.log("Cloudinary deletion result:", cloudinaryResult);
     }
-    
+
     // Delete the post from the database
     const deleteItemQuery = `
       DELETE FROM item WHERE item_id = (SELECT item_id FROM lostpost WHERE lpost_id = $1)
     `;
     await client.query(deleteItemQuery, [postId]);
-    
+
     await client.query("COMMIT");
     return { message: "Lost post deleted successfully" };
   } catch (error) {
@@ -165,7 +188,7 @@ export const createFoundPostService = async (rollno, title, location, descriptio
   const client = await pool.connect();
   try {
     let image_url = ""
-    if(image){
+    if (image) {
       image_url = await uploadToCloudinary(image)
     }
     await client.query("BEGIN");
@@ -199,24 +222,6 @@ export const createFoundPostService = async (rollno, title, location, descriptio
 };
 
 
-export const getFoundPostService = async (postId) => {
-  const client = await pool.connect();
-  try {
-    const query = `
-      SELECT * FROM foundpost
-      INNER JOIN item ON foundpost.item_id = item.item_id
-      WHERE foundpost.f_post_id = $1
-    `;
-    const result = await client.query(query, [postId]);
-    return result.rows[0];
-  } catch (error) {
-    console.error("Error fetching found post:", error);
-    throw new Error("Failed to fetch found post");
-  } finally {
-    client.release();
-  }
-};
-
 export const updateFoundPostService = async (postId, title, location, description, image_url, category_id) => {
   const client = await pool.connect();
   try {
@@ -241,16 +246,16 @@ export const updateFoundPostService = async (postId, title, location, descriptio
 };
 
 export const deleteFoundPostService = async (postId) => {
-  
+
   try {
     let img_url = await getImageUrlFoundPost(postId)
-    if(img_url){
+    if (img_url) {
       await deleteFromCloudinary(img_url)
     }
     const deleteItemQuery = `
       DELETE FROM item WHERE item_id = (SELECT item_id FROM foundpost WHERE f_post_id = $1)
     `;
-    await pool.query(deleteItemQuery,[postId])
+    await pool.query(deleteItemQuery, [postId])
     return { message: "found post deleted successfully" };
   } catch (error) {
     console.error("Error deleting found post:", error);

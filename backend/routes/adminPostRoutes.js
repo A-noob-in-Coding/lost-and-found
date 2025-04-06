@@ -11,12 +11,12 @@ import {
 const router = express.Router();
 
 // Lost post routes for admins
-router.get("/lost/:postId", adminGetLostPost);
+router.get("/lost/", adminGetLostPost);
 router.put("/lost/:postId", adminUpdateLostPost);
 router.delete("/lost/:postId", adminDeleteLostPost);
 
 // Found post routes for admins
-router.get("/found/:postId", adminGetFoundPost);
+router.get("/found/", adminGetFoundPost);
 router.put("/found/:postId", adminUpdateFoundPost);
 router.delete("/found/:postId", adminDeleteFoundPost);
 

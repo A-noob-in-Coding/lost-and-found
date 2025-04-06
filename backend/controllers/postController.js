@@ -63,10 +63,10 @@ export const userDeleteLostPost = async (req, res) => {
 
 // Get a lost post
 export const userGetLostPost = async (req, res) => {
-  const { postId } = req.params;
+
 
   try {
-    const lostPost = await getLostPostService(postId);
+    const lostPost = await getLostPostService();
     if (!lostPost) {
       return res.status(404).json({ message: "Lost post not found" });
     }
@@ -125,10 +125,10 @@ export const userDeleteFoundPost = async (req, res) => {
 
 // Get a found post
 export const userGetFoundPost = async (req, res) => {
-  const { postId } = req.params;
+
 
   try {
-    const foundPost = await getFoundPostService(postId);
+    const foundPost = await getFoundPostService();
     if (!foundPost) {
       return res.status(404).json({ message: "Found post not found" });
     }

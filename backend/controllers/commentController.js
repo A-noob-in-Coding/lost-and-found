@@ -1,4 +1,4 @@
-import { addFoundCommentService, addLostCommentService, deleteFoundCommentService, deleteLostCommentService } from "../service/commentService.js"
+import { addFoundCommentService, addLostCommentService, deleteFoundCommentService, deleteLostCommentService, getAllFoundCommentsService, getAllLostCommentsService } from "../service/commentService.js"
 
 export const addLostComment = async(req,res) =>{
   const {lpostId,rollNo,comment} = req.body
@@ -59,4 +59,24 @@ export const deleteLostComment = async(req,res) =>{
   catch(error){
     return res.status(500).json({message:"internal server error"})
   } 
+}
+
+export const getAllFoundComments = async (req, res) => {
+  try {
+    const comments = await getAllFoundCommentsService();
+    return res.status(200).json(comments);
+  } catch (error) {
+    console.log("error while getting found comments in controller: ", error.message);
+    return res.status(500).json({ message: "internal server error" });
+  }
+}
+
+export const getAllLostComments = async (req, res) => {
+  try {
+    const comments = await getAllLostCommentsService();
+    return res.status(200).json(comments);
+  } catch (error) {
+    console.log("error while getting lost comments in controller: ", error.message);
+    return res.status(500).json({ message: "internal server error" });
+  }
 }

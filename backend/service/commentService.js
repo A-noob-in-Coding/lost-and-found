@@ -42,3 +42,39 @@ export const deleteFoundCommentService = async(rollNo,fcommentID)=>{
     throw new Error(error.message)
   }
 }
+
+
+export const getAllFoundCommentsService = async () => {
+  try {
+    const query = `
+      SELECT fc.f_comment_id, fc.f_post_id, fc.comment, fc.rollno, u.name, u.email, fp.created_at, i.title, i.description, i.location
+      FROM foundpostcomment fc
+      JOIN "User" u ON fc.rollno = u.rollno
+      JOIN foundpost fp ON fc.f_post_id = fp.f_post_id
+      JOIN item i ON fp.item_id = i.item_id
+      ORDER BY fp.created_at DESC
+    `;
+    const result = await pool.query(query);
+    return result.rows;
+  } catch (error) {
+    console.log("error while getting found comments in service: ", error.message);
+    throw new Error(error.message);
+  }
+}
+
+export const getAllLostCommentsService = async () => {
+  try {
+    const query = `
+      SELECT lc.l_comment_id, lc.l_post_id, lc.comment, lc.rollno, u.name, u.email, lp.created_at
+      FROM lostpostcomment lc
+      JOIN "User" u ON lc.rollno = u.rollno
+      JOIN lostpost lp ON lc.l_post_id = lp.lpost_id
+      ORDER BY lp.created_at DESC
+    `;
+    const result = await pool.query(query);
+    return result.rows;
+  } catch (error) {
+    console.log("error while getting lost comments in service: ", error.message);
+    throw new Error(error.message);
+  }
+}

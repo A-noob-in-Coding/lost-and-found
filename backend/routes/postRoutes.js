@@ -14,13 +14,13 @@ const router = express.Router();
 
 // Lost post routes
 router.post("/lost", createLostPostController);
-router.get("/lost/:postId", getLostPost);
+router.get("/lost", getLostPost);
 router.put("/lost/:postId", updateLostPost);
 router.delete("/lost/:postId", deleteLostPost);
 
 // Found post routes
 router.post("/found", createFoundPostController);
-router.get("/found/:postId", getFoundPost);
+router.get("/found", getFoundPost);
 router.put("/found/:postId", updateFoundPost);
 router.delete("/found/:postId", deleteFoundPost);
 
