@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
-
 export default function LoginForm({ setShowForgotPassword }) {
   const navigate = useNavigate(); // Fixed typo in navigate
   const { login } = useAuth(); // Import login function from auth context
@@ -13,18 +12,26 @@ export default function LoginForm({ setShowForgotPassword }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-
-    try {
-      const success = await login(rollNo, password);
-      if (success) {
-        // Redirect to the protected page they tried to visit or feed
-        const from = location.state?.from?.pathname || "/feed";
-        navigate(from, { replace: true });
+    setIsLoading(true); // Start loading
+  
+    setTimeout(async () => {
+      try {
+        const success = await login(rollNo, password);
+        if (success) {
+          const from = location.state?.from?.pathname || "/feed";
+          navigate(from, { replace: true });
+        } else {
+          setError("Invalid credentials");
+        }
+      } catch (error) {
+        console.log(error.message)
+        setError("Invalid credentials");
+      } finally {
+        setIsLoading(false); // Stop loading
       }
-    } catch (err) {
-      setError("Invalid credentials");
-    }
+    }, 1); // Simulate 2s delay
   };
+  
 
   return (
     <form onSubmit={handleLogin} className="space-y-6">

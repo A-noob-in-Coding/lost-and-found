@@ -1,10 +1,18 @@
 import React, { useState } from "react";
 import BackgroundTypography from "../components/backgroundTypography.jsx";
 import RegisterForm from "../components/registerForm.jsx";
-import OtpPage from "../components/otpPage.jsx"; 
+import OtpPage from "../components/otpPage.jsx";
 
 export const Register = () => {
-  const [showOtpPage, setShowOtpPage] = useState(false); // State to show OTP page
+  const [showOtpPage, setShowOtpPage] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    studentId: '',
+    email: '',
+    password: '',
+    imageFile: null
+  });
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -24,12 +32,17 @@ export const Register = () => {
             <p className="text-gray-500 text-center mb-8">
               Reconnect with your belongings
             </p>
-            {!showOtpPage && (
-              <RegisterForm setShowOtpPage={setShowOtpPage} />
-            )}
-            {showOtpPage && (
+            {!showOtpPage ? (
+              <RegisterForm
+                setShowOtpPage={setShowOtpPage}
+                formData={formData}
+                setFormData={setFormData}
+              />
+            ) : (
               <OtpPage
-                setShowOtpPage={setShowOtpPage} // Pass function to hide OTP page if needed
+                setShowOtpPage={setShowOtpPage}
+                setIsVerified={setIsVerified}
+                formData={formData}
               />
             )}
             <div className="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">

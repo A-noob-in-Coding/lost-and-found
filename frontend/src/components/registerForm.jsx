@@ -1,23 +1,17 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import Toast from "../utilities/toast.jsx";
+import toast from "react-hot-toast";
 
-export default function RegisterForm({ setShowOtpPage }) {
+export default function RegisterForm({
+  setShowOtpPage,
+  formData,
+  setFormData,
+}) {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: '',
-    studentId: '',
-    email: '',
-    password: '',
-    imageFile: null
-  });
   const [imagePreview, setImagePreview] = useState(null);
-  const [error, setError] = useState('');
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastType, setToastType] = useState("");
-  const [showToast, setShowToast] = useState(false);
+  const [error, setError] = useState("");
   const [isDragging, setIsDragging] = useState(false);
 
   const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -25,9 +19,9 @@ export default function RegisterForm({ setShowOtpPage }) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -35,12 +29,12 @@ export default function RegisterForm({ setShowOtpPage }) {
     if (!file) return false;
 
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-      setError('Please upload a JPEG, PNG, or WEBP image file.');
+      setError("Please upload a JPEG, PNG, or WEBP image file.");
       return false;
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      setError('Image size must be less than 3MB');
+      setError("Image size must be less than 3MB");
       return false;
     }
 
@@ -54,11 +48,11 @@ export default function RegisterForm({ setShowOtpPage }) {
     if (validateFile(file)) {
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        imageFile: file
+        imageFile: file,
       }));
-      setError('');
+      setError("");
     }
   };
 
@@ -83,11 +77,11 @@ export default function RegisterForm({ setShowOtpPage }) {
     if (file && validateFile(file)) {
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        imageFile: file
+        imageFile: file,
       }));
-      setError('');
+      setError("");
     }
   };
 
@@ -98,41 +92,48 @@ export default function RegisterForm({ setShowOtpPage }) {
   const handleRegister = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     if (!formData.imageFile) {
-      setError('Please upload a profile image');
+      setError("Please upload a profile image");
       setIsLoading(false);
       return;
     }
 
     const formDataToSend = new FormData();
-    formDataToSend.append('name', formData.fullName);
-    formDataToSend.append('rollNo', formData.studentId);
-    formDataToSend.append('email', formData.email);
-    formDataToSend.append('password', formData.password);
-    formDataToSend.append('imageFile', formData.imageFile);
+    formDataToSend.append("name", formData.fullName);
+    formDataToSend.append("rollNo", formData.studentId);
+    formDataToSend.append("email", formData.email);
+    formDataToSend.append("password", formData.password);
+    formDataToSend.append("imageFile", formData.imageFile);
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/register', {
-        method: 'POST',
-        body: formDataToSend,
+      // Store email in local storage for OTP verification
+      localStorage.setItem("registerEmail", formData.email);
+
+      const payload = { email: formData.email };
+      console.log("Sending payload:", payload);
+      console.log("Stringified payload:", JSON.stringify(payload));
+
+      const response = await fetch("http://localhost:5000/api/otp/send-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setToastMessage("Registration successful!");
-        setToastType("success");
-        setShowToast(true);
+        toast.success("OTP sent to your email");
         setShowOtpPage(true);
       } else {
-        throw new Error(data.message || 'Registration failed');
+        setError(data.message || "Failed to send OTP");
       }
     } catch (error) {
-      setToastMessage(error.message);
-      setToastType("error");
-      setShowToast(true);
+      toast.error("Registration process failed");
+      console.log(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -146,7 +147,7 @@ export default function RegisterForm({ setShowOtpPage }) {
             {error}
           </div>
         )}
-        
+
         <div className="relative">
           <i className="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
           <input
@@ -205,7 +206,9 @@ export default function RegisterForm({ setShowOtpPage }) {
           </label>
           <div
             className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-              isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+              isDragging
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300 hover:border-gray-400"
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -219,7 +222,7 @@ export default function RegisterForm({ setShowOtpPage }) {
               accept="image/jpeg,image/png,image/webp"
               onChange={handleImageChange}
             />
-            
+
             {imagePreview ? (
               <div className="space-y-4">
                 <img
@@ -251,7 +254,7 @@ export default function RegisterForm({ setShowOtpPage }) {
           type="submit"
           disabled={isLoading}
           className={`w-full py-3 bg-black text-white font-semibold rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 ${
-            isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-gray-800'
+            isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-gray-800"
           }`}
         >
           {isLoading ? (
@@ -274,14 +277,6 @@ export default function RegisterForm({ setShowOtpPage }) {
           </button>
         </div>
       </form>
-
-      {showToast && (
-        <Toast 
-          message={toastMessage} 
-          type={toastType} 
-          onClose={() => setShowToast(false)} 
-        />
-      )}
     </div>
   );
 }

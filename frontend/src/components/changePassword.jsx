@@ -45,6 +45,7 @@ export default function ChangePassword({ setShowChangePassword }) {
         setError(data.message || 'Failed to change password');
       }
     } catch (error) {
+      console.log('Error:', error);
       setError('Failed to change password');
     } finally {
       setIsLoading(false);
