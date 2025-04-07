@@ -79,7 +79,7 @@ export const verifyOTPService = async (email, otp) => {
     }
 
     // Delete OTP after successful verification
-    await client.query(`DELETE FROM otp WHERE email = $1`, [email]);
+    // await client.query(`DELETE FROM otp WHERE email = $1`, [email]);
     await client.query('COMMIT');
 
     return { success: true, message: 'OTP verified successfully. Account activated.' };
