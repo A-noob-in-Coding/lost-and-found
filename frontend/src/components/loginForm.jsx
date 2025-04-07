@@ -1,21 +1,41 @@
-// src/components/LoginForm.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 
-export default function LoginForm({ setShowRegister, setShowForgotPassword }) {
-  const navigte = useNavigate();
+export default function LoginForm({ setShowForgotPassword }) {
+  const navigate = useNavigate(); // Fixed typo in navigate
+  const { login } = useAuth(); // Import login function from auth context
   const [isLoading, setIsLoading] = useState(false);
   const [rollNo, setRollNo] = useState("");
   const [password, setPassword] = useState("");
-  const handleLogin = () => {};
+  const [error, setError] = useState(""); // Added error state
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const success = await login(rollNo, password);
+      if (success) {
+        // Redirect to the protected page they tried to visit or feed
+        const from = location.state?.from?.pathname || "/feed";
+        navigate(from, { replace: true });
+      }
+    } catch (err) {
+      setError("Invalid credentials");
+    }
+  };
 
   return (
     <form onSubmit={handleLogin} className="space-y-6">
+      {error && (
+        <div className="text-red-500 text-sm text-center">{error}</div>
+      )}
       <div className="relative">
         <i className="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
         <input
-          type="email"
-          placeholder="Email Address"
+          type="text" // Changed from email to text for roll number
+          placeholder="Roll Number"
           value={rollNo}
           onChange={(e) => setRollNo(e.target.value)}
           className="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
@@ -50,7 +70,7 @@ export default function LoginForm({ setShowRegister, setShowForgotPassword }) {
         </button>
         <button
           type="button"
-          onClick={() => navigte("/register")}
+          onClick={() => navigate("/register")}
           className="text-gray-500 hover:text-black transition-colors cursor-pointer"
         >
           Register

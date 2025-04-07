@@ -1,27 +1,32 @@
-// import { useState } from 'react'
-import './index.css';
-// import Login from './login';
-import Feed from './pages/feedPage';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/authContext';
+import ProtectedRoute from './components/protectedRoute';
 import Login from './pages/loginPage';
-import { Route, Routes } from 'react-router-dom';
+import Feed from './pages/feedPage';
 import Register from './pages/registerPage';
-import AboutUs from './pages/aboutUs';
-import ContactUs from './pages/contactUs';
-import HowItWorks from './pages/howItWorks';
+import { Toaster } from 'react-hot-toast';
+
 function App() {
-  
   return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/feed" element={<Feed />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register/>} />
-      <Route path="*" element={<Login />} />
-      <Route path='/aboutUs' element={<AboutUs/>}/>
-      <Route path='/howItWorks' element={<HowItWorks/>}/>
-      <Route path='/contact' element={<ContactUs/>}/>
-    </Routes>
+    <AuthProvider>
+      <BrowserRouter>
+        <Toaster position="top-right" />
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route 
+            path="/feed" 
+            element={
+              <ProtectedRoute>
+                <Feed />
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
-export default App
+export default App;

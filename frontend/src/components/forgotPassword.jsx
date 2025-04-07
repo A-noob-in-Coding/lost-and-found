@@ -1,20 +1,42 @@
 import { useState } from "react";
 import { FaTimes } from "react-icons/fa";
+import toast from 'react-hot-toast';
 
 export default function ForgotPassword({
   setShowForgotPassword,
-  setShowOtpPage, // Receive the function to show OTP page
+  setShowOtpPage,
 }) {
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
     setIsLoading(true);
-    // Simulate an API call or validation
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/otp/send-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.success('OTP sent to your email');
+        localStorage.setItem('resetEmail', email); // Store email for later use
+        setShowForgotPassword(false);
+        setShowOtpPage(true);
+      } else {
+        toast.error(data.message || 'Failed to send OTP');
+      }
+    } catch (error) {
+      toast.error('Failed to send OTP');
+    } finally {
       setIsLoading(false);
-      setShowForgotPassword(false); // Hide the Forgot Password modal
-      setShowOtpPage(true); // Show the OTP page
-    }, 1000); // Simulate a delay
+    }
   };
 
   return (
@@ -29,29 +51,30 @@ export default function ForgotPassword({
             <FaTimes />
           </button>
         </div>
-        <p className="text-gray-600 mb-6">
-          Enter your email address and we'll send you instructions to reset your
-          password.
-        </p>
-        <div className="relative mb-6">
-          <i className="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
-          />
-        </div>
-        <button
-          className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center justify-center shadow-md hover:shadow-lg"
-          onClick={handleResetPassword}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <i className="fas fa-spinner fa-spin"></i>
-          ) : (
-            "Send Reset Link"
-          )}
-        </button>
+        <form onSubmit={handleResetPassword}>
+          <p className="text-gray-600 mb-6">
+            Enter your email address and we'll send you an OTP to reset your
+            password.
+          </p>
+          <div className="relative mb-6">
+            <i className="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-300 cursor-pointer flex items-center justify-center shadow-md hover:shadow-lg"
+          >
+            {isLoading ? <i className="fas fa-spinner fa-spin"></i> : "Send OTP"}
+          </button>
+        </form>
       </div>
     </div>
   );
