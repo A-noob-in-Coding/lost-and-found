@@ -1,4 +1,4 @@
-import { authenticateUserService, changePasswordService, getPasswordUserService, getUserByRollNoService,hashPassword,registerUserService } from "../service/userService.js";
+import { authenticateUserService, changePasswordService, getPasswordUserService, getUserByRollNoService,hashPassword,registerUserService,getUserImageService } from "../service/userService.js";
 
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
@@ -46,6 +46,8 @@ export const getUserByRollNo = async (req, res) => {
 };
 
 
+
+
 export const authenticateUser = async (req, res) => {
   const { rollno, password } = req.body; // Ensure destructuring works correctly
   try {
@@ -71,3 +73,14 @@ export const changePassword = async(req,res) =>{
     return res.status(500).json({message:"Internal server error while changing password"})
   }
 }
+
+export const getUserImage = async (req, res) => {
+  const { rollNo } = req.params;
+
+  try {
+    const imageUrl = await getUserImageService(rollNo);
+    return res.json(imageUrl);
+  } catch (error) {
+    return res.status(404).json({ message: error.message });
+  }
+};

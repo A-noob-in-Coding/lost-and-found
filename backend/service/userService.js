@@ -123,3 +123,19 @@ export const changePasswordService = async(email,password) =>{
     throw new Error(error.message);
   }
 }
+
+export const getUserImageService = async(rollNo) =>{
+  try{
+    const query = 'Select image_url from "User" where rollno = $1';
+    const result = await pool.query(query,[rollNo]);
+    if (result && result.rows && result.rows.length > 0) {
+      return result.rows[0].image_url; // return the user object
+    } else {
+      throw new Error('User not found');
+    }
+  }
+  catch(error){
+    console.error('Error fetching user password:', error);
+    throw new Error(error.message);
+  }
+}
