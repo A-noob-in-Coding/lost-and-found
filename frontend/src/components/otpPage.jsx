@@ -3,7 +3,7 @@ import { FaTimes } from "react-icons/fa";
 import toast from 'react-hot-toast';
 import { useNavigate } from "react-router-dom";
 
-export default function OtpPage({ setShowOtpPage, setIsVerified, formData }) {
+export default function OtpPage({ setShowOtpPage,  formData }) {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -101,7 +101,6 @@ export default function OtpPage({ setShowOtpPage, setIsVerified, formData }) {
         
         if (registerResponse.ok) {
           toast.success('Registration completed successfully');
-          setIsVerified(true);
           localStorage.removeItem('registerEmail'); // Clean up
           navigate("/login");
         } else {

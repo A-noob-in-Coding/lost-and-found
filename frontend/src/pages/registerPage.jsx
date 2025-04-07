@@ -5,7 +5,6 @@ import OtpPage from "../components/otpPage.jsx";
 
 export const Register = () => {
   const [showOtpPage, setShowOtpPage] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     studentId: '',
@@ -41,7 +40,6 @@ export const Register = () => {
             ) : (
               <OtpPage
                 setShowOtpPage={setShowOtpPage}
-                setIsVerified={setIsVerified}
                 formData={formData}
               />
             )}
