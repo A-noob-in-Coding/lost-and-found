@@ -19,16 +19,16 @@ export const Register = () => {
         {/* Background Typography */}
         <BackgroundTypography />
         <div className="max-w-md w-full bg-white shadow-2xl rounded-2xl overflow-hidden z-10 transition-all duration-300 hover:shadow-3xl">
-          <div className="p-8">
+          <div className="p-2">
             <div className="flex justify-center mb-8">
-              <div className="h-16 w-16 rounded-full bg-black flex items-center justify-center shadow-lg">
+              {/* <div className="h-16 w-16 rounded-full bg-black flex items-center justify-center shadow-lg">
                 <i className="fas fa-search text-white text-2xl"></i>
-              </div>
+              </div> */}
             </div>
-            <h1 className="text-3xl font-bold text-center mb-2 tracking-tight">
+            <h1 className="text-3xl font-bold text-center tracking-tight">
               FAST Lost & Found
             </h1>
-            <p className="text-gray-500 text-center mb-8">
+            <p className="text-gray-500 text-center mt-2">
               Reconnect with your belongings
             </p>
             {!showOtpPage ? (
@@ -43,9 +43,9 @@ export const Register = () => {
                 formData={formData}
               />
             )}
-            <div className="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
+            {/* <div className="mt-2 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
               © 2025 FAST NUCES Lost & Found System
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

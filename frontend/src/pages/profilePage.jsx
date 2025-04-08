@@ -65,9 +65,9 @@ const ProfilePage = () => {
 
           {/* Action Buttons */}
           <div className="mt-4 flex gap-6 ">
-            <button className="text-sm w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-white-800 transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center justify-center shadow-md hover:shadow-lg">
+            {/* <button className="text-sm w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-white-800 transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center justify-center shadow-md hover:shadow-lg">
               Edit Profile
-            </button>
+            </button> */}
             <button className="text-sm w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center justify-center shadow-md hover:shadow-lg"
             onClick={() => setShowChangePassword(true)
           }
