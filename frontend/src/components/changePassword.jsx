@@ -2,9 +2,10 @@ import { useState } from "react";
 import { FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-
+import { useAuth } from "../context/authContext";
 export default function ChangePassword({ setShowChangePassword }) {
   const navigate = useNavigate();
+  const {user} = useAuth();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -20,7 +21,7 @@ export default function ChangePassword({ setShowChangePassword }) {
 
     setError("");
     setIsLoading(true);
-    const email = localStorage.getItem('resetEmail');
+    const email = user.email
 
     try {
       const response = await fetch('http://localhost:5000/api/users/changePassword', {

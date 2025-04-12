@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import BackgroundTypography from "../components/backgroundTypography";
 import ChangePassword from "../components/changePassword";
 import { useAuth } from "../context/authContext";
-import axios from "axios";
 import Footer from "../utilities/footer";
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -10,16 +9,8 @@ const ProfilePage = () => {
   const [showForgotPassword,setShowChangePassword] = useState(false);
   useEffect(() => {
     // Fetch the profile image from the backend
-    axios
-      .get(`http://localhost:5000/api/users/image/${user.rollno}`)
-      .then((res) => {
-        setProfileImage(res.data || "https://via.placeholder.com/128"); // Fallback image if data is empty
-      })
-      .catch((err) => {
-        console.error("Failed to load profile image:", err);
-        setProfileImage("https://via.placeholder.com/128"); // Fallback image in case of error
-      });
-  }, [user.rollno]);
+    setProfileImage(user.image_url)
+  },);
 
   return (
     <>

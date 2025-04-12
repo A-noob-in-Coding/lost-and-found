@@ -1,21 +1,15 @@
 import { useState, useEffect } from "react";
-import axios from "axios"; // Make sure axios is installed
 import { useAuth } from "../context/authContext";
+import { useNavigate } from "react-router-dom";
 export default function Navbar({ setShowPostModal }) {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [profileImgUrl, setProfileImgUrl] = useState("");
   const { user } = useAuth(); // call the hook inside the component
   useEffect(() => {
-
-    axios.get(`http://localhost:5000/api/users/image/${user.rollno}`)
-      .then(res => {
-        setProfileImgUrl(res.data); // Adjust if your backend sends it differently
-      })
-      .catch(err => {
-        console.error("Failed to load profile image:", err);
-      });
+    setProfileImgUrl(user.image_url)
   }, []);
 
   const handleNotifications = () => {
@@ -75,11 +69,14 @@ export default function Navbar({ setShowPostModal }) {
             )}
           </div>
           <div className="w-10 h-10 rounded-full bg-gray-200 cursor-pointer overflow-hidden">
+            <button onClick={()=>navigate("/profile")}>
+              
             <img
               src={profileImgUrl || "https://via.placeholder.com/40"}
               alt="Profile"
               className="w-full h-full object-cover"
-            />
+              />
+              </button>
           </div>
         </div>
       </div>
