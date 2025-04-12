@@ -1,7 +1,7 @@
 // misc services
 
 import pool from "../config/db.js"
-export const getCatagoriesService = async() =>{
+export const getCategoriesService = async() =>{
   try{  
     const query = 'select * from category'
     const result = await pool.query(query)

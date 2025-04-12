@@ -1,13 +1,13 @@
-import { getCatagoriesService } from "../service/utitilityService.js";
+import { getCategoriesService } from "../service/utitilityService.js";
 
-export const getCatagories = async(req,res) =>{
+export const getCategories = async(req,res) =>{
   try{
-    const catagories = await getCatagoriesService();
+    const catagories = await getCategoriesService();
     if(catagories){
       return res.status(200).json(catagories)
     }
     else{
-      return res.status(400).json({message:"error fetching catagories"})
+      return res.status(400).json({message:"error fetching categories"})
     }
   }
   catch(error){
