@@ -8,8 +8,7 @@ import ContentGrid from "../components/contentGrid.jsx";
 import Filter from "../components/filter.jsx";
 const Feed = () => {
   const [activeFilter, setActiveFilter] = useState("All");
-  const [showPostModal, setShowPostModal] = useState(false);
-  const [postType, setPostType] = useState("Lost");
+  const [showPostModal, setShowPostModal] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
   // const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(null);
@@ -78,17 +77,6 @@ const Feed = () => {
     setCommentText("");
   };
 
-  const handleSubmitPost = (e) => {
-    e.preventDefault();
-    console.log("Submitting post:", postType);
-    setSuccessMessage("Post created successfully!");
-    setShowPostModal(false);
-
-    // Auto-hide success message after 3 seconds
-    setTimeout(() => {
-      setSuccessMessage("");
-    }, 3000);
-  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -108,7 +96,7 @@ const Feed = () => {
       {/* Post Modal */}
       {showPostModal && (
         // post Modal idher ana
-        <PostModal setPostType={setPostType} postType={postType} setShowPostModal={setShowPostModal} />
+        <PostModal setShowPostModal={setShowPostModal} />
       )}
 
       {/* Success Message Toast */}
