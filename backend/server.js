@@ -6,6 +6,7 @@ import otpRouter from './routes/otpRoutes.js';
 import userPostRouter from './routes/userPostRoutes.js';
 import adminPostRouter from './routes/adminPostRoutes.js';
 import userRouter from './routes/userRoutes.js';
+import Utilrouter from './routes/utilityRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -20,7 +21,7 @@ app.use('/api/users',userRouter);
 app.use('/api/otp',otpRouter);
 app.use('/api/user/posts', userPostRouter); 
 app.use('/api/admin/posts', adminPostRouter);
-
+app.use('/utility',Utilrouter)
 app.get('/', (req, res) => {
   res.send('Express PostgreSQL Cloudinary API is running');
 });
