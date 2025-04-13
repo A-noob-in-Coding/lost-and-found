@@ -9,6 +9,7 @@ import HowItWorks from './pages/howItWorks.jsx';
 import Register from './pages/registerPage';
 import { Toaster } from 'react-hot-toast';
 import ProfilePage from './pages/profilePage';
+import AdminPage from './pages/adminPage.jsx'
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
       <BrowserRouter>
         <Toaster position="top-right" />
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<AdminPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<ProfilePage />} />
