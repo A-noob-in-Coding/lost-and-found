@@ -66,7 +66,7 @@ export const userGetLostPost = async (req, res) => {
 
 
   try {
-    const lostPost = await getLostPostService();
+    const lostPost = await getLostPostService(true);
     if (!lostPost) {
       return res.status(404).json({ message: "Lost post not found" });
     }
@@ -128,7 +128,7 @@ export const userGetFoundPost = async (req, res) => {
 
 
   try {
-    const foundPost = await getFoundPostService();
+    const foundPost = await getFoundPostService(true);
     if (!foundPost) {
       return res.status(404).json({ message: "Found post not found" });
     }
@@ -142,10 +142,8 @@ export const userGetFoundPost = async (req, res) => {
 // Admin Controllers
 // Get a lost post
 export const adminGetLostPost = async (req, res) => {
-  const { postId } = req.params;
-
   try {
-    const lostPost = await getLostPostService(postId);
+    const lostPost = await getLostPostService(false);
     if (!lostPost) {
       return res.status(404).json({ message: "Lost post not found" });
     }
@@ -182,10 +180,8 @@ export const adminDeleteLostPost = async (req, res) => {
 
 // Get a found post
 export const adminGetFoundPost = async (req, res) => {
-  const { postId } = req.params;
-
   try {
-    const foundPost = await getFoundPostService(postId);
+    const foundPost = await getFoundPostService(false);
     if (!foundPost) {
       return res.status(404).json({ message: "Found post not found" });
     }

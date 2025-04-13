@@ -1,18 +1,26 @@
 import { deleteFromCloudinary, uploadToCloudinary } from "../config/cloudinary.js";
 import pool from "../config/db.js";
 
-
-export const getLostPostService = async () => {
+// if flag is true we send verified posts else unverified posts
+export const getLostPostService = async (flag) => {
   const client = await pool.connect();
+  let is_verified
+  if(flag){
+    is_verified = true    
+  }
+  else{
+    is_verified = false
+  }
   try {
     const query = `
     SELECT lp.lpost_id, lp.rollno, lp.created_at, i.item_id, i.title, i.description, i.image_url, i.location, c.category
 FROM lostpost lp
 JOIN item i ON lp.item_id = i.item_id
 JOIN category c ON i.category_id = c.category_id
+where is_verified=$1
 ORDER BY lp.created_at DESC
     `;
-    const result = await client.query(query);
+    const result = await client.query(query,[is_verified]);
     return result.rows;
   } catch (error) {
     console.error("Database connection error:", error);
@@ -22,17 +30,26 @@ ORDER BY lp.created_at DESC
   }
 };
 
-export const getFoundPostService = async () => {
+// if flag is true we send verified posts else unverified posts
+export const getFoundPostService = async (flag) => {
   const client = await pool.connect();
+  let is_verified
+  if(flag){
+    is_verified = true    
+  }
+  else{
+    is_verified = false
+  }
   try {
     const query = `
      SELECT fp.f_post_id, fp.rollno, fp.created_at, i.item_id, i.title, i.description, i.image_url, i.location, c.category
 FROM foundpost fp
 JOIN item i ON fp.item_id = i.item_id
 JOIN category c ON i.category_id = c.category_id
+where is_verified=$1
 ORDER BY fp.created_at DESC
     `;
-    const result = await client.query(query);
+    const result = await client.query(query,[is_verified]);
     return result.rows;
   } catch (error) {
     console.error("Database connection error:", error);
