@@ -1,4 +1,4 @@
-import { addFoundCommentService, addLostCommentService, deleteFoundCommentService, deleteLostCommentService, getAllFoundCommentsService, getAllLostCommentsService, verifyFoundCommentService, verifyLostCommentService, getAdminAllCommentsService} from "../service/commentService.js"
+import { addFoundCommentService, addLostCommentService, deleteFoundCommentService, deleteLostCommentService, getAllFoundCommentsService, getAllLostCommentsService, verifyFoundCommentService, verifyLostCommentService, getAdminAllCommentsService, deleteAdminFoundCommentService, deleteAdminLostCommentService} from "../service/commentService.js"
 
 export const addLostComment = async(req,res) =>{
   const {lpostId,rollNo,comment} = req.body
@@ -31,6 +31,35 @@ export const addFoundComment = async(req,res) =>{
   }
 }
 
+export const deleteAdminFoundComment = async(req,res) =>{
+  const f_comment_id = req.query.id
+  try{
+    if(!f_comment_id){
+      return res.status(400).json({message:"please provide all fields"})
+    } 
+    await deleteAdminFoundCommentService(f_comment_id)
+    return res.status(200).json({message:"comment deleted successfully"})
+    
+  } 
+  catch(error){
+    return res.status(500).json({message:"internal server error"})
+  } 
+}
+
+export const deleteAdminLostComment = async(req,res) =>{
+  const l_comment_id = req.query.id
+  try{
+    if(!l_comment_id){
+      return res.status(400).json({message:"please provide all fields"})
+    }
+    await deleteAdminLostCommentService(l_comment_id)
+    return res.status(200).json({message:"comment deleted successfully"})
+    
+  } 
+  catch(error){
+    return res.status(500).json({message:"internal server error"})
+  } 
+}
 export const deleteFoundComment = async(req,res) =>{
   const { f_comment_id , rollNo} = req.body
   try{
@@ -132,3 +161,4 @@ export const getAdminAllComments = async(req,res) =>{
     return res.status(500).json({message:error.message})
   }
 }
+

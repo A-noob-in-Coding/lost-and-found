@@ -122,7 +122,7 @@ export const verifyFoundCommentService = async(fcommentID) =>{
 
 export const getAdminAllCommentsService = async() =>{
   try{
-    const query = "SELECT l_comment_id AS comment_id, comment FROM lostpostcomment WHERE is_verified = false UNION ALL SELECT f_comment_id AS comment_id, comment FROM foundpostcomment WHERE is_verified = false"
+    const query = "SELECT l_comment_id AS comment_id, comment, 'l' AS comment_type FROM lostpostcomment WHERE is_verified = false UNION ALL SELECT f_comment_id AS comment_id, comment, 'f' AS comment_type FROM foundpostcomment WHERE is_verified = false"
     const result = await pool.query(query,[])
     return result.rows
   }
@@ -132,3 +132,25 @@ export const getAdminAllCommentsService = async() =>{
 
   }
 }
+
+export const deleteAdminLostCommentService = async(lcommentID) =>{
+  try{
+    const query = "DELETE FROM lostpostcomment WHERE l_comment_id = $1"
+    await pool.query(query,[lcommentID])
+  }
+  catch(error){
+    console.log(error.message)
+    throw new Error(error.message)
+  }
+} 
+
+export const deleteAdminFoundCommentService = async(fcommentID) =>{
+  try{
+    const query = "DELETE FROM foundpostcomment WHERE f_comment_id = $1"
+    await pool.query(query,[fcommentID])
+  }
+  catch(error){
+    console.log(error.message)
+    throw new Error(error.message)
+  }
+} 
