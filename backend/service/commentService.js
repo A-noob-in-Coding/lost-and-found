@@ -43,8 +43,15 @@ export const deleteFoundCommentService = async(rollNo,fcommentID)=>{
   }
 }
 
-
-export const getAllFoundCommentsService = async () => {
+// if flag is true send verified comments, else unverified comments
+export const getAllFoundCommentsService = async (flag) => {
+  let is_verified
+  if(flag){
+    is_verified = true
+  }
+  else{
+    is_verified = false
+  }
   try {
     const query = `
       SELECT fc.f_comment_id, fc.f_post_id, fc.comment, fc.rollno, u.name, u.email, fp.created_at, i.title, i.description, i.location
@@ -52,9 +59,10 @@ export const getAllFoundCommentsService = async () => {
       JOIN "User" u ON fc.rollno = u.rollno
       JOIN foundpost fp ON fc.f_post_id = fp.f_post_id
       JOIN item i ON fp.item_id = i.item_id
+      where fc.is_verified = $1
       ORDER BY fp.created_at DESC
     `;
-    const result = await pool.query(query);
+    const result = await pool.query(query,[is_verified]);
     return result.rows;
   } catch (error) {
     console.log("error while getting found comments in service: ", error.message);
@@ -62,16 +70,25 @@ export const getAllFoundCommentsService = async () => {
   }
 }
 
-export const getAllLostCommentsService = async () => {
+// if flag is true send verified comments, else unverified comments
+export const getAllLostCommentsService = async (flag) => {
+  let is_verified
+  if(flag){
+    is_verified = true
+  }
+  else{
+    is_verified = false
+  }
   try {
     const query = `
       SELECT lc.l_comment_id, lc.l_post_id, lc.comment, lc.rollno, u.name, u.email, lp.created_at
       FROM lostpostcomment lc
       JOIN "User" u ON lc.rollno = u.rollno
       JOIN lostpost lp ON lc.l_post_id = lp.lpost_id
+      where lc.is_verified = $1
       ORDER BY lp.created_at DESC
     `;
-    const result = await pool.query(query);
+    const result = await pool.query(query,[is_verified]);
     return result.rows;
   } catch (error) {
     console.log("error while getting lost comments in service: ", error.message);

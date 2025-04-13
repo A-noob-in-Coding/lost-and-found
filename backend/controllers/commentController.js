@@ -36,7 +36,7 @@ export const deleteFoundComment = async(req,res) =>{
   try{
     if(!f_comment_id || !rollNo){
       return res.status(400).json({message:"please provide all fields"})
-    }
+    } 
     await deleteFoundCommentService(rollNo,f_comment_id)
     return res.status(200).json({message:"comment deleted successfully"})
     
@@ -61,9 +61,9 @@ export const deleteLostComment = async(req,res) =>{
   } 
 }
 
-export const getAllFoundComments = async (req, res) => {
+export const getAdminAllFoundComments = async (req, res) => {
   try {
-    const comments = await getAllFoundCommentsService();
+    const comments = await getAllFoundCommentsService(false);
     return res.status(200).json(comments);
   } catch (error) {
     console.log("error while getting found comments in controller: ", error.message);
@@ -71,9 +71,28 @@ export const getAllFoundComments = async (req, res) => {
   }
 }
 
-export const getAllLostComments = async (req, res) => {
+export const getAdminAllLostComments = async (req, res) => {
   try {
-    const comments = await getAllLostCommentsService();
+    const comments = await getAllLostCommentsService(false);
+    return res.status(200).json(comments);
+  } catch (error) {
+    console.log("error while getting lost comments in controller: ", error.message);
+    return res.status(500).json({ message: "internal server error" });
+  }
+}
+export const getUserAllFoundComments = async (req, res) => {
+  try {
+    const comments = await getAllFoundCommentsService(true);
+    return res.status(200).json(comments);
+  } catch (error) {
+    console.log("error while getting found comments in controller: ", error.message);
+    return res.status(500).json({ message: "internal server error" });
+  }
+}
+
+export const getUserAllLostComments = async (req, res) => {
+  try {
+    const comments = await getAllLostCommentsService(true);
     return res.status(200).json(comments);
   } catch (error) {
     console.log("error while getting lost comments in controller: ", error.message);
