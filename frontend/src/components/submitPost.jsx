@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "../context/authContext";
 import { Form } from "react-router-dom";
 export default function SubmitPost({ postType, setShowPostModal }) {
+  const [isFormSend , setIsFormSend] = useState(false); // to check if the form is sent or not
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: "",
@@ -34,7 +35,9 @@ export default function SubmitPost({ postType, setShowPostModal }) {
   }, []);
 
   const handleSubmitPost = async (e) => {
+    if(isFormSend) return; // Prevent multiple submissions
     e.preventDefault();
+    setIsFormSend(true); // Set to true to prevent multiple submissions
     setError("");
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
@@ -228,12 +231,13 @@ export default function SubmitPost({ postType, setShowPostModal }) {
             accept="image/jpeg,image/png,image/webp"
             onChange={handleImageChange}
           />
-          {imagePreview ? (
-            <div className="relative">
+         {imagePreview ? (
+            <div className="flex justify-center items-center w-12 h-12 border border-gray-300 rounded-lg overflow-hidden">
               <img
                 src={imagePreview}
                 alt="Preview"
-                className="mx-auto h-32 w-32 object-cover rounded-lg"
+                className="object-cover w-12 h-12 rounded-lg"
+                style={{ width: '10vh', height: '10vh' }}
               />
               <button
                 type="button"
