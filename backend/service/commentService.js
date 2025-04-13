@@ -119,3 +119,16 @@ export const verifyFoundCommentService = async(fcommentID) =>{
     throw new Error(error.message)
   }
 }
+
+export const getAdminAllCommentsService = async() =>{
+  try{
+    const query = "SELECT l_comment_id AS comment_id, comment FROM lostpostcomment WHERE is_verified = false UNION ALL SELECT f_comment_id AS comment_id, comment FROM foundpostcomment WHERE is_verified = false"
+    const result = await pool.query(query,[])
+    return result.rows
+  }
+  catch(error){
+    console.log(error.message)
+    throw new Error(error.message)
+
+  }
+}

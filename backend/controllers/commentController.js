@@ -1,4 +1,4 @@
-import { addFoundCommentService, addLostCommentService, deleteFoundCommentService, deleteLostCommentService, getAllFoundCommentsService, getAllLostCommentsService, verifyFoundCommentService, verifyLostCommentService} from "../service/commentService.js"
+import { addFoundCommentService, addLostCommentService, deleteFoundCommentService, deleteLostCommentService, getAllFoundCommentsService, getAllLostCommentsService, verifyFoundCommentService, verifyLostCommentService, getAdminAllCommentsService} from "../service/commentService.js"
 
 export const addLostComment = async(req,res) =>{
   const {lpostId,rollNo,comment} = req.body
@@ -117,6 +117,17 @@ export const verifyFoundComment = async(req,res) =>{
     await verifyFoundCommentService(f_comment_id)
     return res.status(200).json({message:"successfully marked as verfied"})
   }
+  catch(error){
+    return res.status(500).json({message:error.message})
+  }
+}
+
+export const getAdminAllComments = async(req,res) =>{
+  try{
+    const result = await getAdminAllCommentsService()
+    return res.status(200).json(result)
+
+  } 
   catch(error){
     return res.status(500).json({message:error.message})
   }
