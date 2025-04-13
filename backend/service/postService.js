@@ -30,6 +30,48 @@ ORDER BY lp.created_at DESC
   }
 };
 
+export const getAdminPostsService = async() =>{
+  try{
+    const query = `
+  SELECT 
+      'l' AS post_type,
+      lp.lpost_id AS post_id,
+      i.image_url,
+      i.title,
+      i.description,
+      i.location
+  FROM 
+      lostpost lp
+  JOIN 
+      item i ON lp.item_id = i.item_id
+  WHERE 
+      lp.is_verified = false
+
+  UNION ALL
+
+  SELECT 
+      'f' AS post_type,
+      fp.f_post_id AS post_id,
+      i.image_url,
+      i.title,
+      i.description,
+      i.location
+  FROM 
+      foundpost fp
+  JOIN 
+      item i ON fp.item_id = i.item_id
+  WHERE 
+      fp.is_verified = false
+`;
+    const result = await pool.query(query)
+    return result.rows
+  }
+  catch(error){
+    console.log(error.message)
+    throw new Error(error.message)
+  }
+}
+
 // if flag is true we send verified posts else unverified posts
 export const getFoundPostService = async (flag) => {
   const client = await pool.connect();
@@ -144,26 +186,15 @@ export const createLostPostService = async (rollno, title, location, description
 };
 
 
-export const updateLostPostService = async (postId, title, location, description, image_url, category_id) => {
-  const client = await pool.connect();
+export const updateLostPostService = async (post_id) => {
   try {
-    await client.query("BEGIN");
 
-    const updateItemQuery = `
-      UPDATE item
-      SET title = $1, location = $2, description = $3, image_url = $4, category_id = $5
-      WHERE item_id = (SELECT item_id FROM lostpost WHERE lpost_id = $6)
-    `;
-    await client.query(updateItemQuery, [title, location, description, image_url, category_id, postId]);
-
-    await client.query("COMMIT");
+    const query = "UPDATE lostpost SET is_verified = true WHERE lpost_id = $1"
+    await pool.query(query,[post_id])
     return { message: "Lost post updated successfully" };
   } catch (error) {
-    await client.query("ROLLBACK");
-    console.error("Error updating lost post:", error);
-    throw new Error("Failed to update lost post");
-  } finally {
-    client.release();
+    console.error("Error updating found post:", error);
+    throw new Error("Failed to update found post");
   }
 };
 
@@ -239,26 +270,15 @@ export const createFoundPostService = async (rollno, title, location, descriptio
 };
 
 
-export const updateFoundPostService = async (postId, title, location, description, image_url, category_id) => {
-  const client = await pool.connect();
+export const updateFoundPostService = async (post_id) => {
   try {
-    await client.query("BEGIN");
 
-    const updateItemQuery = `
-      UPDATE item
-      SET title = $1, location = $2, description = $3, image_url = $4, category_id = $5
-      WHERE item_id = (SELECT item_id FROM foundpost WHERE f_post_id = $6)
-    `;
-    await client.query(updateItemQuery, [title, location, description, image_url, category_id, postId]);
-
-    await client.query("COMMIT");
+    const query = "UPDATE foundpost SET is_verified = true WHERE f_post_id = $1"
+    await pool.query(query,[post_id])
     return { message: "Found post updated successfully" };
   } catch (error) {
-    await client.query("ROLLBACK");
     console.error("Error updating found post:", error);
     throw new Error("Failed to update found post");
-  } finally {
-    client.release();
   }
 };
 

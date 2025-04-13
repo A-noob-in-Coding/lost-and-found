@@ -2,11 +2,12 @@ import {
   createLostPostService,
   createFoundPostService,
   getLostPostService,
-  updateLostPostService,
   deleteLostPostService,
   getFoundPostService,
   updateFoundPostService,
   deleteFoundPostService,
+  getAdminPostsService,
+  updateLostPostService,
 } from "../service/postService.js";
 
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -141,34 +142,22 @@ export const userGetFoundPost = async (req, res) => {
 
 // Admin Controllers
 // Get a lost post
-export const adminGetLostPost = async (req, res) => {
+export const getAdminPosts = async (req, res) => {
   try {
-    const lostPost = await getLostPostService(false);
-    if (!lostPost) {
+    const result = await getAdminPostsService(false);
+    if (!result) {
       return res.status(404).json({ message: "Lost post not found" });
     }
-    return res.json(lostPost);
+    return res.json(result);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
 
-// Update a lost post
-export const adminUpdateLostPost = async (req, res) => {
-  const { postId } = req.params;
-  const { title, location, description, image_url, category_id } = req.body;
-
-  try {
-    const updatedPost = await updateLostPostService(postId, title, location, description, image_url, category_id);
-    return res.json({ message: "Lost post updated successfully", updatedPost });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
 
 // Delete a lost post
 export const adminDeleteLostPost = async (req, res) => {
-  const { postId } = req.params;
+  const postId  = req.query.id;
 
   try {
     await deleteLostPostService(postId);
@@ -193,12 +182,13 @@ export const adminGetFoundPost = async (req, res) => {
 
 // Update a found post
 export const adminUpdateFoundPost = async (req, res) => {
-  const { postId } = req.params;
-  const { title, location, description, image_url, category_id } = req.body;
-
+  const post_id = req.query.id
+  if(!post_id){
+    return res.status(400).json({message:"must provide post id"})
+  }
   try {
-    const updatedPost = await updateFoundPostService(postId, title, location, description, image_url, category_id);
-    return res.json({ message: "Found post updated successfully", updatedPost });
+    await updateFoundPostService(post_id);
+    return res.json({ message: "Found post updated successfully"});
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -206,11 +196,27 @@ export const adminUpdateFoundPost = async (req, res) => {
 
 // Delete a found post
 export const adminDeleteFoundPost = async (req, res) => {
-  const { postId } = req.params;
-
+  const postId  = req.query.id
+  if(!postId){
+    return res.status(400).json({message:"must provide post id"})
+  }
   try {
+    
     await deleteFoundPostService(postId);
     return res.json({ message: "Found post deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const adminUpdateLostPost = async (req, res) => {
+  const post_id = req.query.id
+  if(!post_id){
+    return res.status(400).json({message:"must provide post id"})
+  }
+  try {
+    await updateLostPostService(post_id);
+    return res.json({ message: "Found post updated successfully"});
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

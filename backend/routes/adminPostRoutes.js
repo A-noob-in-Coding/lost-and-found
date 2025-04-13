@@ -1,23 +1,23 @@
 import express from "express";
 import {
-  adminGetLostPost,
   adminUpdateLostPost,
   adminDeleteLostPost,
-  adminGetFoundPost,
   adminUpdateFoundPost,
   adminDeleteFoundPost,
+  getAdminPosts,
 } from "../controllers/postController.js";
-
 const router = express.Router();
 
+
+router.get("/", getAdminPosts);
+
 // Lost post routes for admins
-router.get("/lost/", adminGetLostPost);
-router.put("/lost/:postId", adminUpdateLostPost);
-router.delete("/lost/:postId", adminDeleteLostPost);
+router.put("/lost", adminUpdateLostPost);
+router.delete("/lost", adminDeleteLostPost);
 
 // Found post routes for admins
-router.get("/found/", adminGetFoundPost);
-router.put("/found/:postId", adminUpdateFoundPost);
-router.delete("/found/:postId", adminDeleteFoundPost);
+
+router.put("/found", adminUpdateFoundPost);
+router.delete("/found", adminDeleteFoundPost);
 
 export default router;
