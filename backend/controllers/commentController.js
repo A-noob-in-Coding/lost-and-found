@@ -1,4 +1,4 @@
-import { addFoundCommentService, addLostCommentService, deleteFoundCommentService, deleteLostCommentService, getAllFoundCommentsService, getAllLostCommentsService } from "../service/commentService.js"
+import { addFoundCommentService, addLostCommentService, deleteFoundCommentService, deleteLostCommentService, getAllFoundCommentsService, getAllLostCommentsService, verifyFoundCommentService, verifyLostCommentService} from "../service/commentService.js"
 
 export const addLostComment = async(req,res) =>{
   const {lpostId,rollNo,comment} = req.body
@@ -97,5 +97,27 @@ export const getUserAllLostComments = async (req, res) => {
   } catch (error) {
     console.log("error while getting lost comments in controller: ", error.message);
     return res.status(500).json({ message: "internal server error" });
+  }
+}
+
+export const verifyLostComment = async(req,res) =>{
+  const l_comment_id = req.query.id
+  try{
+    await verifyLostCommentService(l_comment_id)
+    return res.status(200).json({message:"successfully marked as verfied"}) 
+  }
+  catch(error){
+    return res.status(500).json({message:error.message})
+  }
+}
+
+export const verifyFoundComment = async(req,res) =>{
+  const f_comment_id = req.query.id
+  try{
+    await verifyFoundCommentService(f_comment_id)
+    return res.status(200).json({message:"successfully marked as verfied"})
+  }
+  catch(error){
+    return res.status(500).json({message:error.message})
   }
 }

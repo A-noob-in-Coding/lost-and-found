@@ -95,3 +95,27 @@ export const getAllLostCommentsService = async (flag) => {
     throw new Error(error.message);
   }
 }
+
+export const verifyLostCommentService = async(lcommentID) =>{
+  try{
+    const query = 'UPDATE lostpostcomment SET is_verified = true where l_comment_id = $1'
+    await pool.query(query,[lcommentID])
+    return 
+  }
+  catch(error){
+    console.log("error marking lost comment"+error.message)
+    throw new Error(error.message)
+  }
+}
+
+export const verifyFoundCommentService = async(fcommentID) =>{
+  try{
+    const query = 'UPDATE foundpostcomment SET is_verified = true where f_comment_id = $1'
+    await pool.query(query,[fcommentID])
+    return 
+  }
+  catch(error){
+    console.log("error marking lost comment"+error.message)
+    throw new Error(error.message)
+  }
+}
