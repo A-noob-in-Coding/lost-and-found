@@ -15,14 +15,6 @@ const AdminPage = () => {
     }
   ]);
 
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      text: "I think I saw a similar watch at the park entrance yesterday. The security guard might have it.",
-      postId: 1,
-      status: "pending"
-    }
-  ]);
 
   const handlePostAction = (id, action) => {
     setPosts(posts.map(post => 
@@ -30,11 +22,6 @@ const AdminPage = () => {
     ));
   };
 
-  const handleCommentAction = (id, action) => {
-    setComments(comments.map(comment => 
-      comment.id === id ? { ...comment, status: action } : comment
-    ));
-  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -67,10 +54,6 @@ const AdminPage = () => {
         )}
         {activeTab === 'comments' && (
           <CommentVerificationContainer 
-            comments={comments} 
-            posts={posts} 
-            onApprove={(id) => handleCommentAction(id, 'approve')} 
-            onReject={(id) => handleCommentAction(id, 'reject')} 
           />
         )}
       </div>
