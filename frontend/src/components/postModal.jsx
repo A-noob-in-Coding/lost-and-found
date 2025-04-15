@@ -3,7 +3,7 @@ import { useState } from "react";
 export default function PostModal({setShowPostModal}) {
   const [postType, setPostType] = useState("lost");
   return (
-    <div className="fixed inset-0 bg-black bgopacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 rounded-2xl border border-black/30">
           <div className="bg-white rounded-xl w-full max-w-md p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold">Create New Post</h3>

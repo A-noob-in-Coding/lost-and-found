@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
-export default function Navbar({ setShowPostModal }) {
+export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }) {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [profileImgUrl, setProfileImgUrl] = useState("");

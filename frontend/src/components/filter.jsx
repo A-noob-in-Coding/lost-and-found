@@ -1,4 +1,4 @@
-export default function Filter(setActiveFilter, activeFilter) {
+export default function Filter({setActiveFilter, activeFilter}) {
   const filters = ["All", "Lost", "Found"];
   return (
     <div className="pt-[76px] pb-4 px-4 bg-white border-b border-gray-100">

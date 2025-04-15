@@ -301,7 +301,7 @@ export const deleteFoundPostService = async (postId) => {
 
 export const getPostDataService = async() =>{
   try{
-    const getVerifiedLostPostsQuery = `
+    const getAllVerifiedPostsQuery = `
   SELECT
     lp.lpost_id AS id,
     'Lost' AS type,
@@ -319,7 +319,7 @@ export const getPostDataService = async() =>{
       json_build_object(
         'id', lc.l_comment_id,
         'text', lc.comment,
-        'date', to_char(lp.created_at, 'YYYY-MM-DD HH24:MI:SS'),
+        'date', to_char(lc.created_at, 'YYYY-MM-DD HH24:MI:SS'),
         'user', json_build_object(
           'name', cu.name,
           'avatar', cu.image_url
@@ -333,9 +333,45 @@ export const getPostDataService = async() =>{
   LEFT JOIN "User" cu ON lc.rollno = cu.rollno
   WHERE lp.is_verified = true
   GROUP BY lp.lpost_id, i.title, i.description, i.location, i.image_url, lp.created_at, u.name, u.rollno, u.image_url
-  ORDER BY lp.created_at DESC;
+
+  UNION ALL
+
+  SELECT
+    fp.f_post_id AS id,
+    'Found' AS type,
+    i.title,
+    i.description,
+    i.location,
+    to_char(fp.created_at, 'YYYY-MM-DD HH24:MI:SS') AS date,
+    i.image_url AS image,
+    json_build_object(
+      'name', u.name,
+      'rollNumber', u.rollno,
+      'avatar', u.image_url
+    ) AS user,
+    COALESCE(json_agg(
+      json_build_object(
+        'id', fc.f_comment_id,
+        'text', fc.comment,
+        'date', to_char(fc.created_at, 'YYYY-MM-DD HH24:MI:SS'),
+        'user', json_build_object(
+          'name', cu.name,
+          'avatar', cu.image_url
+        )
+      )
+    ) FILTER (WHERE fc.f_comment_id IS NOT NULL), '[]') AS comments
+  FROM foundpost fp
+  JOIN "User" u ON fp.rollno = u.rollno
+  JOIN item i ON fp.item_id = i.item_id
+  LEFT JOIN foundpostcomment fc ON fc.f_post_id = fp.f_post_id AND fc.is_verified = true
+  LEFT JOIN "User" cu ON fc.rollno = cu.rollno
+  WHERE fp.is_verified = true
+  GROUP BY fp.f_post_id, i.title, i.description, i.location, i.image_url, fp.created_at, u.name, u.rollno, u.image_url
+
+  ORDER BY date DESC;
 `;
-    const result = await pool.query(getVerifiedLostPostsQuery)
+  
+    const result = await pool.query(getAllVerifiedPostsQuery)
     return result.rows
   }
   catch(error){

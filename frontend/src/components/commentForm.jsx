@@ -1,36 +1,59 @@
 import { useState } from "react";
 import { MdSend } from "react-icons/md";
-export default function CommentForm(item) {
+import { useAuth } from "../context/authContext";
+
+export default function CommentForm({ item }) {
+  const { user } = useAuth();
   const [commentText, setCommentText] = useState("");
-  const handleAddComment = async (e, itemId) => {
+
+  const handleAddComment = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-    const response = await fetch(
-      `http://localhost:8000/api/comments/${itemId}/`,
-      {
+
+    const isLost = item.type === "Lost";
+    const url = isLost
+      ? "http://localhost:5000/comment/addlostcomment"
+      : "http://localhost:5000/comment/addfoundcomment";
+
+    const body = isLost
+      ? {
+          lpostId: item.id,
+          rollNo: user.rollno,
+          comment: commentText,
+        }
+      : {
+          fpostId: item.id,
+          rollNo: user.rollno,
+          comment: commentText,
+        };
+
+    try {
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ text: commentText }),
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        setCommentText("");
+        console.log("Comment added successfully");
+        // Optional: trigger a state refresh to update comments
+      } else {
+        console.error("Failed to add comment");
       }
-    );
-    if (response.ok) {
-      setCommentText("");
-      // Optionally, you can also refresh the comments list here
-    } else {
-      console.error("Failed to add comment");
+    } catch (error) {
+      console.error("Error sending comment:", error);
     }
   };
+
   return (
-    <form
-      className="flex items-center mt-3"
-      onSubmit={(e) => handleAddComment(e, item.id)}
-    >
+    <form className="flex items-center mt-3" onSubmit={handleAddComment}>
       <div className="w-6 h-6 rounded-full overflow-hidden mr-2">
         <img
-          src="https://public.readdy.ai/ai/img_res/9611ce60f32dec530b3011a82805d677.jpg"
+          src={user.image_url}
           alt="You"
           className="w-full h-full object-cover"
         />

@@ -62,7 +62,8 @@ export default function ContentGrid({filteredItems}) {
                       <div className="text-xs text-gray-500 flex items-center">
                         <span>{item.user.rollNumber}</span>
                         <span className="mx-1">•</span>
-                        <span>{item.date}</span>
+                        <span>{new Date(item.date).toLocaleString()}</span>
+
                       </div>
                     </div>
                   </div>
@@ -163,7 +164,7 @@ export default function ContentGrid({filteredItems}) {
                                     {comment.user.name}
                                   </div>
                                   <div className="text-xs text-gray-400">
-                                    {comment.date}
+                                  {new Date(comment.date).toLocaleString()}
                                   </div>
                                 </div>
                                 <div className="text-sm mt-1">
@@ -178,7 +179,7 @@ export default function ContentGrid({filteredItems}) {
                           No comments yet
                         </div>
                       )}
-                      <CommentForm />
+                      <CommentForm  item={item}/>
                       {/* comment form */}
                     </div>
                   )}
