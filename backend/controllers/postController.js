@@ -8,6 +8,7 @@ import {
   deleteFoundPostService,
   getAdminPostsService,
   updateLostPostService,
+  getPostDataService,
 } from "../service/postService.js";
 
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -221,3 +222,14 @@ export const adminUpdateLostPost = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+export const getPostData = async(req,res) =>{
+  try{
+    const result = await getPostDataService();
+  return res.status(200).json(result)
+  }
+  catch(error){
+    console.log("error in getPostdata controller"+ error.message)
+    return res.status(500).json({message:"internal server error"})
+  }
+}

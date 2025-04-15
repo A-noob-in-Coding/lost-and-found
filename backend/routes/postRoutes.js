@@ -8,20 +8,22 @@ import {
   getFoundPost,
   updateFoundPost,
   deleteFoundPost,
+  getPostData,
 } from "../controllers/postController.js";
 
-const router = express.Router();
+const postRouter = express.Router();
 
 // Lost post routes
-router.post("/lost", createLostPostController);
-router.get("/lost", getLostPost);
-router.put("/lost/:postId", updateLostPost);
-router.delete("/lost/:postId", deleteLostPost);
+postRouter.post("/lost", createLostPostController);
+postRouter.get("/lost", getLostPost);
+postRouter.put("/lost/:postId", updateLostPost);
+postRouter.delete("/lost/:postId", deleteLostPost);
 
 // Found post routes
-router.post("/found", createFoundPostController);
-router.get("/found", getFoundPost);
-router.put("/found/:postId", updateFoundPost);
-router.delete("/found/:postId", deleteFoundPost);
+postRouter.post("/found", createFoundPostController);
+postRouter.get("/found", getFoundPost);
+postRouter.put("/found/:postId", updateFoundPost);
+postRouter.delete("/found/:postId", deleteFoundPost);
+postRouter.get('/getPostsData',getPostData);
 
-export default router;
+export default postRouter;

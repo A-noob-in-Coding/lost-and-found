@@ -6,6 +6,7 @@ import {
   userCreateFoundPost,
   userDeleteFoundPost,
   userGetFoundPost,
+  getPostData,
 } from "../controllers/postController.js";
 import upload from "../config/mutler.js";
 
@@ -24,5 +25,5 @@ router.post('/found', upload.single("image"), userCreateFoundPost);
 router.post("/found", userCreateFoundPost);
 router.get("/found", userGetFoundPost);
 router.delete("/found/:postId", userDeleteFoundPost);
-
+router.get('/getPostData',getPostData)
 export default router;

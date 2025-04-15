@@ -283,7 +283,6 @@ export const updateFoundPostService = async (post_id) => {
 };
 
 export const deleteFoundPostService = async (postId) => {
-
   try {
     let img_url = await getImageUrlFoundPost(postId)
     if (img_url) {
@@ -299,3 +298,48 @@ export const deleteFoundPostService = async (postId) => {
     throw new Error("Failed to delete found post");
   }
 };
+
+export const getPostDataService = async() =>{
+  try{
+    const getVerifiedLostPostsQuery = `
+  SELECT
+    lp.lpost_id AS id,
+    'Lost' AS type,
+    i.title,
+    i.description,
+    i.location,
+    to_char(lp.created_at, 'YYYY-MM-DD HH24:MI:SS') AS date,
+    i.image_url AS image,
+    json_build_object(
+      'name', u.name,
+      'rollNumber', u.rollno,
+      'avatar', u.image_url
+    ) AS user,
+    COALESCE(json_agg(
+      json_build_object(
+        'id', lc.l_comment_id,
+        'text', lc.comment,
+        'date', to_char(lp.created_at, 'YYYY-MM-DD HH24:MI:SS'),
+        'user', json_build_object(
+          'name', cu.name,
+          'avatar', cu.image_url
+        )
+      )
+    ) FILTER (WHERE lc.l_comment_id IS NOT NULL), '[]') AS comments
+  FROM lostpost lp
+  JOIN "User" u ON lp.rollno = u.rollno
+  JOIN item i ON lp.item_id = i.item_id
+  LEFT JOIN lostpostcomment lc ON lc.l_post_id = lp.lpost_id AND lc.is_verified = true
+  LEFT JOIN "User" cu ON lc.rollno = cu.rollno
+  WHERE lp.is_verified = true
+  GROUP BY lp.lpost_id, i.title, i.description, i.location, i.image_url, lp.created_at, u.name, u.rollno, u.image_url
+  ORDER BY lp.created_at DESC;
+`;
+    const result = await pool.query(getVerifiedLostPostsQuery)
+    return result.rows
+  }
+  catch(error){
+    console.log("error fetching post data"+ error.message)
+    throw new Error(error.message)
+  }
+}
