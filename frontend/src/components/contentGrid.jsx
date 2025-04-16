@@ -36,7 +36,8 @@ export default function ContentGrid({filteredItems}) {
           {filteredItems.map((item) => (
             <div
               key={item.id}
-              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
+              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-black/10
+"
             >
               <div className="aspect-square overflow-hidden rounded-t-xl">
                 <img

@@ -10,6 +10,7 @@ import Register from './pages/registerPage';
 import { Toaster } from 'react-hot-toast';
 import ProfilePage from './pages/profilePage';
 import AdminPage from './pages/adminPage.jsx'
+import "nprogress/nprogress.css";
 
 function App() {
   return (

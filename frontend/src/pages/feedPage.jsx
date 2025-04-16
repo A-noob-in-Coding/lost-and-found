@@ -6,7 +6,8 @@ import Toast from "../utilities/toast.jsx";
 import PostModal from "../components/postModal.jsx";
 import ContentGrid from "../components/contentGrid.jsx";
 import Filter from "../components/filter.jsx";
-
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
 const Feed = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
@@ -18,18 +19,21 @@ const Feed = () => {
   const [expandedComments, setExpandedComments] = useState(null);
   const [commentText, setCommentText] = useState("");
   const [filteredItems, setFilteredItems] = useState([]);
-
   useEffect(() => {
+    NProgress.start(); // show progress bar
+  
     fetch("http://localhost:5000/api/user/posts/getPostData")
       .then((res) => res.json())
       .then((data) => {
         setFilteredItems(data);
+        NProgress.done(); // hide progress bar
       })
       .catch((err) => {
         console.error("Failed to fetch post data:", err);
+        NProgress.done(); // even on error
       });
   }, []);
-
+  
   const filters = ["All", "Lost", "Found"];
 
   const toggleDropdown = (itemId) => {

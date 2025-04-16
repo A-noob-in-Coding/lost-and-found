@@ -3,8 +3,15 @@ import toast from "react-hot-toast";
 import { useAuth } from "../context/authContext";
 import { Form } from "react-router-dom";
 export default function SubmitPost({ postType, setShowPostModal }) {
-  const [isFormSend , setIsFormSend] = useState(false); // to check if the form is sent or not
+  const [isFormSend, setIsFormSend] = useState(false); // to check if the form is sent or not
   const { user } = useAuth();
+  const fileInputRef = useRef(null);
+  // const [isLoading, setIsLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [error, setError] = useState("");
+
+  const [isDragging, setIsDragging] = useState(false);
+
   const [formData, setFormData] = useState({
     title: "",
     location: "",
@@ -31,11 +38,11 @@ export default function SubmitPost({ postType, setShowPostModal }) {
     };
 
     fetchCategories();
-    formData.rollNo = user.rollno;
+    console.log(user.rollno);
   }, []);
 
   const handleSubmitPost = async (e) => {
-    if(isFormSend) return; // Prevent multiple submissions
+    if (isFormSend) return; // Prevent multiple submissions
     e.preventDefault();
     setIsFormSend(true); // Set to true to prevent multiple submissions
     setError("");
@@ -43,37 +50,33 @@ export default function SubmitPost({ postType, setShowPostModal }) {
     formDataToSend.append("title", formData.title);
     formDataToSend.append("location", formData.location);
     formDataToSend.append("description", formData.description);
-    formDataToSend.append("imageFile", formData.imageFile);
+    formDataToSend.append("image", formData.imageFile);
     formDataToSend.append("category_id", formData.category_id);
-    formDataToSend.append("rollno", formData.rollNo);
-
+    formDataToSend.append("rollno", user.rollno);
+    console.log("FormData entries:");
+for (let pair of formDataToSend.entries()) {
+  console.log(pair[0] + ": " + pair[1]);
+}
     let result = false;
     if (postType === "lost") {
       result = await fetch("http://localhost:5000/api/user/posts/lost", {
         method: "POST",
-        // Remove the Content-Type header to let the browser set it automatically with boundary info
         body: formDataToSend,
       });
     } else {
       result = await fetch("http://localhost:5000/api/user/posts/found", {
         method: "POST",
-        // Remove the Content-Type header to let the browser set it automatically with boundary info
         body: formDataToSend,
       });
     }
     if (result.ok) {
       toast.success("Item successfully posted");
+      setShowPostModal(false);
     } else {
       toast.error(result.message || "Failed to post item");
     }
   };
 
-  const fileInputRef = useRef(null);
-  // const [isLoading, setIsLoading] = useState(false);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [error, setError] = useState("");
-
-  const [isDragging, setIsDragging] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -145,6 +148,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
     }
   };
   return (
+
     <form onSubmit={handleSubmitPost}>
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -194,7 +198,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
           required
           onChange={handleInputChange}
           name="location"
-        />
+          />
       </div>
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -207,7 +211,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
           required
           name="description"
           onChange={handleInputChange}
-        ></textarea>
+          ></textarea>
       </div>
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
@@ -223,7 +227,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={triggerFileInput}
-        >
+          >
           <input
             ref={fileInputRef}
             type="file"
@@ -231,39 +235,43 @@ export default function SubmitPost({ postType, setShowPostModal }) {
             accept="image/jpeg,image/png,image/webp"
             onChange={handleImageChange}
           />
-         {imagePreview ? (
-            <div className="flex justify-center items-center w-12 h-12 border border-gray-300 rounded-lg overflow-hidden">
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="object-cover w-12 h-12 rounded-lg"
-                style={{ width: '10vh', height: '10vh' }}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  URL.revokeObjectURL(imagePreview);
-                  setImagePreview(null);
-                  setFormData((prev) => ({ ...prev, imageFile: null }));
-                }}
-                className="absolute top-0 right-0 bg-red-500 text-red-500 text-2xl px-0 py-0 rounded-tr-lg hover:bg-red-600 transition-all"
-              >
-                ✖
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <i className="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
-              <div className="space-y-2">
-                <p className="text-gray-600">
-                  Drag and drop an image or click to browse
-                </p>
-                <p className="text-sm text-gray-500">
-                  JPEG, PNG, or WEBP (max 3MB)
-                </p>
-              </div>
-            </div>
-          )}
+{imagePreview ? (
+  <div className="relative flex justify-center items-center h-auto w-40 mx-auto">
+    <img
+      src={imagePreview}
+      alt="Preview"
+      className="object-cover w-32 h-32 rounded-lg"
+      />
+    <button
+  type="button"
+  onClick={(e) => {
+    e.stopPropagation(); // Prevent triggering the file input
+    URL.revokeObjectURL(imagePreview);
+    setImagePreview(null);
+    setFormData((prev) => ({ ...prev, imageFile: null }));
+  }}
+  className="absolute top-0 right-0 transform -translate-x-2 -translate-y-1 bg-red-500 text-red-500 rounded-full p-1 hover:bg-red-600 transition-all"
+  title="Remove image"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+    <line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg>
+</button>
+  </div>
+) : (
+  <div className="space-y-4">
+    <i className="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+    <div className="space-y-2">
+      <p className="text-gray-600">
+        Drag and drop an image or click to browse
+      </p>
+      <p className="text-sm text-gray-500">
+        JPEG, PNG, or WEBP (max 3MB)
+      </p>
+    </div>
+  </div>
+)}
         </div>
       </div>
       <div className="flex space-x-3 mt-6">
