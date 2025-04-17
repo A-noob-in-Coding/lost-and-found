@@ -133,9 +133,12 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
 "
             >
               {item.isOwnPost && (
-                <span className={`absolute top-2 right-2 z-10 text-xs font-semibold px-3 py-1 rounded ${item.isVerified === false ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
-                  {item.isVerified === false ? 'UNVERIFIED' : 'VERIFIED'}
-                </span>
+                <span
+                className="absolute top-2 right-2 z-10 text-xs font-semibold px-3 py-1 rounded text-white"
+                style={{ backgroundColor: item.isVerified === false ? '#ef4444' : '#10b981' }}
+              >
+                {item.isVerified ? 'Verified' : 'Unverified'}
+              </span>
               )}
               <div className="aspect-square overflow-hidden rounded-t-xl">
                 <img
