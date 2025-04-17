@@ -59,12 +59,10 @@ export const doesUserExist = async(email)=>{
   try{
     const query = 'select count(*) from "User" where email = $1'
     const result = await pool.query(query,[email])
-    if(result){
-      return true
+    if(result && result.rows && result.rows.length > 0) {
+      return parseInt(result.rows[0].count) > 0;
     }
-    else{
-      return false
-    }
+    return false;
   }
   catch(error){
     console.log("Error while checking existence of user : ",error.message)

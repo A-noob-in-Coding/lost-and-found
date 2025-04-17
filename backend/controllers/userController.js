@@ -1,4 +1,4 @@
-import { authenticateUserService, changePasswordService, getPasswordUserService, getUserByRollNoService,hashPassword,registerUserService,getUserImageService } from "../service/userService.js";
+import { authenticateUserService, changePasswordService, doesUserExist, getPasswordUserService, getUserByRollNoService, hashPassword, registerUserService, getUserImageService } from "../service/userService.js";
 
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
@@ -82,5 +82,22 @@ export const getUserImage = async (req, res) => {
     return res.json(imageUrl);
   } catch (error) {
     return res.status(404).json({ message: error.message });
+  }
+};
+
+export const checkUserByEmail = async (req, res) => {
+  const { email } = req.query;
+  
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required', exists: false });
+  }
+
+  try {
+    // Use doesUserExist function which accepts email instead of getPasswordUserService
+    const exists = await doesUserExist(email);
+    return res.json({ exists: exists });
+  } catch (error) {
+    console.error('Error checking user by email:', error);
+    return res.status(200).json({ exists: false });
   }
 };
