@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/authContext";
 import LoginForm from "../components/loginForm.jsx";
 import BackgroundTypography from "../components/backgroundTypography.jsx";
 import ForgotPassword from "../components/forgotPassword.jsx";
@@ -10,6 +10,13 @@ export const Login = ({ onLoginSuccess }) => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showOtpPage, setShowOtpPage] = useState(false); // State to show OTP page
   const [showChangePassword, setShowChangePassword] = useState(false); // State to show ChangePassword page
+  const { logout } = useAuth();
+
+  // Reset auth context when component mounts
+  useEffect(() => {
+    logout(); // This will clear the user from context and localStorage
+    console.log("Auth context reset on login page mount");
+  }, [logout]);
 
   return (
     <div className="min-h-screen bg-white text-black">

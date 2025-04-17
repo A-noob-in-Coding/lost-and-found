@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/authContext';
-import ProtectedRoute from './components/protectedRoute';
+import ProtectedRoutes from './components/protectedRoutes';
 import Login from './pages/loginPage';
 import Feed from './pages/feedPage';
 import AboutUs from './pages/aboutUs.jsx';
@@ -18,23 +18,20 @@ function App() {
       <BrowserRouter>
         <Toaster position="top-right" />
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<ProfilePage />} />          <Route path="/aboutus" element={<AboutUs />} />
+          <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/contact" element={<ContactForm />} />
           <Route path="/howitworks" element={<HowItWorks />} />
           <Route path="/admin/:password" element={<AdminPage />} />
 
-
-          <Route 
-            path="/feed" 
-            element={
-              <ProtectedRoute>
-                <Feed />
-              </ProtectedRoute>
-            } 
-          />
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoutes />}>
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/feed" element={<Feed />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
