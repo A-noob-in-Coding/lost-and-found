@@ -8,12 +8,28 @@ export default function ForgotPassword({
 }) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
+      // First check if user exists with this email
+      const checkUserResponse = await fetch(`http://localhost:5000/api/users/check-email?email=${encodeURIComponent(email)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const userData = await checkUserResponse.json();
+      
+      if (!checkUserResponse.ok || !userData.exists) {
+        toast.error('No account exists with this email address');
+        setIsLoading(false);
+        return;
+      }
+      
+      // If user exists, proceed with sending OTP
       const response = await fetch('http://localhost:5000/api/otp/send-otp', {
         method: 'POST',
         headers: {
@@ -33,7 +49,8 @@ export default function ForgotPassword({
         toast.error(data.message || 'Failed to send OTP');
       }
     } catch (error) {
-      toast.error('Failed to send OTP');
+      console.error('Error during password reset:', error);
+      toast.error('Failed to process your request');
     } finally {
       setIsLoading(false);
     }

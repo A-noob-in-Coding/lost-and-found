@@ -1,5 +1,7 @@
 import { useState } from "react";
 import CommentForm from "./commentForm";
+import { useAuth } from "../context/authContext";
+import toast from 'react-hot-toast';
 export default function ContentGrid({filteredItems}) {
   const [showDropdown, setShowDropdown] = useState(null);
   const [expandedComments, setExpandedComments] = useState(null);
@@ -7,7 +9,8 @@ export default function ContentGrid({filteredItems}) {
   const filters = ["All", "Lost", "Found"];
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [items, setItems] = useState(filteredItems);
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);  const { user } = useAuth();
+  
   const toggleDropdown = (itemId) => {
     if (showDropdown === itemId) {
       setShowDropdown(null);
@@ -22,9 +25,71 @@ export default function ContentGrid({filteredItems}) {
       setExpandedComments(itemId);
     }
   };
-  const handleAction = (action, type) => {
+  const handleAction = async (action, type, item) => {
     console.log(`${action} action for ${type} item`);
     setShowDropdown(null);
+    
+    try {
+      // Get current user's email from auth context
+      const senderEmail = user.email;
+      const itemTitle = item.title;
+      
+      // Get receiver's email by making a request to the backend to fetch it by roll number
+      const receiverRollno = item.user.rollNumber;
+      
+      // First, fetch the receiver's email using their roll number
+      const userResponse = await fetch(`http://localhost:5000/api/users/${receiverRollno}`);
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch receiver\'s information');
+      }
+      
+      const userData = await userResponse.json();
+      const receiverEmail = userData.email;
+      
+      if (action === "Found" && type === "Lost") {
+        // Send found notification
+        const response = await fetch('http://localhost:5000/api/notifications/found-item', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            senderEmail,
+            receiverEmail,
+            itemTitle
+          }),
+        });
+        
+        if (response.ok) {
+          toast.success('Owner notified that you found their item!');
+        } else {
+          toast.error('Failed to send notification. Please try again.');
+        }
+      } 
+      else if (action === "Claim" && type === "Found") {
+        // Send claim notification
+        const response = await fetch('http://localhost:5000/api/notifications/claim-item', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            senderEmail,
+            receiverEmail,
+            itemTitle
+          }),
+        });
+        
+        if (response.ok) {
+          toast.success('Finder notified that you claimed this item!');
+        } else {
+          toast.error('Failed to send notification. Please try again.');
+        }
+      }
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      toast.error('An error occurred while sending the notification.');
+    }
   };
   const handleFilterClick = (filter) => {
     setSelectedFilter(filter);
@@ -77,18 +142,17 @@ export default function ContentGrid({filteredItems}) {
                     </button>
                     {showDropdown === item.id && (
                       <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 z-10">
-                        <ul className="py-1">
-                          {item.type === "Lost" ? (
+                        <ul className="py-1">                          {item.type === "Lost" ? (
                             <li
                               className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                              onClick={() => handleAction("Found", item.type)}
+                              onClick={() => handleAction("Found", item.type, item)}
                             >
                               <i className="fas fa-check mr-2"></i> Found
                             </li>
                           ) : (
                             <li
                               className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                              onClick={() => handleAction("Claim", item.type)}
+                              onClick={() => handleAction("Claim", item.type, item)}
                             >
                               <i className="fas fa-hand-paper mr-2"></i> Claim
                             </li>
@@ -111,13 +175,13 @@ export default function ContentGrid({filteredItems}) {
                 </div>
                 <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                   {item.description}
-                </p>
-                <button
+                </p>                <button
                   className="w-full py-2 bg-black text-white rounded-lg font-medium text-sm hover:bg-gray-900 transition-colors cursor-pointer whitespace-nowrap"
                   onClick={() =>
                     handleAction(
                       item.type === "Lost" ? "Found" : "Claim",
-                      item.type
+                      item.type,
+                      item
                     )
                   }
                 >
