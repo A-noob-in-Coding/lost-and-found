@@ -22,6 +22,33 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]); // This will run whenever user state changes
 
+  const updateUsername = async (newUsername) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/users/updateusername`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rollno: user.rollno, // Send the rollno to identify the user
+          username: newUsername,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update username');
+      }
+
+      const updatedUser = { ...user, name: newUsername };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      toast.success('Username updated successfully!');
+    } catch (error) {
+      console.error('Error updating username:', error);
+      toast.error(error.message);
+    }
+  };
+
   const login = async (rollno, password) => {
     setLoading(true);
     try {
@@ -81,6 +108,7 @@ export const AuthProvider = ({ children }) => {
       login, 
       logout,
       loading,
+      updateUsername,
       isAuthenticated: !!user 
     }}>
       {children}

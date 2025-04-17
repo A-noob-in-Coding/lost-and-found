@@ -137,3 +137,14 @@ export const getUserImageService = async(rollNo) =>{
     throw new Error(error.message);
   }
 }
+
+export const updateUserNameService = async(rollno,username) =>{
+  try{
+    const query = 'UPDATE "User" SET name = $1 WHERE rollno = $2'
+    await pool.query(query,[username,rollno])
+  }
+  catch(error){
+    console.log("error while changing username"+error.message)
+    throw new Error(error.message)
+  }
+}

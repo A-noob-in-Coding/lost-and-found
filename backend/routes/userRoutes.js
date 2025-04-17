@@ -1,5 +1,5 @@
 import express from 'express';
-import { authenticateUser, changePassword, checkUserByEmail, getUserByRollNo, getUserImage, registerUser } from '../controllers/userController.js';
+import { authenticateUser, changePassword, checkUserByEmail, getUserByRollNo, getUserImage, registerUser, updateUserName } from '../controllers/userController.js';
 import upload from '../config/mutler.js';
 
 const userRouter = express.Router();
@@ -11,4 +11,5 @@ userRouter.get('/:rollNo', getUserByRollNo);
 userRouter.post('/login',authenticateUser);
 userRouter.post('/changePassword',changePassword);
 userRouter.get('/image/:rollNo', getUserImage);
+userRouter.put('/updateusername',updateUserName)
 export default userRouter;

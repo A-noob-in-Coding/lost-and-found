@@ -1,4 +1,4 @@
-import { authenticateUserService, changePasswordService, doesUserExist, getPasswordUserService, getUserByRollNoService, hashPassword, registerUserService, getUserImageService } from "../service/userService.js";
+import { authenticateUserService, changePasswordService, doesUserExist, getPasswordUserService, getUserByRollNoService, hashPassword, registerUserService, getUserImageService, updateUserNameService } from "../service/userService.js";
 
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
@@ -101,3 +101,18 @@ export const checkUserByEmail = async (req, res) => {
     return res.status(200).json({ exists: false });
   }
 };
+
+export const updateUserName = async(req,res) =>{
+  const {rollno,username} = req.body
+  if(!rollno | !username){
+    return res.status(400).json({message:"please provide all fields"})
+  }
+  try{
+    await updateUserNameService(rollno,username) 
+    return res.status(200).json({message:"username successfully changed"})
+  }
+  catch(error){
+    console.log(error.message)
+    return res.status(500).json({message:"internal server error"})
+  }
+}

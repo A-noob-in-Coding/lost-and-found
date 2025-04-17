@@ -1,19 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 export default function LoginForm({ setShowForgotPassword }) {
   const navigate = useNavigate(); // Fixed typo in navigate
-  const { login } = useAuth(); // Import login function from auth context
+  const { login,user } = useAuth(); // Import login function from auth context
   const [isLoading, setIsLoading] = useState(false);
   const [rollNo, setRollNo] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(""); // Added error state
+
+  useEffect(() => {
+  }, [user]);
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setIsLoading(true); // Start loading
   
+
+
     setTimeout(async () => {
       try {
         const success = await login(rollNo, password);
