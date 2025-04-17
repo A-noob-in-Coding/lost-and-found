@@ -402,3 +402,55 @@ export const getPostsByRollNoService = async(rollno) => {
     throw new Error("Failed to fetch post IDs by roll number: " + error.message);
   }
 };
+
+export const getUnverifiedPostsByRollNoService = async(rollno) => {
+  try {
+    const query = `
+      SELECT 
+        'Lost' AS post_type,
+        lp.lpost_id AS post_id,
+        i.image_url,
+        i.title,
+        i.description,
+        i.location,
+        to_char(lp.created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
+        c.category
+      FROM 
+        lostpost lp
+      JOIN 
+        item i ON lp.item_id = i.item_id
+      JOIN 
+        category c ON i.category_id = c.category_id
+      WHERE 
+        lp.rollno = $1 AND lp.is_verified = false
+        
+      UNION ALL
+      
+      SELECT 
+        'Found' AS post_type,
+        fp.f_post_id AS post_id,
+        i.image_url,
+        i.title,
+        i.description,
+        i.location,
+        to_char(fp.created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
+        c.category
+      FROM 
+        foundpost fp
+      JOIN 
+        item i ON fp.item_id = i.item_id
+      JOIN 
+        category c ON i.category_id = c.category_id
+      WHERE 
+        fp.rollno = $1 AND fp.is_verified = false
+      
+      ORDER BY created_at DESC
+    `;
+    
+    const { rows } = await pool.query(query, [rollno]);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching unverified posts by roll number:", error);
+    throw new Error("Failed to fetch unverified posts by roll number: " + error.message);
+  }
+};

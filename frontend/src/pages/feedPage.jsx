@@ -38,6 +38,8 @@ const Feed = () => {
       });
   };
   
+  const [unverifiedPosts, setUnverifiedPosts] = useState([]);
+
   const fetchUserPosts = () => {
     if (user && user.rollno) {
       NProgress.start();
@@ -54,10 +56,26 @@ const Feed = () => {
     }
   };
   
-  useEffect(() => {
+  const fetchUnverifiedPosts = () => {
+    if (user && user.rollno) {
+      NProgress.start();
+      fetch(`http://localhost:5000/api/user/posts/unverified/rollno/${user.rollno}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setUnverifiedPosts(data);
+          NProgress.done();
+        })
+        .catch((err) => {
+          console.error("Failed to fetch unverified posts:", err);
+          NProgress.done();
+        });
+    }
+  };
+    useEffect(() => {
     fetchAllPosts();
     if (user && user.rollno) {
       fetchUserPosts();
+      fetchUnverifiedPosts();
     }
   }, [user]);
   
@@ -114,17 +132,42 @@ const Feed = () => {
       NProgress.done();
     }
   };
-
   const displayedItems = activeFilter === "My Posts" 
-    ? userPosts.map(userPost => {
-        // Find the full post data from filteredItems using post_id
-        const fullPostData = filteredItems.find(item => item.id === userPost.post_id);
-        if (fullPostData) {
-          // Add a flag to indicate this is user's own post
-          return { ...fullPostData, isOwnPost: true, post_type: userPost.post_type };
-        }
-        return null;
-      }).filter(Boolean)
+    ? [
+        // Add verified posts
+        ...userPosts.map(userPost => {
+          // Find the full post data from filteredItems using post_id
+          const fullPostData = filteredItems.find(item => item.id === userPost.post_id);
+          if (fullPostData) {
+            // Add flags to indicate this is user's own post and it's verified
+            return { ...fullPostData, isOwnPost: true, post_type: userPost.post_type, isVerified: true };
+          }
+          return null;
+        }).filter(Boolean),
+        // Add unverified posts
+        ...unverifiedPosts.map(unverifiedPost => {
+          // For unverified posts, use the data directly from the API
+          // Create an object that follows the same structure as verified posts
+          return {
+            id: unverifiedPost.post_id,
+            title: unverifiedPost.title,
+            description: unverifiedPost.description,
+            location: unverifiedPost.location,
+            image: unverifiedPost.image_url || 'https://via.placeholder.com/300?text=No+Image',
+            date: unverifiedPost.created_at,
+            type: unverifiedPost.post_type,
+            category: unverifiedPost.category,
+            isOwnPost: true,
+            post_type: unverifiedPost.post_type,
+            isVerified: false,
+            user: {
+              name: user?.name || 'User',
+              rollNumber: user?.rollno || '',
+              avatar: user?.image || 'https://via.placeholder.com/40'
+            }
+          };
+        })
+      ]
     : filteredItems.filter((item) => {
         const matchesFilter = activeFilter === "All" || item.type === activeFilter;
         const matchesSearch = item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||

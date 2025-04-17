@@ -129,9 +129,14 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
           {filteredItems.map((item) => (
             <div
               key={item.id}
-              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-black/10
+              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-black/10 relative
 "
             >
+              {item.isOwnPost && (
+                <span className={`absolute top-2 right-2 z-10 text-xs font-semibold px-3 py-1 rounded ${item.isVerified === false ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+                  {item.isVerified === false ? 'UNVERIFIED' : 'VERIFIED'}
+                </span>
+              )}
               <div className="aspect-square overflow-hidden rounded-t-xl">
                 <img
                   src={item.image}
@@ -152,12 +157,18 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                     <div>
                       <div className="text-sm font-medium">
                         {item.user.name}
-                      </div>
-                      <div className="text-xs text-gray-500 flex items-center">
+                      </div>                      <div className="text-xs text-gray-500 flex items-center">
                         <span>{item.user.rollNumber}</span>
                         <span className="mx-1">•</span>
                         <span>{new Date(item.date).toLocaleString()}</span>
-
+                        {item.isOwnPost && (
+                          <>
+                            <span className="mx-1">•</span>
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded ${item.isVerified === false ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                              {item.isVerified === false ? 'Unverified' : 'Verified'}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

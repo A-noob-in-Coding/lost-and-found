@@ -10,6 +10,7 @@ import {
   updateLostPostService,
   getPostDataService,
   getPostsByRollNoService,
+  getUnverifiedPostsByRollNoService
 } from "../service/postService.js";
 
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -248,6 +249,23 @@ export const getPostsByRollNo = async (req, res) => {
     return res.status(200).json(posts);
   } catch (error) {
     console.error("Error in getPostsByRollNo controller:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Get unverified posts by roll number
+export const getUnverifiedPostsByRollNo = async (req, res) => {
+  try {
+    const { rollno } = req.params;
+    
+    if (!rollno) {
+      return res.status(400).json({ message: "Roll number is required" });
+    }
+    
+    const posts = await getUnverifiedPostsByRollNoService(rollno);
+    return res.status(200).json(posts);
+  } catch (error) {
+    console.error("Error in getUnverifiedPostsByRollNo controller:", error.message);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
