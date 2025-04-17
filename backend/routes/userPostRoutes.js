@@ -7,6 +7,7 @@ import {
   userDeleteFoundPost,
   userGetFoundPost,
   getPostData,
+  getPostsByRollNo,
 } from "../controllers/postController.js";
 import upload from "../config/mutler.js";
 
@@ -26,4 +27,5 @@ router.post("/found", userCreateFoundPost);
 router.get("/found", userGetFoundPost);
 router.delete("/found/:postId", userDeleteFoundPost);
 router.get('/getPostData',getPostData)
+router.get('/rollno/:rollno', getPostsByRollNo);
 export default router;

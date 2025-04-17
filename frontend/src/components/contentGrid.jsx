@@ -2,14 +2,16 @@ import { useState } from "react";
 import CommentForm from "./commentForm";
 import { useAuth } from "../context/authContext";
 import toast from 'react-hot-toast';
-export default function ContentGrid({filteredItems}) {
+
+export default function ContentGrid({filteredItems, onDeletePost}) {
   const [showDropdown, setShowDropdown] = useState(null);
   const [expandedComments, setExpandedComments] = useState(null);
   const [commentText, setCommentText] = useState("");
-  const filters = ["All", "Lost", "Found"];
+  const filters = ["All", "Lost", "Found" , "My Posts"];
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [items, setItems] = useState(filteredItems);
-  const [showFilters, setShowFilters] = useState(false);  const { user } = useAuth();
+  const [showFilters, setShowFilters] = useState(false);
+  const { user } = useAuth();
   
   const toggleDropdown = (itemId) => {
     if (showDropdown === itemId) {
@@ -17,14 +19,40 @@ export default function ContentGrid({filteredItems}) {
     } else {
       setShowDropdown(itemId);
     }
-  };
-  const toggleComments = (itemId) => {
+  };  const toggleComments = (itemId) => {
     if (expandedComments === itemId) {
       setExpandedComments(null);
     } else {
       setExpandedComments(itemId);
     }
   };
+  
+  const handleDeletePost = async (postId, postType) => {
+    // If onDeletePost prop is provided, use it; otherwise, handle locally
+    if (onDeletePost) {
+      onDeletePost(postId, postType);
+    } else {
+      try {
+        const endpoint = `http://localhost:5000/api/user/posts/${postType.toLowerCase()}/${postId}`;
+        const response = await fetch(endpoint, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          toast.success("Post deleted successfully!");
+          // Refresh the page to update the post list
+          window.location.reload();
+        } else {
+          const errorData = await response.json();
+          toast.error(errorData.message || "Failed to delete post");
+        }
+      } catch (error) {
+        console.error("Error deleting post:", error);
+        toast.error("An error occurred while deleting the post");
+      }
+    }
+  };
+  
   const handleAction = async (action, type, item) => {
     console.log(`${action} action for ${type} item`);
     setShowDropdown(null);
@@ -157,6 +185,14 @@ export default function ContentGrid({filteredItems}) {
                               <i className="fas fa-hand-paper mr-2"></i> Claim
                             </li>
                           )}
+                          {item.isOwnPost && (
+                            <li
+                              className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer text-red-600"
+                              onClick={() => handleDeletePost(item.id, item.post_type || item.type)}
+                            >
+                              <i className="fas fa-trash mr-2"></i> Delete
+                            </li>
+                          )}
                           <li
                             className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer text-red-500"
                             onClick={() => handleAction("Report", item.type)}
@@ -172,20 +208,23 @@ export default function ContentGrid({filteredItems}) {
                 <div className="flex items-center text-gray-600 text-sm mb-2">
                   <i className="fas fa-map-marker-alt mr-2"></i>
                   {item.location}
-                </div>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                </div>                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                   {item.description}
                 </p>                <button
-                  className="w-full py-2 bg-black text-white rounded-lg font-medium text-sm hover:bg-gray-900 transition-colors cursor-pointer whitespace-nowrap"
+                  className={`w-full py-2 ${item.isOwnPost ? 'bg-black' : 'bg-black hover:bg-gray-900'} text-white rounded-lg font-medium text-sm transition-colors cursor-pointer whitespace-nowrap`}
                   onClick={() =>
-                    handleAction(
-                      item.type === "Lost" ? "Found" : "Claim",
-                      item.type,
-                      item
-                    )
+                    item.isOwnPost 
+                    ? handleDeletePost(item.id, item.post_type || item.type)
+                    : handleAction(
+                        item.type === "Lost" ? "Found" : "Claim",
+                        item.type,
+                        item
+                      )
                   }
                 >
-                  {item.type === "Lost" ? "Found This Item" : "Claim This Item"}
+                  {item.isOwnPost 
+                    ? "Delete This Item" 
+                    : (item.type === "Lost" ? "Found This Item" : "Claim This Item")}
                 </button>
 
                 {/* Comment section */}

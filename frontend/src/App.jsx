@@ -18,13 +18,13 @@ function App() {
       <BrowserRouter>
         <Toaster position="top-right" />
         <Routes>
-          <Route path="/" element={<AdminPage />} />
+          <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/aboutus" element={<AboutUs />} />
+          <Route path="/profile" element={<ProfilePage />} />          <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/contact" element={<ContactForm />} />
           <Route path="/howitworks" element={<HowItWorks />} />
+          <Route path="/admin/:password" element={<AdminPage />} />
 
 
           <Route 

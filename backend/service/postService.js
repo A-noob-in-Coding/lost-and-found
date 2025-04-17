@@ -379,3 +379,26 @@ export const getPostDataService = async() =>{
     throw new Error(error.message)
   }
 }
+
+export const getPostsByRollNoService = async(rollno) => {
+  try {
+    // Simple query to get just the post IDs for a specific roll number
+    const getPostIdsQuery = `
+      SELECT lpost_id AS post_id, 'Lost' AS post_type 
+      FROM lostpost 
+      WHERE rollno = $1
+      
+      UNION ALL
+      
+      SELECT f_post_id AS post_id, 'Found' AS post_type 
+      FROM foundpost 
+      WHERE rollno = $1
+    `;
+    
+    const { rows } = await pool.query(getPostIdsQuery, [rollno]);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching post IDs by roll number:", error);
+    throw new Error("Failed to fetch post IDs by roll number: " + error.message);
+  }
+};

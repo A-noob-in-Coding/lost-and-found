@@ -9,6 +9,7 @@ import {
   getAdminPostsService,
   updateLostPostService,
   getPostDataService,
+  getPostsByRollNoService,
 } from "../service/postService.js";
 
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -233,3 +234,20 @@ export const getPostData = async(req,res) =>{
     return res.status(500).json({message:"internal server error"})
   }
 }
+
+// Get posts by roll number (user's own posts)
+export const getPostsByRollNo = async (req, res) => {
+  try {
+    const { rollno } = req.params;
+    
+    if (!rollno) {
+      return res.status(400).json({ message: "Roll number is required" });
+    }
+    
+    const posts = await getPostsByRollNoService(rollno);
+    return res.status(200).json(posts);
+  } catch (error) {
+    console.error("Error in getPostsByRollNo controller:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};

@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import PostVerificationContainer from '../components/postVerificationContainer.jsx';
 import CommentVerificationContainer from '../components/commentVerificationContainer.jsx';
 
 const AdminPage = () => {
+  const { password } = useParams();
+  const navigate = useNavigate();
+  const [authenticated, setAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('posts');
   const [posts, setPosts] = useState([
     {
@@ -15,6 +19,18 @@ const AdminPage = () => {
     }
   ]);
 
+ //ADMIN PASSWORD
+  const ADMIN_PASSWORD = "admin";
+
+
+  // Check if the provided password matches the admin password
+  useEffect(() => {
+    if (password === ADMIN_PASSWORD) {
+      setAuthenticated(true);
+    } else {
+      navigate('/login');
+    }
+  }, [password, navigate]);
 
   const handlePostAction = (id, action) => {
     setPosts(posts.map(post => 
@@ -22,6 +38,17 @@ const AdminPage = () => {
     ));
   };
 
+  // Show loading or unauthorized message while checking password
+  if (!authenticated) {
+    return (
+      <div className="min-h-screen bg-gray-100 p-6 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
+          <p className="text-gray-700">Invalid admin password. Redirecting to login page...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">

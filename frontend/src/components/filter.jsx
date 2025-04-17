@@ -1,5 +1,5 @@
 export default function Filter({setActiveFilter, activeFilter}) {
-  const filters = ["All", "Lost", "Found"];
+  const filters = ["All", "Lost", "Found", "My Posts"];
   return (
     <div className="pt-[76px] pb-4 px-4 bg-white border-b border-gray-100">
             <div className="max-w-7xl mx-auto flex space-x-4 overflow-x-auto">
