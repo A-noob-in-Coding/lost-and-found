@@ -6,17 +6,22 @@ import ForgotPassword from "../components/forgotPassword.jsx";
 import OtpPage from "../components/otpPage.jsx";
 import ChangePassword from "../components/changePassword.jsx"; // Import ChangePassword component
 
-export const Login = ({ onLoginSuccess }) => {
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
+export const Login = ({ onLoginSuccess }) => {  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showOtpPage, setShowOtpPage] = useState(false); // State to show OTP page
   const [showChangePassword, setShowChangePassword] = useState(false); // State to show ChangePassword page
-  const { logout } = useAuth();
+  const [initialMount, setInitialMount] = useState(true);
+  const { logout, user } = useAuth();
 
-  // Reset auth context when component mounts
+  // Reset auth context only on initial direct navigation to login page
   useEffect(() => {
-    logout(); // This will clear the user from context and localStorage
-    console.log("Auth context reset on login page mount");
-  }, [logout]);
+    // Only logout if this is the initial mount and there's no login in progress
+    if (initialMount && !user) {
+      logout(); // This will clear the user from context and localStorage
+      console.log("Auth context reset on login page initial mount");
+    }
+    // Mark that initial mount has occurred
+    setInitialMount(false);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white text-black">
