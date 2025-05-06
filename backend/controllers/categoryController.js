@@ -76,6 +76,11 @@ export const updateCategory = async (req, res) => {
       return res.status(404).json({ message: 'Category not found' });
     }
     
+    // Check if the returned result has an error flag
+    if (updatedCategory.error === true) {
+      return res.status(400).json({ message: updatedCategory.message });
+    }
+    
     res.status(200).json(updatedCategory);
   } catch (error) {
     console.error('Error in updateCategory controller:', error);
@@ -91,6 +96,11 @@ export const deleteCategory = async (req, res) => {
     
     if (!result) {
       return res.status(404).json({ message: 'Category not found' });
+    }
+    
+    // Check if the returned result has an error flag
+    if (result.error === true) {
+      return res.status(400).json({ message: result.message });
     }
     
     res.status(200).json({ message: 'Category deleted successfully' });

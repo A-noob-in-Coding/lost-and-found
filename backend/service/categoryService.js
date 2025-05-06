@@ -3,7 +3,8 @@ import db from '../config/db.js';
 // Get all categories
 export const getAllCategories = async () => {
   try {
-    const query = 'SELECT * FROM category ORDER BY category';
+    // Modified to exclude the default category (id=1)
+    const query = 'SELECT * FROM category WHERE category_id != 1 ORDER BY category';
     const { rows } = await db.query(query);
     return rows;
   } catch (error) {
@@ -53,6 +54,11 @@ export const createCategory = async ({ category }) => {
 // Update an existing category
 export const updateCategory = async (id, { category }) => {
   try {
+    // Check if trying to modify the default category (id=1)
+    if (id == 1) {
+      return { error: true, message: "Cannot modify the default category" };
+    }
+
     // Start transaction
     await db.query('BEGIN');
     
@@ -75,40 +81,21 @@ export const updateCategory = async (id, { category }) => {
 // Delete a category
 export const deleteCategory = async (id) => {
   try {
+    // Check if trying to delete the default category (id=1)
+    if (id == 1) {
+      return { error: true, message: "Cannot delete the default category" };
+    }
+
     // Start transaction
     await db.query('BEGIN');
 
-    // Delete related comments from lostpost
+    // Update items to use the default category (id=1) instead of deleting them
     await db.query(
-      'DELETE FROM public.lostpostcomment WHERE l_post_id IN (SELECT lpost_id FROM public.lostpost WHERE item_id IN (SELECT item_id FROM public.item WHERE category_id = $1))',
+      'UPDATE public.item SET category_id = 1 WHERE category_id = $1',
       [id]
     );
 
-    // Delete related comments from foundpost
-    await db.query(
-      'DELETE FROM public.foundpostcomment WHERE f_post_id IN (SELECT f_post_id FROM public.foundpost WHERE item_id IN (SELECT item_id FROM public.item WHERE category_id = $1))',
-      [id]
-    );
-
-    // Delete related lostposts
-    await db.query(
-      'DELETE FROM public.lostpost WHERE item_id IN (SELECT item_id FROM public.item WHERE category_id = $1)',
-      [id]
-    );
-
-    // Delete related foundposts
-    await db.query(
-      'DELETE FROM public.foundpost WHERE item_id IN (SELECT item_id FROM public.item WHERE category_id = $1)',
-      [id]
-    );
-
-    // Delete related items
-    await db.query(
-      'DELETE FROM public.item WHERE category_id = $1',
-      [id]
-    );
-
-    // Finally delete the category itself
+    // Delete the category itself
     const query = 'DELETE FROM public.category WHERE category_id = $1 RETURNING *';
     const { rows } = await db.query(query, [id]);
     
