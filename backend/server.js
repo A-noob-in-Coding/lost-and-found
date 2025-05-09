@@ -10,6 +10,7 @@ import Utilrouter from './routes/utilityRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import notificationRouter from './routes/notificationRoutes.js';
 import categoryRouter from './routes/categoryRoutes.js';
+import { cleanupExpiredOTPs } from './service/otpService.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -29,6 +30,13 @@ app.use('/api/categories', categoryRouter)
 app.get('/', (req, res) => {
   res.send('Express PostgreSQL Cloudinary API is running');
 });
+
+// cleanupExpiredOTPs().catch();
+// // Run cleanup every 5 minutes
+// const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
+// setInterval(() => {
+//   cleanupExpiredOTPs().catch();
+// }, CLEANUP_INTERVAL);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

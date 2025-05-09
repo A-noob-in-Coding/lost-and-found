@@ -38,6 +38,45 @@ export default function LoginForm({ setShowForgotPassword }) {
     }, 1); // Simulate 2s delay
   };
   
+  const handleRollNumberChange = (e) => {
+    let value = e.target.value;
+    console.log(value);
+    console.log(value.length);
+
+    if (e.nativeEvent.inputType === "deleteContentBackward") {
+      if (value.length === 4) {
+        value = value.slice(0, 2);
+      }
+    }
+
+    if (e.nativeEvent.inputType === "insertText") {
+      //checking entered is number or not
+      if (isNaN(value[value.length - 1])) {
+        value = value.slice(0, -1);
+      }
+      
+      if (value.length <= 2) {
+        value = value.replace(/\D/g, "");
+        if (value.length === 2) {
+          value = value + "L-";
+        }
+      }
+    } else {
+      const prefix = value.slice(0, 3);
+      const rest = value.slice(3).replace(/[^\d-]/g, "");
+      value = prefix + rest;
+    }
+
+    // Validate the format XXL-YYYY
+     const rollNoRegex = /^\d{2}L-\d{4,5}$/;
+    if (value.length > 8 && !rollNoRegex.test(value)) {
+      setError("Roll number must be in format: XXL-YYYY (e.g., 23L-3059)");
+    } else {
+      setError("");
+    }
+
+    setRollNo(value);
+  };
 
   return (
     <form onSubmit={handleLogin} className="space-y-6">
@@ -47,12 +86,15 @@ export default function LoginForm({ setShowForgotPassword }) {
       <div className="relative">
         <i className="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
         <input
-          type="text" // Changed from email to text for roll number
-          placeholder="Roll Number"
+          type="text"
+          placeholder="Roll Number (e.g., 23L-XXXX)"
           value={rollNo}
-          onChange={(e) => setRollNo(e.target.value)}
+          onChange={handleRollNumberChange}
+          maxLength={8}
           className="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
           required
+          pattern="\d{2}L-\d{4}"
+          title="Roll number format: XXL-YYYY (e.g., 23L-3059)"
         />
       </div>
       <div className="relative">

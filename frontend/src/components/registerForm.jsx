@@ -139,6 +139,41 @@ export default function RegisterForm({
     }
   };
 
+  const handleRollNumberChange = (e) => {
+    let value = e.target.value;
+
+    if(e.nativeEvent.inputType === "deleteContentBackward"){
+    if (value.length == 4) {
+      value = value.slice(0, 2);
+    }
+  }
+
+  if(e.nativeEvent.inputType === "insertText"){
+     if (value.length <= 2) {
+      value = value.replace(/\D/g, "");
+      if (value.length === 2) {
+        value = value + "L-";
+      }
+    }
+  }
+    else {
+      const prefix = value.slice(0, 3); 
+      const rest = value.slice(3).replace(/[^\d-]/g, ""); 
+      value = prefix + rest;
+    }    // Validate the format XXL-YYYY
+    const rollNoRegex = /^\d{2}L-\d{4,5}$/;
+    if (value.length > 8 && !rollNoRegex.test(value)) {
+      setError("Roll number must be in format: XXL-YYYY (e.g., 23L-3059)");
+    } else {
+      setError("");
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      studentId: value,
+    }));
+  };
+
   return (
     <div className="max-w-md mx-auto p-6">
       <form onSubmit={handleRegister} className="space-y-6">
@@ -168,9 +203,11 @@ export default function RegisterForm({
             name="studentId"
             placeholder="Student ID (e.g., 23L-XXXX)"
             value={formData.studentId}
-            onChange={handleInputChange}
+            onChange={handleRollNumberChange}            maxLength={8}
             className="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
             required
+            pattern="\d{2}L-\d{4,5}"
+            title="Roll number format: XXL-YYYY (e.g., 23L-3059)"
           />
         </div>
 

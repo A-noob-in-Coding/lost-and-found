@@ -91,3 +91,22 @@ export const verifyOTPService = async (email, otp) => {
     client.release();
   }
 };
+
+// Function to cleanup expired OTP records
+export const cleanupExpiredOTPs = async () => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const deleteQuery = `DELETE FROM otp WHERE created_at + INTERVAL '5 minutes' < NOW()`;
+    const result = await client.query(deleteQuery);
+    await client.query('COMMIT');
+    console.log(`Cleaned up ${result.rowCount} expired OTP records`);
+    return result.rowCount;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error cleaning up expired OTPs:', error);
+    throw new Error('Failed to cleanup expired OTPs');
+  } finally {
+    client.release();
+  }
+};
