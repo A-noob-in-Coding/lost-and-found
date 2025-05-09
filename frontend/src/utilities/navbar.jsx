@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
-export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }) {
+export default function Navbar({ setShowPostModal , searchQuery, setSearchQuery }) {
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
@@ -35,7 +35,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
         </div>
         <div className="flex items-center space-x-6">
           <button
-            onClick={() => setShowPostModal(true)}
+            onClick={() => navigate('/createPost')}
             className="bg-black text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-900 transition-colors whitespace-nowrap"
           >
             <i className="fas fa-plus mr-2"></i>

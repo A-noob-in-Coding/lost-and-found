@@ -1,16 +1,16 @@
 import { useRef, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/authContext";
-import { Form } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 export default function SubmitPost({ postType, setShowPostModal }) {
   const [isFormSend, setIsFormSend] = useState(false); // to check if the form is sent or not
   const { user } = useAuth();
   const fileInputRef = useRef(null);
-  // const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [error, setError] = useState("");
-
   const [isDragging, setIsDragging] = useState(false);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -20,6 +20,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
     description: "",
     imageFile: null,
   });
+  
   const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
   const [categories, setCategories] = useState([]);
@@ -46,6 +47,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
     e.preventDefault();
     setIsFormSend(true); // Set to true to prevent multiple submissions
     setError("");
+    
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
     formDataToSend.append("location", formData.location);
@@ -53,10 +55,12 @@ export default function SubmitPost({ postType, setShowPostModal }) {
     formDataToSend.append("image", formData.imageFile);
     formDataToSend.append("category_id", formData.category_id);
     formDataToSend.append("rollno", user.rollno);
+    
     console.log("FormData entries:");
-for (let pair of formDataToSend.entries()) {
-  console.log(pair[0] + ": " + pair[1]);
-}
+    for (let pair of formDataToSend.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
+    
     let result = false;
     if (postType === "lost") {
       result = await fetch("http://localhost:5000/api/user/posts/lost", {
@@ -69,14 +73,20 @@ for (let pair of formDataToSend.entries()) {
         body: formDataToSend,
       });
     }
+    
     if (result.ok) {
       toast.success("Item successfully posted");
-      setShowPostModal(false);
+      // Navigate back to the previous page or to a specific route
+      if (setShowPostModal) {
+        setShowPostModal(false); // For modal use case
+      } else {
+        navigate('/'); // For page use case - navigate to home or listing page
+      }
     } else {
       toast.error(result.message || "Failed to post item");
+      setIsFormSend(false); // Allow resubmission on error
     }
   };
-
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -89,6 +99,7 @@ for (let pair of formDataToSend.entries()) {
   const triggerFileInput = () => {
     fileInputRef.current.click();
   };
+  
   const validateFile = (file) => {
     if (!file) return false;
 
@@ -147,148 +158,168 @@ for (let pair of formDataToSend.entries()) {
       }));
     }
   };
+
   return (
-
-    <form onSubmit={handleSubmitPost}>
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Title
-        </label>
-        <input
-          type="text"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black text-sm"
-          placeholder={`${postType} item title...`}
-          required
-          onChange={handleInputChange}
-          name="title"
-        />
-      </div>
-
-      {/* Added Category Dropdown */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Category
-        </label>
-        <select
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black text-sm appearance-none bg-white"
-          required
-          onChange={handleInputChange}
-          name="category_id"
-          defaultValue=""
-        >
-          <option value="" disabled>
-            Select a category
-          </option>
-          {categories.map((category) => (
-            <option key={category.category_id} value={category.category_id}>
-              {category.category}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Location
-        </label>
-        <input
-          type="text"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black text-sm"
-          placeholder="Where was it lost/found?"
-          required
-          onChange={handleInputChange}
-          name="location"
-          />
-      </div>
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Description
-        </label>
-        <textarea
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black text-sm"
-          placeholder="Describe the item..."
-          rows={3}
-          required
-          name="description"
-          onChange={handleInputChange}
-          ></textarea>
-      </div>
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
-          Profile Image (JPEG, PNG, or WEBP, max 3MB)
-        </label>
-        <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-            isDragging
-              ? "border-blue-500 bg-blue-50"
-              : "border-gray-300 hover:border-gray-400"
-          }`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={triggerFileInput}
-          >
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={handleImageChange}
-          />
-{imagePreview ? (
-  <div className="relative flex justify-center items-center h-auto w-40 mx-auto">
-    <img
-      src={imagePreview}
-      alt="Preview"
-      className="object-cover w-32 h-32 rounded-lg"
-      />
-    <button
-  type="button"
-  onClick={(e) => {
-    e.stopPropagation(); // Prevent triggering the file input
-    URL.revokeObjectURL(imagePreview);
-    setImagePreview(null);
-    setFormData((prev) => ({ ...prev, imageFile: null }));
-  }}
-  className="absolute top-0 right-0 transform -translate-x-2 -translate-y-1 bg-red-500 text-red-500 rounded-full p-1 hover:bg-red-600 transition-all"
-  title="Remove image"
->
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-</button>
-  </div>
-) : (
-  <div className="space-y-4">
-    <i className="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
-    <div className="space-y-2">
-      <p className="text-gray-600">
-        Drag and drop an image or click to browse
-      </p>
-      <p className="text-sm text-gray-500">
-        JPEG, PNG, or WEBP (max 3MB)
-      </p>
-    </div>
-  </div>
-)}
+    <div>
+      {error && (
+        <div className="mb-4 p-2 bg-red-50 text-red-500 rounded-md">
+          {error}
         </div>
-      </div>
-      <div className="flex space-x-3 mt-6">
-        <button
-          type="button"
-          onClick={() => setShowPostModal(false)}
-          className="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-200 transition-colors whitespace-nowrap"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="flex-1 py-2 bg-black text-white rounded-lg font-medium text-sm hover:bg-gray-900 transition-colors whitespace-nowrap"
-        >
-          Post {postType} item
-        </button>
-      </div>
-    </form>
+      )}
+      <form onSubmit={handleSubmitPost}>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Title
+          </label>
+          <input
+            type="text"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black text-sm"
+            placeholder={`${postType} item title...`}
+            required
+            onChange={handleInputChange}
+            name="title"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Category
+          </label>
+          <select
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black text-sm appearance-none bg-white"
+            required
+            onChange={handleInputChange}
+            name="category_id"
+            defaultValue=""
+          >
+            <option value="" disabled>
+              Select a category
+            </option>
+            {categories.map((category) => (
+              <option key={category.category_id} value={category.category_id}>
+                {category.category}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Location
+          </label>
+          <input
+            type="text"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black text-sm"
+            placeholder="Where was it lost/found?"
+            required
+            onChange={handleInputChange}
+            name="location"
+          />
+        </div>
+        
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black text-sm"
+            placeholder="Describe the item..."
+            rows={3}
+            required
+            name="description"
+            onChange={handleInputChange}
+          ></textarea>
+        </div>
+        
+        <div className="space-y-2 mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Item Image (JPEG, PNG, or WEBP, max 3MB)
+          </label>
+          <div
+            className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+              isDragging
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300 hover:border-gray-400"
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={triggerFileInput}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleImageChange}
+            />
+            {imagePreview ? (
+              <div className="relative flex justify-center items-center h-auto w-40 mx-auto">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="object-cover w-32 h-32 rounded-lg"
+                />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent triggering the file input
+                    URL.revokeObjectURL(imagePreview);
+                    setImagePreview(null);
+                    setFormData((prev) => ({ ...prev, imageFile: null }));
+                  }}
+                  className="absolute top-0 right-0 transform -translate-x-2 -translate-y-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-all"
+                  title="Remove image"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <i className="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                <div className="space-y-2">
+                  <p className="text-gray-600">
+                    Drag and drop an image or click to browse
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    JPEG, PNG, or WEBP (max 3MB)
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex space-x-3 mt-6">
+          <button
+            type="button"
+            onClick={() => setShowPostModal ? setShowPostModal(false) : navigate(-1)}
+            className="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-200 transition-colors whitespace-nowrap"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isFormSend}
+            className={`flex-1 py-2 ${isFormSend ? 'bg-gray-500' : 'bg-black hover:bg-gray-900'} text-white rounded-lg font-medium text-sm transition-colors whitespace-nowrap`}
+          >
+            {isFormSend ? 'Posting...' : `Post ${postType} item`}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

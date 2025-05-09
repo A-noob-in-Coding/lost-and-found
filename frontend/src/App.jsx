@@ -9,6 +9,7 @@ import HowItWorks from './pages/howItWorks.jsx';
 import Register from './pages/registerPage';
 import { Toaster } from 'react-hot-toast';
 import ProfilePage from './pages/profilePage';
+import CreatePost from './pages/createPost.jsx';
 import AdminPage from './pages/adminPage.jsx'
 import "nprogress/nprogress.css";
 
@@ -21,6 +22,7 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/createPost" element={<CreatePost />} />
           <Route path="/register" element={<Register />} />
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/contact" element={<ContactForm />} />

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PostVerificationContainer from '../components/postVerificationContainer.jsx';
 import CommentVerificationContainer from '../components/commentVerificationContainer.jsx';
+import CategoryContainer from '../components/catagorySection.jsx';
 
 const AdminPage = () => {
   const { password } = useParams();
@@ -19,9 +20,8 @@ const AdminPage = () => {
     }
   ]);
 
- //ADMIN PASSWORD
+  //ADMIN PASSWORD
   const ADMIN_PASSWORD = "admin";
-
 
   // Check if the provided password matches the admin password
   useEffect(() => {
@@ -33,7 +33,7 @@ const AdminPage = () => {
   }, [password, navigate]);
 
   const handlePostAction = (id, action) => {
-    setPosts(posts.map(post => 
+    setPosts(posts.map(post =>
       post.id === id ? { ...post, status: action } : post
     ));
   };
@@ -55,33 +55,45 @@ const AdminPage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard - Lost and Found</h1>
-          <div className="flex gap-6">
-            <button 
+          <div className="flex gap-3">
+            <button
               onClick={() => setActiveTab('posts')}
-              className="!rounded-button whitespace-nowrap px-4 py-2 text-sm font-medium bg-black text-white"
+              className={`!rounded-button whitespace-nowrap px-4 py-2 text-sm font-medium ${activeTab === 'posts' ? 'bg-black text-white' : 'bg-gray-200 text-gray-800'}`}
             >
               <i className="fas fa-clipboard-list mr-2"></i>
               Posts
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('comments')}
-              className="!rounded-button whitespace-nowrap px-4 py-2 text-sm font-medium bg-black text-white"
+              className={`!rounded-button whitespace-nowrap px-4 py-2 text-sm font-medium ${activeTab === 'comments' ? 'bg-black text-white' : 'bg-gray-200 text-gray-800'}`}
             >
               <i className="fas fa-comments mr-2"></i>
               Comments
             </button>
+            <button
+              onClick={() => setActiveTab('categories')}
+              className={`!rounded-button whitespace-nowrap px-4 py-2 text-sm font-medium ${activeTab === 'categories' ? 'bg-black text-white' : 'bg-gray-200 text-gray-800'}`}
+            >
+              <i className="fas fa-tags mr-2"></i>
+              Categories
+            </button>
           </div>
         </div>
+
         {activeTab === 'posts' && (
-          <PostVerificationContainer 
-            posts={posts} 
-            onApprove={(id) => handlePostAction(id, 'approve')} 
-            onReject={(id) => handlePostAction(id, 'reject')} 
+          <PostVerificationContainer
+            posts={posts}
+            onApprove={(id) => handlePostAction(id, 'approve')}
+            onReject={(id) => handlePostAction(id, 'reject')}
           />
         )}
+        
         {activeTab === 'comments' && (
-          <CommentVerificationContainer 
-          />
+          <CommentVerificationContainer />
+        )}
+        
+        {activeTab === 'categories' && (
+          <CategoryContainer />
         )}
       </div>
     </div>

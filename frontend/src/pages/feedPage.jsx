@@ -3,7 +3,6 @@ import Footer from "../utilities/footer.jsx";
 import Navbar from "../utilities/navbar.jsx";
 import BackgroundBrand from "../utilities/backgroundBrand.jsx";
 import Toast from "../utilities/toast.jsx";
-import PostModal from "../components/postModal.jsx";
 import ContentGrid from "../components/contentGrid.jsx";
 import Filter from "../components/filter.jsx";
 import NProgress from "nprogress";
@@ -187,7 +186,6 @@ const Feed = () => {
       <Filter setActiveFilter={setActiveFilter} />
       <ContentGrid filteredItems={displayedItems} onDeletePost={handleDeletePost} />
       <Footer />
-      {showPostModal && <PostModal setShowPostModal={setShowPostModal} />}
       {successMessage &&
         Toast({ message: successMessage, type: "success", duration: 3000 })}
     </div>
