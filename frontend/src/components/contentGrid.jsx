@@ -90,7 +90,12 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
         
         if (response.ok) {
           toast.success('Owner notified that you found their item!');
-        } else {
+        } 
+        else if(response.status === 400) {
+          const errorData = await response.json();
+          toast.error(errorData.message || 'Sender and receiver cannot be same.');
+        }
+        else {
           toast.error('Failed to send notification. Please try again.');
         }
       } 
@@ -110,6 +115,10 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
         
         if (response.ok) {
           toast.success('Finder notified that you claimed this item!');
+        } 
+         else if(response.status === 400) {
+          const errorData = await response.json();
+          toast.error(errorData.message || 'Sender and receiver cannot be same.');
         } else {
           toast.error('Failed to send notification. Please try again.');
         }

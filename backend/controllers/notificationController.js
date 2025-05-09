@@ -13,6 +13,10 @@ export const sendFoundItemNotification = async (req, res) => {
     return res.status(400).json({ message: 'All fields are required: senderEmail, receiverEmail, itemTitle' });
   }
 
+  if (senderEmail === receiverEmail) {
+    return res.status(400).json({ message: 'Sender and receiver email cannot be the same.' });
+  }
+
   try {
     // Creating email content using sender's email
     const emailContent = createFoundItemEmailContent(senderEmail, itemTitle);
@@ -37,6 +41,10 @@ export const sendClaimItemNotification = async (req, res) => {
 
   if (!senderEmail || !receiverEmail || !itemTitle) {
     return res.status(400).json({ message: 'All fields are required: senderEmail, receiverEmail, itemTitle' });
+  }
+
+  if (senderEmail === receiverEmail) {
+    return res.status(400).json({ message: 'Sender and receiver email cannot be the same.' });
   }
 
   try {
