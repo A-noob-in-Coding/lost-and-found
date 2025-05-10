@@ -1,4 +1,4 @@
-import { authenticateUserService, changePasswordService, doesUserExist, getPasswordUserService, getUserByRollNoService, hashPassword, registerUserService, getUserImageService, updateUserNameService } from "../service/userService.js";
+import { authenticateUserService, changePasswordService, doesUserExist, getPasswordUserService, getUserByRollNoService, hashPassword, registerUserService, getUserImageService, updateUserNameService, updateUserImageService } from "../service/userService.js";
 
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
@@ -116,3 +116,32 @@ export const updateUserName = async(req,res) =>{
     return res.status(500).json({message:"internal server error"})
   }
 }
+
+export const updateUserImage = async (req, res) => {
+  const { rollno } = req.body;
+  const imageFile = req.file;
+
+  if (!rollno || !imageFile) {
+    return res.status(400).json({ message: "Roll number and image file are required" });
+  }
+
+  // Validate image file type
+  if (!ALLOWED_FILE_TYPES.includes(imageFile.mimetype)) {
+    return res.status(400).json({ message: "Invalid file type. Only JPEG, PNG, and WEBP are allowed." });
+  }
+
+  // Validate file size
+  if (imageFile.size > MAX_FILE_SIZE) {
+    return res.status(400).json({ message: "File size exceeds the 3MB limit." });
+  }
+  try {
+    const newImageUrl = await updateUserImageService(rollno, imageFile);
+    return res.status(200).json({ 
+      message: "Profile image updated successfully",
+      image_url: newImageUrl 
+    });
+  } catch (error) {
+    console.error("Error updating profile image:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
