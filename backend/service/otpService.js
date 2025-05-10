@@ -1,11 +1,12 @@
-// otpService.js
 import pool from '../config/db.js';
 import nodemailer from 'nodemailer';
 
 export const sendOTPEmail = async (email, otp) => {
   try {
     console.log('EMAIL_USER:', process.env.EMAIL_USER);
-    console.log('EMAIL_PASS:', process.env.EMAIL_PASS);
+    // Remove password logging for security
+    // console.log('EMAIL_PASS:', process.env.EMAIL_PASS);
+    
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       throw new Error('Email credentials not configured in environment variables');
     }
@@ -44,16 +45,28 @@ export const sendOTPEmail = async (email, otp) => {
   }
 };
 
-// Updated to match otp table structure with rollno instead of email
 export const storeOTP = async (email, otp) => {
   const client = await pool.connect();
   try {
     console.log(email, otp);
+
+    const createdAt = new Date(); // now
+    const expiresAt = new Date(createdAt.getTime() + 5 * 60 * 1000); // 5 minutes later
+
     await client.query('BEGIN');
+
     await client.query(
-      `INSERT INTO otp (email, otp, expires_at, is_verified) VALUES ($1, $2, NOW() + INTERVAL '5 minutes', false) ON CONFLICT (email) DO UPDATE SET otp = $2, expires_at = NOW() + INTERVAL '5 minutes', is_verified = false`,
-      [email, otp]
+      `INSERT INTO otp (email, otp, is_verified, created_at, expires_at)
+       VALUES ($1, $2, false, $3, $4)
+       ON CONFLICT (email)
+       DO UPDATE SET
+         otp = $2,
+         is_verified = false,
+         created_at = $3,
+         expires_at = $4`,
+      [email, otp, createdAt, expiresAt]
     );
+
     await client.query('COMMIT');
   } catch (error) {
     await client.query('ROLLBACK');
@@ -64,24 +77,30 @@ export const storeOTP = async (email, otp) => {
   }
 };
 
+
 export const verifyOTPService = async (email, otp) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+    
+    // Use the expires_at column directly for expiry checking
     const result = await client.query(
       `SELECT * FROM otp WHERE email = $1 AND otp = $2 AND expires_at > NOW()`,
       [email, otp]
     );
-
+    
     if (result.rows.length === 0) {
       await client.query('ROLLBACK');
       return { success: false, message: 'Invalid or expired OTP' };
     }
-
-    // Delete OTP after successful verification
-    // await client.query(`DELETE FROM otp WHERE email = $1`, [email]);
+    
+    // Update is_verified flag instead of deleting
+    await client.query(
+      `UPDATE otp SET is_verified = true WHERE email = $1`,
+      [email]
+    );
+    
     await client.query('COMMIT');
-
     return { success: true, message: 'OTP verified successfully. Account activated.' };
   } catch (error) {
     await client.query('ROLLBACK');
@@ -97,7 +116,9 @@ export const cleanupExpiredOTPs = async () => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const deleteQuery = `DELETE FROM otp WHERE created_at + INTERVAL '5 minutes' < NOW()`;
+    
+    // Use the expires_at column directly for cleanup
+    const deleteQuery = `DELETE FROM otp WHERE expires_at < NOW()`;
     const result = await client.query(deleteQuery);
     await client.query('COMMIT');
     console.log(`Cleaned up ${result.rowCount} expired OTP records`);
@@ -106,6 +127,38 @@ export const cleanupExpiredOTPs = async () => {
     await client.query('ROLLBACK');
     console.error('Error cleaning up expired OTPs:', error);
     throw new Error('Failed to cleanup expired OTPs');
+  } finally {
+    client.release();
+  }
+};
+
+// Debugging function to check timestamp handling
+export const debugOTPTimestamps = async (email) => {
+  const client = await pool.connect();
+  try {
+    // Get OTP record for this email
+    const otpQuery = await client.query(
+      `SELECT 
+         email, otp, created_at, expires_at, 
+         NOW() as current_time, 
+         expires_at > NOW() as is_valid
+       FROM otp 
+       WHERE email = $1`,
+      [email]
+    );
+    
+    // Get database timezone info
+    const tzQuery = await client.query(`SHOW timezone`);
+    
+    console.log('DB Timezone:', tzQuery.rows[0].timezone);
+    console.log('OTP Record:', otpQuery.rows[0]);
+    
+    return {
+      dbTimezone: tzQuery.rows[0].timezone,
+      otpRecord: otpQuery.rows[0]
+    };
+  } catch (error) {
+    console.error('Error in debugOTPTimestamps:', error);
   } finally {
     client.release();
   }

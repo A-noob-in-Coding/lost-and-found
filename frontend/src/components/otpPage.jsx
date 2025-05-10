@@ -1,12 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaTimes } from "react-icons/fa";
 import toast from 'react-hot-toast';
-import { useNavigate } from "react-router-dom";
 
-export default function OtpPage({ setShowOtpPage,  formData }) {
+export default function OtpPage({ 
+  setShowOtpPage, 
+  setShowChangePassword,
+  formData, 
+  mode = "register" 
+}) {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [isResending, setIsResending] = useState(false);
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    // Set email based on the mode we're in
+    if (mode === "register") {
+      setEmail(formData?.email || "");
+    } else if (mode === "reset") {
+      const resetEmail = localStorage.getItem('resetEmail');
+      setEmail(resetEmail || "");
+    }
+  }, [mode, formData]);
 
   const handleChange = (element, index) => {
     if (isNaN(element.value)) return;
@@ -55,17 +70,40 @@ export default function OtpPage({ setShowOtpPage,  formData }) {
     }
   };
 
-  const handleSubmit = async () => {
-    // Validate that all OTP fields are filled
-    if (otp.some(digit => digit === "")) {
-      toast.error("Please enter the complete OTP");
+  const handleResendOtp = async () => {
+    console.log(email)
+    if (!email) {
+      toast.error("Email not found. Please try again.");
       return;
     }
+
+    setIsResending(true);
     
-    setIsLoading(true);
-    const email = localStorage.getItem('registerEmail');
-    const enteredOtp = otp.join('');
-    
+    try {
+      const response = await fetch('http://localhost:5000/api/otp/send-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.success('OTP resent successfully');
+      } else {
+        toast.error(data.message || 'Failed to resend OTP');
+      }
+    } catch (error) {
+      toast.error('Error sending OTP');
+      console.error(error);
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const handleRegisterSubmit = async (enteredOtp) => {
     try {
       // First verify the OTP
       const verifyResponse = await fetch('http://localhost:5000/api/otp/verify-otp', {
@@ -101,26 +139,87 @@ export default function OtpPage({ setShowOtpPage,  formData }) {
         
         if (registerResponse.ok) {
           toast.success('Registration completed successfully');
-          localStorage.removeItem('registerEmail'); // Clean up
-          navigate("/login");
+          localStorage.removeItem('resetEmail'); // Clean up
+          return true;
         } else {
           toast.error(registerData.message || 'Failed to complete registration');
+          return false;
         }
       } else {
         toast.error(verifyData.message || 'Invalid OTP');
+        return false;
       }
     } catch (error) {
       toast.error('Failed to verify OTP');
       console.error(error);
-    } finally {
-      setIsLoading(false);
+      return false;
     }
+  };
+
+  const handleResetSubmit = async (enteredOtp) => {
+    try {
+      // First verify the OTP
+      const verifyResponse = await fetch('http://localhost:5000/api/otp/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          otp: enteredOtp
+        }),
+      });
+      
+      const verifyData = await verifyResponse.json();
+      
+      if (verifyResponse.ok) {
+        // If OTP is verified, allow user to reset password
+        toast.success('OTP verified successfully');
+        // Store verification status in localStorage to use in reset password page
+        localStorage.setItem('otpVerified', 'true');
+        // Show password reset form
+        setShowOtpPage(false);
+        setShowChangePassword(true);
+        return true;
+      } else {
+        toast.error(verifyData.message || 'Invalid OTP');
+        return false;
+      }
+    } catch (error) {
+      toast.error('Failed to verify OTP');
+      console.error(error);
+      return false;
+    }
+  };
+
+  const handleSubmit = async () => {
+    // Validate that all OTP fields are filled
+    if (otp.some(digit => digit === "")) {
+      toast.error("Please enter the complete OTP");
+      return;
+    }
+    
+    setIsLoading(true);
+    const enteredOtp = otp.join('');
+    
+    let success = false;
+    
+    if (mode === "register") {
+      success = await handleRegisterSubmit(enteredOtp);
+    } else if (mode === "reset") {
+      success = await handleResetSubmit(enteredOtp);
+    }
+    
+    setIsLoading(false);
+    return success;
   };
 
   return (
     <div className="p-6 w-full">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-semibold text-black">Enter OTP</h3>
+        <h3 className="text-xl font-semibold text-black">
+          {mode === "register" ? "Verify Registration" : "Verify Reset Password"}
+        </h3>
         <button
           onClick={() => setShowOtpPage(false)}
           className="text-black hover:text-gray-800"
@@ -130,7 +229,8 @@ export default function OtpPage({ setShowOtpPage,  formData }) {
       </div>
       
       <p className="text-gray-600 mb-6 text-center">
-        Enter the 6-digit OTP sent to your email.
+        Enter the 6-digit OTP sent to{" "}
+        <span className="font-medium">{email}</span>
       </p>
       
       <div className="flex justify-center items-center gap-3 mb-6">
@@ -159,13 +259,27 @@ export default function OtpPage({ setShowOtpPage,  formData }) {
             <span>Verifying...</span>
           </>
         ) : (
-          "Submit OTP"
+          "Verify OTP"
         )}
       </button>
       
       <div className="mt-4 text-center">
-        <button className="text-sm text-gray-500 hover:text-black transition-colors">
-          Didn't receive code? Resend OTP
+        <button 
+          className="text-sm text-gray-500 hover:text-black transition-colors flex items-center justify-center mx-auto"
+          onClick={handleResendOtp}
+          disabled={isResending}
+        >
+          {isResending ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Resending...</span>
+            </>
+          ) : (
+            "Didn't receive code? Resend OTP"
+          )}
         </button>
       </div>
     </div>

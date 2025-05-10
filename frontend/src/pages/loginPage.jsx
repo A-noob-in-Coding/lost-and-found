@@ -36,6 +36,7 @@ export const Login = () => {  const [showForgotPassword, setShowForgotPassword] 
               <OtpPage
                 setShowChangePassword={setShowChangePassword}
                 setShowOtpPage={setShowOtpPage}
+                mode="reset"
               />
             )}
             {showChangePassword && (

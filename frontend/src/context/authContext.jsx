@@ -22,6 +22,37 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]); // This will run whenever user state changes
 
+  const updateProfileImage = async (imageFile) => {
+    try {
+      const formData = new FormData();
+      formData.append('rollno', user.rollno);
+      formData.append('image', imageFile);
+
+      const response = await fetch('http://localhost:5000/api/users/update-image', {
+        method: 'POST',
+        body: formData, // No need to set Content-Type header when using FormData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile image');
+      }
+
+      const data = await response.json();
+      
+      // Update user state with new image URL
+      const updatedUser = { ...user, image_url: data.image_url };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      toast.success('Profile picture updated successfully!');
+      return data.image_url;
+    } catch (error) {
+      console.error('Error updating profile image:', error);
+      toast.error(error.message || 'Failed to update profile image');
+      throw error;
+    }
+  };
+
   const updateUsername = async (newUsername) => {
     try {
       const response = await fetch(`http://localhost:5000/api/users/updateusername`, {
@@ -68,7 +99,6 @@ export const AuthProvider = ({ children }) => {
 
       // If authentication successful, fetch user details
       const userDetailsResponse = await fetch(`http://localhost:5000/api/users/${rollno}`);
-      
       if (!userDetailsResponse.ok) {
         throw new Error('Failed to fetch user details');
       }
@@ -103,13 +133,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      login, 
+    <AuthContext.Provider value={{
+      user,
+      login,
       logout,
       loading,
       updateUsername,
-      isAuthenticated: !!user 
+      updateProfileImage,
+      isAuthenticated: !!user
     }}>
       {children}
     </AuthContext.Provider>

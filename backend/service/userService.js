@@ -105,6 +105,8 @@ export const authenticateUserService = async(rollNo,password) =>{
 
 export const changePasswordService = async(email,password) =>{
   try{
+    console.log(email)
+    console.log(password)
     const result = doesUserExist(email)
     if(result){
       const newPass =  await hashPassword(password)

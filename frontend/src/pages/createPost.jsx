@@ -5,14 +5,14 @@ import SubmitPost from "../components/submitPost";
 export default function CreatePostPage() {
   const [postType, setPostType] = useState("lost");
   const navigate = useNavigate();
-
+  
   const handleBackToFeed = () => {
     navigate("/feed");
   };
-
+  
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md mx-auto py-8 rounded-md border-gray-100 px-4 sm:px-6 lg:px-8">
         {/* Header with back button */}
         <div className="flex items-center mb-6">
           <button
@@ -26,7 +26,7 @@ export default function CreatePostPage() {
           </button>
           <h1 className="text-2xl font-bold">Create New Post</h1>
         </div>
-
+        
         {/* Post type selector */}
         <div className="mb-8">
           <div className="flex space-x-4 mb-6">
@@ -54,11 +54,13 @@ export default function CreatePostPage() {
             </button>
           </div>
           
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <SubmitPost
-              postType={postType}
-              setShowPostModal={() => navigate("/feed")}
-            />
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+            <div className="w-full max-w-sm mx-auto">
+              <SubmitPost
+                postType={postType}
+                setShowPostModal={() => navigate("/feed")}
+              />
+            </div>
           </div>
         </div>
       </div>

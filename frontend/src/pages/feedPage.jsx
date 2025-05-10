@@ -188,9 +188,9 @@ const Feed = () => {
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
       />
-
-      <Filter setActiveFilter={setActiveFilter} activeFilter={activeFilter} onRefresh={onRefresh}/>
       
+      <Filter setActiveFilter={setActiveFilter} activeFilter={activeFilter} onRefresh={onRefresh}/>
+    
       <main className="flex-grow">
         <ContentGrid filteredItems={displayedItems} onDeletePost={handleDeletePost} />
       </main>

@@ -65,6 +65,7 @@ export const authenticateUser = async (req, res) => {
 
 export const changePassword = async(req,res) =>{
   const {email, password} = req.body
+  
   try{
     await changePasswordService(email,password);
     return res.status(200).json({message:"Password changed successfully"})

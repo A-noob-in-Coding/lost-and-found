@@ -2,6 +2,7 @@ import { useState } from "react";
 import CommentForm from "./commentForm";
 import { useAuth } from "../context/authContext";
 import toast from 'react-hot-toast';
+import { FaCheck, FaEllipsisV } from "react-icons/fa";
 
 export default function ContentGrid({filteredItems, onDeletePost}) {
   const [showDropdown, setShowDropdown] = useState(null);
@@ -11,7 +12,7 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [items, setItems] = useState(filteredItems);
   const [showFilters, setShowFilters] = useState(false);
-  const [loadingStates, setLoadingStates] = useState({}); // Track loading states for each item
+  const [expandedDescriptions, setExpandedDescriptions] = useState({});
   const { user } = useAuth();
   
   const toggleDropdown = (itemId) => {
@@ -20,12 +21,21 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
     } else {
       setShowDropdown(itemId);
     }
-  };  const toggleComments = (itemId) => {
+  };
+  
+  const toggleComments = (itemId) => {
     if (expandedComments === itemId) {
       setExpandedComments(null);
     } else {
       setExpandedComments(itemId);
     }
+  };
+
+  const toggleDescription = (itemId) => {
+    setExpandedDescriptions(prev => ({
+      ...prev,
+      [itemId]: !prev[itemId]
+    }));
   };
   
   const setItemLoading = (itemId, isLoading) => {
@@ -140,26 +150,27 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
       setItemLoading(item.id, false);
     }
   };
+
   const handleFilterClick = (filter) => {
     setSelectedFilter(filter);
     setShowFilters(false);
   };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredItems.map((item) => (
             <div
               key={item.id}
-              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-black/10 relative
-"
+              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-black/10 relative flex flex-col h-full"
             >
               {item.isOwnPost && (
                 <span
-                className="absolute top-2 right-2 z-10 text-xs font-semibold px-3 py-1 rounded text-white"
-                style={{ backgroundColor: item.isVerified === false ? '#ef4444' : '#10b981' }}
-              >
-                {item.isVerified ? 'Verified' : 'Unverified'}
-              </span>
+                  className="absolute top-2 right-2 z-10 text-xs font-semibold px-3 py-1 rounded text-white"
+                  style={{ backgroundColor: item.isVerified === false ? '#ef4444' : '#10b981' }}
+                >
+                  {item.isVerified ? 'Verified' : 'Unverified'}
+                </span>
               )}
               <div className="aspect-square overflow-hidden rounded-t-xl">
                 <img
@@ -168,7 +179,7 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                   className="w-full h-full object-cover object-top"
                 />
               </div>
-              <div className="p-4">
+              <div className="p-4 flex-1 flex flex-col">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 rounded-full overflow-hidden">
@@ -181,7 +192,8 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                     <div>
                       <div className="text-sm font-medium">
                         {item.user.name}
-                      </div>                      <div className="text-xs text-gray-500 flex items-center">
+                      </div>
+                      <div className="text-xs text-gray-500 flex items-center flex-wrap">
                         <span>{item.user.rollNumber}</span>
                         <span className="mx-1">•</span>
                         <span>{new Date(item.date).toLocaleString()}</span>
@@ -196,59 +208,39 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                       </div>
                     </div>
                   </div>
-                  <div className="relative">
-                    <button
-                      onClick={() => toggleDropdown(item.id)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      <i className="fas fa-ellipsis-v"></i>
-                    </button>
-                    {showDropdown === item.id && (
-                      <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 z-10">
-                        <ul className="py-1">                          {item.type === "Lost" ? (
-                            <li
-                              className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                              onClick={() => handleAction("Found", item.type, item)}
-                            >
-                              <i className="fas fa-check mr-2"></i> Found
-                            </li>
-                          ) : (
-                            <li
-                              className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                              onClick={() => handleAction("Claim", item.type, item)}
-                            >
-                              <i className="fas fa-hand-paper mr-2"></i> Claim
-                            </li>
-                          )}
-                          {item.isOwnPost && (
-                            <li
-                              className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer text-red-600"
-                              onClick={() => handleDeletePost(item.id, item.post_type || item.type)}
-                            >
-                              <i className="fas fa-trash mr-2"></i> Delete
-                            </li>
-                          )}
-                          <li
-                            className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer text-red-500"
-                            onClick={() => handleAction("Report", item.type)}
-                          >
-                            <i className="fas fa-flag mr-2"></i> Report
-                          </li>
-                        </ul>
-                      </div>
+                </div>
+                
+                {/* Content section */}
+                <div className="flex flex-col flex-grow">
+                  <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                  <div className="flex items-center text-gray-600 text-sm mb-2">
+                    <i className="fas fa-map-marker-alt mr-2"></i>
+                    {item.location}
+                  </div>
+                  
+                  <div className="mb-4">
+                    <p className={`text-sm text-gray-600 ${!expandedDescriptions[item.id] ? "line-clamp-2" : ""}`}>
+                      {item.description}
+                    </p>
+                    {item.description && item.description.length > 120 && (
+                      <button 
+                        onClick={() => toggleDescription(item.id)} 
+                        className="text-blue-600 text-xs font-medium mt-1 hover:underline"
+                      >
+                        {expandedDescriptions[item.id] ? "Show less" : "Show more"}
+                      </button>
                     )}
                   </div>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-                <div className="flex items-center text-gray-600 text-sm mb-2">
-                  <i className="fas fa-map-marker-alt mr-2"></i>
-                  {item.location}
-                </div>                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                  {item.description}
-                </p>                <button
-                  className={`w-full py-2 ${item.isOwnPost ? 'bg-black' : 'bg-black hover:bg-gray-900'} text-white rounded-lg font-medium text-sm transition-colors cursor-pointer whitespace-nowrap relative overflow-hidden ${loadingStates[item.id] ? 'cursor-not-allowed opacity-75' : ''}`}
-                  onClick={() =>
-                    !loadingStates[item.id] && (
+                
+                <div>
+                  
+                </div>
+                {/* Button section - now consistently at the bottom */}
+                <div className="mt-auto">
+                  <button
+                    className={`w-full py-2 ${item.isOwnPost ? 'bg-black' : 'bg-black hover:bg-gray-900'} text-white rounded-lg font-medium text-sm transition-colors cursor-pointer whitespace-nowrap`}
+                    onClick={() =>
                       item.isOwnPost 
                       ? handleDeletePost(item.id, item.post_type || item.type)
                       : handleAction(
@@ -256,23 +248,13 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                           item.type,
                           item
                         )
-                    )
-                  }
-                  disabled={loadingStates[item.id]}
-                >
-                  {loadingStates[item.id] ? (
-                    <span className="flex items-center justify-center">
-                      <i className="fas fa-spinner fa-spin mr-2"></i>
-                      {item.isOwnPost 
-                        ? "Deleting..." 
-                        : (item.type === "Lost" ? "Notifying Owner..." : "Notifying Finder...")}
-                    </span>
-                  ) : (
-                    item.isOwnPost 
+                    }
+                  >
+                    {item.isOwnPost 
                       ? "Delete This Item" 
-                      : (item.type === "Lost" ? "Found This Item" : "Claim This Item")
-                  )}
-                </button>
+                      : (item.type === "Lost" ? "Found This Item" : "Claim This Item")}
+                  </button>
+                </div>
 
                 {/* Comment section */}
                 <div className="mt-4 pt-3 border-t border-gray-100">
@@ -315,7 +297,7 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                                     {comment.user.name}
                                   </div>
                                   <div className="text-xs text-gray-400">
-                                  {new Date(comment.date).toLocaleString()}
+                                    {new Date(comment.date).toLocaleString()}
                                   </div>
                                 </div>
                                 <div className="text-sm mt-1">
@@ -330,8 +312,7 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                           No comments yet
                         </div>
                       )}
-                      <CommentForm  item={item}/>
-                      {/* comment form */}
+                      <CommentForm item={item}/>
                     </div>
                   )}
                 </div>
@@ -340,5 +321,5 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
           ))}
         </div>
       </div>
-  )
+  );
 }
