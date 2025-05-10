@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt'
 import pool from "../config/db.js"
-import { uploadToCloudinary } from '../config/cloudinary.js';
+import { uploadToCloudinary, deleteFromCloudinary } from '../config/cloudinary.js';
 
 export const hashPassword = async (password) =>{
   const saltRound = 10;
@@ -148,3 +148,40 @@ export const updateUserNameService = async(rollno,username) =>{
     throw new Error(error.message)
   }
 }
+
+export const updateUserImageService = async (rollno, image) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Get the old image URL first to delete it later
+    const oldImageQuery = 'SELECT image_url FROM "User" WHERE rollno = $1';
+    const oldImageResult = await client.query(oldImageQuery, [rollno]);
+    const oldImageUrl = oldImageResult.rows[0]?.image_url;
+
+    // Upload new image to Cloudinary
+    const newImageUrl = await uploadToCloudinary(image);
+
+    // Update user's image URL in database
+    const updateQuery = 'UPDATE "User" SET image_url = $1 WHERE rollno = $2 RETURNING image_url';
+    const result = await client.query(updateQuery, [newImageUrl, rollno]);
+
+    if (result && result.rows && result.rows.length > 0) {
+      // Delete old image from Cloudinary if it exists
+      if (oldImageUrl) {
+        await deleteFromCloudinary(oldImageUrl);
+      }
+
+      await client.query('COMMIT');
+      return result.rows[0].image_url;
+    } else {
+      throw new Error('User not found');
+    }
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error updating user image:', error);
+    throw new Error(error.message);
+  } finally {
+    client.release();
+  }
+};
