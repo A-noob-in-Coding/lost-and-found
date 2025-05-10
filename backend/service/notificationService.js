@@ -59,8 +59,8 @@ export const createFoundItemEmailContent = (finderName, itemTitle) => {
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
       <h2 style="color: #333;">Good News! Your Item Has Been Found</h2>
       <p>Hello,</p>
-      <p>We're pleased to inform you that <strong>${finderName}</strong> has found your item: <strong>${itemTitle}</strong>.</p>
-      <p>Please log in to the Lost and Found application to check the details and get in touch with the finder.</p>
+      <p>We are pleased to inform you that <strong>${finderName}</strong> has found your item: <strong>${itemTitle}</strong>.</p>
+      <p>Please log in to the Lost and Found application to delete the post if it is no longer needed.</p>
       <p>Thank you for using our service!</p>
       <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #777;">
         <p>This is an automated message. Please do not reply to this email.</p>
@@ -76,7 +76,7 @@ export const createClaimItemEmailContent = (claimerName, itemTitle) => {
       <h2 style="color: #333;">Item Claim Notification</h2>
       <p>Hello,</p>
       <p>We'd like to inform you that <strong>${claimerName}</strong> has claimed your found item: <strong>${itemTitle}</strong>.</p>
-      <p>Please log in to the Lost and Found application to check the details and get in touch with the claimer.</p>
+<p>Please log in to the Lost and Found application to delete the post if it is no longer needed.</p>
       <p>Thank you for using our service!</p>
       <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #777;">
         <p>This is an automated message. Please do not reply to this email.</p>

@@ -11,6 +11,7 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [items, setItems] = useState(filteredItems);
   const [showFilters, setShowFilters] = useState(false);
+  const [loadingStates, setLoadingStates] = useState({}); // Track loading states for each item
   const { user } = useAuth();
   
   const toggleDropdown = (itemId) => {
@@ -27,12 +28,20 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
     }
   };
   
+  const setItemLoading = (itemId, isLoading) => {
+    setLoadingStates(prev => ({
+      ...prev,
+      [itemId]: isLoading
+    }));
+  };
+
   const handleDeletePost = async (postId, postType) => {
-    // If onDeletePost prop is provided, use it; otherwise, handle locally
-    if (onDeletePost) {
-      onDeletePost(postId, postType);
-    } else {
-      try {
+    setItemLoading(postId, true);
+    try {
+      // If onDeletePost prop is provided, use it; otherwise, handle locally
+      if (onDeletePost) {
+        await onDeletePost(postId, postType);
+      } else {
         const endpoint = `http://localhost:5000/api/user/posts/${postType.toLowerCase()}/${postId}`;
         const response = await fetch(endpoint, {
           method: 'DELETE'
@@ -46,17 +55,17 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
           const errorData = await response.json();
           toast.error(errorData.message || "Failed to delete post");
         }
-      } catch (error) {
-        console.error("Error deleting post:", error);
-        toast.error("An error occurred while deleting the post");
       }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast.error("An error occurred while deleting the post");
+    } finally {
+      setItemLoading(postId, false);
     }
   };
   
   const handleAction = async (action, type, item) => {
-    console.log(`${action} action for ${type} item`);
-    setShowDropdown(null);
-    
+    setItemLoading(item.id, true);
     try {
       // Get current user's email from auth context
       const senderEmail = user.email;
@@ -123,9 +132,12 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
           toast.error('Failed to send notification. Please try again.');
         }
       }
+      setShowDropdown(null);
     } catch (error) {
       console.error('Error sending notification:', error);
       toast.error('An error occurred while sending the notification.');
+    } finally {
+      setItemLoading(item.id, false);
     }
   };
   const handleFilterClick = (filter) => {
@@ -234,20 +246,32 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                 </div>                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                   {item.description}
                 </p>                <button
-                  className={`w-full py-2 ${item.isOwnPost ? 'bg-black' : 'bg-black hover:bg-gray-900'} text-white rounded-lg font-medium text-sm transition-colors cursor-pointer whitespace-nowrap`}
+                  className={`w-full py-2 ${item.isOwnPost ? 'bg-black' : 'bg-black hover:bg-gray-900'} text-white rounded-lg font-medium text-sm transition-colors cursor-pointer whitespace-nowrap relative overflow-hidden ${loadingStates[item.id] ? 'cursor-not-allowed opacity-75' : ''}`}
                   onClick={() =>
-                    item.isOwnPost 
-                    ? handleDeletePost(item.id, item.post_type || item.type)
-                    : handleAction(
-                        item.type === "Lost" ? "Found" : "Claim",
-                        item.type,
-                        item
-                      )
+                    !loadingStates[item.id] && (
+                      item.isOwnPost 
+                      ? handleDeletePost(item.id, item.post_type || item.type)
+                      : handleAction(
+                          item.type === "Lost" ? "Found" : "Claim",
+                          item.type,
+                          item
+                        )
+                    )
                   }
+                  disabled={loadingStates[item.id]}
                 >
-                  {item.isOwnPost 
-                    ? "Delete This Item" 
-                    : (item.type === "Lost" ? "Found This Item" : "Claim This Item")}
+                  {loadingStates[item.id] ? (
+                    <span className="flex items-center justify-center">
+                      <i className="fas fa-spinner fa-spin mr-2"></i>
+                      {item.isOwnPost 
+                        ? "Deleting..." 
+                        : (item.type === "Lost" ? "Notifying Owner..." : "Notifying Finder...")}
+                    </span>
+                  ) : (
+                    item.isOwnPost 
+                      ? "Delete This Item" 
+                      : (item.type === "Lost" ? "Found This Item" : "Claim This Item")
+                  )}
                 </button>
 
                 {/* Comment section */}
