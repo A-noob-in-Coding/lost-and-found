@@ -11,6 +11,7 @@ import { Toaster } from 'react-hot-toast';
 import ProfilePage from './pages/profilePage';
 import CreatePost from './pages/createPost.jsx';
 import AdminPage from './pages/adminPage.jsx'
+import CreatePostPage from './pages/createPost.jsx';
 import "nprogress/nprogress.css";
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/createPost" element={<CreatePost />} />
           <Route path="/register" element={<Register />} />
+          <Route path='/createPost' element={<CreatePostPage/>} />
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/contact" element={<ContactForm />} />
           <Route path="/howitworks" element={<HowItWorks />} />

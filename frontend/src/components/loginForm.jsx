@@ -17,9 +17,7 @@ export default function LoginForm({ setShowForgotPassword }) {
     e.preventDefault();
     setError("");
     setIsLoading(true); // Start loading
-  
-
-
+    console.log(rollNo+password)
     setTimeout(async () => {
       try {
         const success = await login(rollNo, password);

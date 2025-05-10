@@ -2,9 +2,10 @@ import { useNavigate } from "react-router-dom";
 
 export default function Footer() {
   const navigate = useNavigate();
+  
   return (
-    <footer className="bg-black text-white py-10 mt-10">
-      <div className="max-w-7xl mx-auto px-4">
+    <footer className="bg-black text-white w-full mt-auto">
+      <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-xl font-bold mb-4">Lost & Found</h3>

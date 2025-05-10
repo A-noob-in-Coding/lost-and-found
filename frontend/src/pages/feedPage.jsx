@@ -9,6 +9,7 @@ import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 import { useAuth } from "../context/authContext";
 import toast from "react-hot-toast";
+
 const Feed = () => {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,6 +24,10 @@ const Feed = () => {
   const [filteredItems, setFilteredItems] = useState([]);
   const [userPosts, setUserPosts] = useState([]);
   
+  const onRefresh = () => {
+    fetchAllPosts();
+  }
+
   const fetchAllPosts = () => {
     NProgress.start();
     fetch("http://localhost:5000/api/user/posts/getPostData")
@@ -70,7 +75,8 @@ const Feed = () => {
         });
     }
   };
-    useEffect(() => {
+  
+  useEffect(() => {
     fetchAllPosts();
     if (user && user.rollno) {
       fetchUserPosts();
@@ -105,7 +111,6 @@ const Feed = () => {
   };
   
   const handleDeletePost = async (postId, postType) => {
-    
     NProgress.start();
     try {
       const endpoint = `http://localhost:5000/api/user/posts/${postType.toLowerCase()}/${postId}`;
@@ -131,6 +136,7 @@ const Feed = () => {
       NProgress.done();
     }
   };
+  
   const displayedItems = activeFilter === "My Posts" 
     ? [
         // Add verified posts
@@ -173,19 +179,24 @@ const Feed = () => {
                               item.description?.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesFilter && matchesSearch;
       });
-  
 
   return (
-    <div className="min-h-screen bg-white">
-      <BackgroundBrand />      <Navbar 
-  setShowPostModal={setShowPostModal} 
-  searchQuery={searchQuery}
-  setSearchQuery={setSearchQuery}
-/>
+    <div className="flex flex-col min-h-screen bg-white">
+      <BackgroundBrand />
+      <Navbar 
+        setShowPostModal={setShowPostModal} 
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
 
-      <Filter setActiveFilter={setActiveFilter} />
-      <ContentGrid filteredItems={displayedItems} onDeletePost={handleDeletePost} />
+      <Filter setActiveFilter={setActiveFilter} activeFilter={activeFilter} onRefresh={onRefresh}/>
+      
+      <main className="flex-grow">
+        <ContentGrid filteredItems={displayedItems} onDeletePost={handleDeletePost} />
+      </main>
+      
       <Footer />
+      
       {successMessage &&
         Toast({ message: successMessage, type: "success", duration: 3000 })}
     </div>
