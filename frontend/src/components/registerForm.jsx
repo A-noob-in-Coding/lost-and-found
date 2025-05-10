@@ -149,6 +149,11 @@ export default function RegisterForm({
   }
 
   if(e.nativeEvent.inputType === "insertText"){
+   //checking entered is number or not
+      if (isNaN(value[value.length - 1])) {
+        value = value.slice(0, -1);
+      }
+
      if (value.length <= 2) {
       value = value.replace(/\D/g, "");
       if (value.length === 2) {
