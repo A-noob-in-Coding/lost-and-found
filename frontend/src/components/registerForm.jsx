@@ -11,14 +11,27 @@ export default function RegisterForm({
   const fileInputRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
-  const [error, setError] = useState("");
-  const [isDragging, setIsDragging] = useState(false);
+  const [error, setError] = useState("");  const [isDragging, setIsDragging] = useState(false);
+  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    if (name === "password") {
+      const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
+      if (!passwordRegex.test(value)) {
+        setError(
+          "Password must be at least 8 characters long, include 1 capital letter and 1 special character"
+        );
+      } else {
+        setError("");
+      }
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -92,10 +105,14 @@ export default function RegisterForm({
   const handleRegister = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
-
-    if (!formData.imageFile) {
+    setError("");    if (!formData.imageFile) {
       setError("Please upload a profile image");
+      setIsLoading(false);
+      return;
+    }
+
+    if (formData.password !== confirmPassword) {
+      setError("Passwords do not match");
       setIsLoading(false);
       return;
     }
@@ -142,30 +159,29 @@ export default function RegisterForm({
   const handleRollNumberChange = (e) => {
     let value = e.target.value;
 
-    if(e.nativeEvent.inputType === "deleteContentBackward"){
-    if (value.length == 4) {
-      value = value.slice(0, 2);
+    if (e.nativeEvent.inputType === "deleteContentBackward") {
+      if (value.length == 4) {
+        value = value.slice(0, 2);
+      }
     }
-  }
 
-  if(e.nativeEvent.inputType === "insertText"){
-   //checking entered is number or not
+    if (e.nativeEvent.inputType === "insertText") {
+      //checking entered is number or not
       if (isNaN(value[value.length - 1])) {
         value = value.slice(0, -1);
       }
 
-     if (value.length <= 2) {
-      value = value.replace(/\D/g, "");
-      if (value.length === 2) {
-        value = value + "L-";
+      if (value.length <= 2) {
+        value = value.replace(/\D/g, "");
+        if (value.length === 2) {
+          value = value + "L-";
+        }
       }
-    }
-  }
-    else {
-      const prefix = value.slice(0, 3); 
-      const rest = value.slice(3).replace(/[^\d-]/g, ""); 
+    } else {
+      const prefix = value.slice(0, 3);
+      const rest = value.slice(3).replace(/[^\d-]/g, "");
       value = prefix + rest;
-    }    // Validate the format XXL-YYYY
+    } // Validate the format XXL-YYYY
     const rollNoRegex = /^\d{2}L-\d{4,5}$/;
     if (value.length > 8 && !rollNoRegex.test(value)) {
       setError("Roll number must be in format: XXL-YYYY (e.g., 23L-3059)");
@@ -208,7 +224,8 @@ export default function RegisterForm({
             name="studentId"
             placeholder="Student ID (e.g., 23L-XXXX)"
             value={formData.studentId}
-            onChange={handleRollNumberChange}            maxLength={8}
+            onChange={handleRollNumberChange}
+            maxLength={8}
             className="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
             required
             pattern="\d{2}L-\d{4,5}"
@@ -226,20 +243,67 @@ export default function RegisterForm({
             onChange={handleInputChange}
             className="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
             required
-          />
+          />        </div>
+        <div className="relative space-y-2">
+          <div className="relative">
+            <i className="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleInputChange}
+              onFocus={() => setShowPasswordRequirements(true)}
+              onBlur={() => setShowPasswordRequirements(false)}
+              className="w-full pl-10 pr-12 py-3 bg-gray-100 border-none rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
+              required
+              pattern="^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})"
+              title="Password must be at least 8 characters long, include 1 capital letter and 1 special character"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+            </button>
+          </div>
+          {showPasswordRequirements && (
+            <div className="text-xs text-gray-500 space-y-1 pl-2">
+              <p>Password requirements:</p>
+              <ul className="list-disc pl-4">
+                <li>At least 8 characters long</li>
+                <li>Must contain 1 capital letter</li>
+                <li>Must contain 1 special character (!@#$%^&*)</li>
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="relative">
           <i className="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
           <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleInputChange}
-            className="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              if (e.target.value !== formData.password) {
+                setError("Passwords do not match");
+              } else {
+                setError("");
+              }
+            }}
+            className="w-full pl-10 pr-12 py-3 bg-gray-100 border-none rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
             required
           />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+          >
+            <i className={`fas ${showConfirmPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+          </button>
         </div>
 
         <div className="space-y-2">
