@@ -255,10 +255,9 @@ export default function RegisterForm({
               onChange={handleInputChange}
               onFocus={() => setShowPasswordRequirements(true)}
               onBlur={() => setShowPasswordRequirements(false)}
-              className="w-full pl-10 pr-12 py-3 bg-gray-100 border-none rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
-              required
-              pattern="^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})"
-              title="Password must be at least 8 characters long, include 1 capital letter and 1 special character"
+              className="w-full pl-10 pr-12 py-3 bg-gray-100 border-none rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"              required
+              pattern="^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[0-9]).{8,}$"
+              title="Password must be at least 8 characters long, include 1 capital letter, 1 special character, and 1 digit"
             />
             <button
               type="button"
