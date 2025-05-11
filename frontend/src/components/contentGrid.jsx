@@ -8,6 +8,8 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
   const [showDropdown, setShowDropdown] = useState(null);
   const [expandedComments, setExpandedComments] = useState(null);
   const [commentText, setCommentText] = useState("");
+  const [loadingStates, setLoadingStates] = useState({});
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const filters = ["All", "Lost", "Found" , "My Posts"];
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [items, setItems] = useState(filteredItems);
@@ -155,11 +157,18 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
     setSelectedFilter(filter);
     setShowFilters(false);
   };
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredItems.map((item) => (
+        {!filteredItems.length ? (
+          <div className="h-[100vh] w-[40vw] flex items-center justify-center">
+            <div className= "flex flex-col items-center space-y-4">
+              <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+              <p style={{fontSize: '1.5rem' , margin:"50px" , textAlign:"center"}} className="text-gray-600 font-large">Loading posts...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredItems.map((item) => (
             <div
               key={item.id}
               className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-black/10 relative flex flex-col h-full"
@@ -173,21 +182,33 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                 </span>
               )}
               <div className="aspect-square overflow-hidden rounded-t-xl">
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-full object-cover object-top"
-                />
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover object-top"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-400">No image available</span>
+                  </div>
+                )}
               </div>
               <div className="p-4 flex-1 flex flex-col">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 rounded-full overflow-hidden">
-                      <img
-                        src={item.user.avatar}
-                        alt={item.user.name}
-                        className="w-full h-full object-cover"
-                      />
+                      {item.user?.avatar ? (
+                        <img
+                          src={item.user.avatar}
+                          alt={item.user.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                          <i className="fas fa-user text-gray-400"></i>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <div className="text-sm font-medium">
@@ -236,10 +257,10 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                 <div>
                   
                 </div>
-                {/* Button section - now consistently at the bottom */}
-                <div className="mt-auto">
+                {/* Button section - now consistently at the bottom */}                <div className="mt-auto">
                   <button
-                    className={`w-full py-2 ${item.isOwnPost ? 'bg-black' : 'bg-black hover:bg-gray-900'} text-white rounded-lg font-medium text-sm transition-colors cursor-pointer whitespace-nowrap`}
+                    disabled={loadingStates[item.id]}
+                    className={`w-full py-2 ${item.isOwnPost ? 'bg-black' : 'bg-black hover:bg-gray-900'} text-white rounded-lg font-medium text-sm transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center`}
                     onClick={() =>
                       item.isOwnPost 
                       ? handleDeletePost(item.id, item.post_type || item.type)
@@ -250,9 +271,16 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                         )
                     }
                   >
-                    {item.isOwnPost 
+                    {loadingStates[item.id] ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        {item.isOwnPost ? "Deleting..." : (item.type === "Lost" ? "Processing..." : "Processing...")}
+                      </>
+                    ) : (
+                      item.isOwnPost 
                       ? "Delete This Item" 
-                      : (item.type === "Lost" ? "Found This Item" : "Claim This Item")}
+                      : (item.type === "Lost" ? "Found This Item" : "Claim This Item")
+                    )}
                   </button>
                 </div>
 
@@ -285,11 +313,17 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                           >
                             <div className="flex items-start">
                               <div className="w-6 h-6 rounded-full overflow-hidden mr-2">
-                                <img
-                                  src={comment.user.avatar}
-                                  alt={comment.user.name}
-                                  className="w-full h-full object-cover"
-                                />
+                                {comment.user?.avatar ? (
+                                  <img
+                                    src={comment.user.avatar}
+                                    alt={comment.user.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                                    <i className="fas fa-user text-gray-400 text-xs"></i>
+                                  </div>
+                                )}
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center justify-between">
@@ -317,9 +351,9 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                   )}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            </div>          ))}
+          </div>
+        )}
       </div>
   );
 }

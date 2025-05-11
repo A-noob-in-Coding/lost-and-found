@@ -23,56 +23,57 @@ const Feed = () => {
   const [commentText, setCommentText] = useState("");
   const [filteredItems, setFilteredItems] = useState([]);
   const [userPosts, setUserPosts] = useState([]);
-  
-  const onRefresh = () => {
-    fetchAllPosts();
-  }
-
-  const fetchAllPosts = () => {
-    NProgress.start();
-    fetch("http://localhost:5000/api/user/posts/getPostData")
-      .then((res) => res.json())
-      .then((data) => {
-        setFilteredItems(data);
-        NProgress.done();
-      })
-      .catch((err) => {
-        console.error("Failed to fetch post data:", err);
-        NProgress.done();
-      });
-  };
-  
-  const [unverifiedPosts, setUnverifiedPosts] = useState([]);
-
-  const fetchUserPosts = () => {
+    const onRefresh = async () => {
+    setFilteredItems([]); // Clear posts while refreshing
+    await fetchAllPosts();
     if (user && user.rollno) {
+      await fetchUserPosts();
+      await fetchUnverifiedPosts();
+    }
+  }
+  const fetchAllPosts = async () => {
+    try {
       NProgress.start();
-      fetch(`http://localhost:5000/api/user/posts/rollno/${user.rollno}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setUserPosts(data);
-          NProgress.done();
-        })
-        .catch((err) => {
-          console.error("Failed to fetch user posts:", err);
-          NProgress.done();
-        });
+      const response = await fetch("http://localhost:5000/api/user/posts/getPostData");
+      const data = await response.json();
+      setFilteredItems(data);
+    } catch (err) {
+      console.error("Failed to fetch post data:", err);
+      toast.error("Failed to fetch posts");
+    } finally {
+      NProgress.done();
     }
   };
   
-  const fetchUnverifiedPosts = () => {
+  const [unverifiedPosts, setUnverifiedPosts] = useState([]);
+  const fetchUserPosts = async () => {
     if (user && user.rollno) {
-      NProgress.start();
-      fetch(`http://localhost:5000/api/user/posts/unverified/rollno/${user.rollno}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setUnverifiedPosts(data);
-          NProgress.done();
-        })
-        .catch((err) => {
-          console.error("Failed to fetch unverified posts:", err);
-          NProgress.done();
-        });
+      try {
+        NProgress.start();
+        const response = await fetch(`http://localhost:5000/api/user/posts/rollno/${user.rollno}`);
+        const data = await response.json();
+        setUserPosts(data);
+      } catch (err) {
+        console.error("Failed to fetch user posts:", err);
+        toast.error("Failed to fetch your posts");
+      } finally {
+        NProgress.done();
+      }
+    }
+  };
+    const fetchUnverifiedPosts = async () => {
+    if (user && user.rollno) {
+      try {
+        NProgress.start();
+        const response = await fetch(`http://localhost:5000/api/user/posts/unverified/rollno/${user.rollno}`);
+        const data = await response.json();
+        setUnverifiedPosts(data);
+      } catch (err) {
+        console.error("Failed to fetch unverified posts:", err);
+        toast.error("Failed to fetch unverified posts");
+      } finally {
+        NProgress.done();
+      }
     }
   };
   
