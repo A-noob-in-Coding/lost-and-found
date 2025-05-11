@@ -25,16 +25,17 @@ export const AuthProvider = ({ children }) => {
   const updateProfileImage = async (imageFile) => {
     try {
       const formData = new FormData();
-      formData.append('rollno', user.rollno);
-      formData.append('image', imageFile);
+      formData.append('imageFile', imageFile);
+      formData.append('rollno', user.rollno); // Changed rollNo to rollno to match backend
 
       const response = await fetch('http://localhost:5000/api/users/update-image', {
         method: 'POST',
-        body: formData, // No need to set Content-Type header when using FormData
+        body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update profile image');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to update profile image');
       }
 
       const data = await response.json();
