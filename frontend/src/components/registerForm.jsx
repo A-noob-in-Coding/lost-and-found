@@ -101,11 +101,12 @@ export default function RegisterForm({
   const triggerFileInput = () => {
     fileInputRef.current.click();
   };
-
   const handleRegister = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");    if (!formData.imageFile) {
+    setError("");
+    
+    if (!formData.imageFile) {
       setError("Please upload a profile image");
       setIsLoading(false);
       return;
@@ -117,14 +118,24 @@ export default function RegisterForm({
       return;
     }
 
-    const formDataToSend = new FormData();
-    formDataToSend.append("name", formData.fullName);
-    formDataToSend.append("rollNo", formData.studentId);
-    formDataToSend.append("email", formData.email);
-    formDataToSend.append("password", formData.password);
-    formDataToSend.append("imageFile", formData.imageFile);
-
     try {
+      // First check if email already exists
+      const emailCheckResponse = await fetch(`http://localhost:5000/api/users/email/get-user?email=${encodeURIComponent(formData.email)}`);
+      
+      if (emailCheckResponse.ok) {
+        setError("This email is already registered. Please use a different email address.");
+        toast.error("This email is already registered. Please use a different email address.");
+        setIsLoading(false);
+        return;
+      }
+
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.fullName);
+      formDataToSend.append("rollNo", formData.studentId);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("password", formData.password);
+      formDataToSend.append("imageFile", formData.imageFile);
+
       // Store email in local storage for OTP verification
       localStorage.setItem("registerEmail", formData.email);
 

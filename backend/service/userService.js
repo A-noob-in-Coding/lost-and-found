@@ -187,3 +187,19 @@ export const updateUserImageService = async (rollno, image) => {
     client.release();
   }
 };
+
+export const getUserByEmailService = async(email) => {
+  try {
+    const query = 'SELECT * FROM "User" WHERE email = $1';
+    const result = await pool.query(query, [email]);
+
+    if (result && result.rows && result.rows.length > 0) {
+      return result.rows[0]; // return the user object
+    } else {
+      throw new Error('User not found');
+    }
+  } catch (error) {
+    console.error('Error fetching user by email:', error);
+    throw new Error(error.message);
+  }
+};

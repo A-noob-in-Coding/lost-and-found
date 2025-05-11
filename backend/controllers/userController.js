@@ -1,4 +1,4 @@
-import { authenticateUserService, changePasswordService, doesUserExist, getPasswordUserService, getUserByRollNoService, hashPassword, registerUserService, getUserImageService, updateUserNameService, updateUserImageService } from "../service/userService.js";
+import { authenticateUserService, changePasswordService, doesUserExist, getPasswordUserService, getUserByRollNoService, hashPassword, registerUserService, getUserImageService, updateUserNameService, updateUserImageService, getUserByEmailService } from "../service/userService.js";
 
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
@@ -45,9 +45,6 @@ export const getUserByRollNo = async (req, res) => {
   }
 };
 
-
-
-
 export const authenticateUser = async (req, res) => {
   const { rollno, password } = req.body; // Ensure destructuring works correctly
   try {
@@ -59,7 +56,7 @@ export const authenticateUser = async (req, res) => {
     }
   } catch (error) {
     console.log("failed");
-    return res.status(404).json({ message: error.message });
+    return res.status(404).json({ message: "Invalid credentials" });
   }
 };
 
@@ -144,5 +141,26 @@ export const updateUserImage = async (req, res) => {
   } catch (error) {
     console.error("Error updating profile image:", error);
     return res.status(500).json({ message: error.message });
+  }
+};
+
+export const getUserByEmail = async (req, res) => {
+  const { email } = req.query;
+  
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    const user = await getUserByEmailService(email);
+    const userResponse = {
+      email: user.email,
+      name: user.name,
+      rollno: user.rollno,
+      image_url: user.image_url
+    };
+    return res.json({message:"Email already exists!"});
+  } catch (error) {
+    return res.status(404).json({ message: error.message });
   }
 };

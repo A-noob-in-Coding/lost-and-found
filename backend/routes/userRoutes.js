@@ -7,7 +7,8 @@ import {
   getUserImage, 
   registerUser, 
   updateUserName,
-  updateUserImage 
+  updateUserImage,
+  getUserByEmail
 } from '../controllers/userController.js';
 import upload from '../config/mutler.js';
 
@@ -17,6 +18,7 @@ userRouter.post('/register', upload.single('imageFile'), registerUser);
 userRouter.post('/register', registerUser);
 userRouter.get('/check-email', checkUserByEmail); //For OTP verification
 userRouter.get('/:rollNo', getUserByRollNo);
+userRouter.get('/email/get-user', getUserByEmail);
 userRouter.post('/login',authenticateUser);
 userRouter.post('/changePassword',changePassword);
 userRouter.get('/image/:rollNo', getUserImage);
