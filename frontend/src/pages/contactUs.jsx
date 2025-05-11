@@ -7,7 +7,6 @@ export default function ContactForm() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    subject: "",
     message: ""
   });
   
@@ -43,7 +42,6 @@ export default function ContactForm() {
         setFormData({
           name: "",
           email: "",
-          subject: "",
           message: ""
         });
       } else {
@@ -70,20 +68,20 @@ export default function ContactForm() {
       )}
       
       {/* Root container with min-h-screen and flex to ensure footer at bottom */}
-      <div className="flex flex-col min-h-screen relative">
+      <div  className="flex flex-col min-h-screen relative">
         {/* Background typography with absolute positioning */}
         <div className="absolute inset-0 overflow-hidden z-0">
           <BackgroundTypography />
         </div>
         
         {/* Main content area - with flex-grow to push footer down */}
-        <main className="flex-grow flex items-center justify-center pt-12 px-4 relative z-10">
+        <main style={{marginBottom: '7vh' , marginTop:'7vh' }} className="flex-grow flex items-center justify-center pt-12 px-4 relative z-10">
           {/* Form container */}
-          <div className="max-w-md w-full mx-auto bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+          <div style={{ border: '1.5px solid black'}} className="max-w-md w-full mx-auto bg-white rounded-xl shadow-lg p-8 border border-gray-100">
             <h2 className="text-2xl font-semibold mb-6 text-center">Send Us a Message</h2>
             
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
+              <div style={{ marginBottom: '1rem' }}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Your Name
                 </label>
@@ -97,7 +95,7 @@ export default function ContactForm() {
                 />
               </div>
               
-              <div>
+              <div style={{ marginBottom: '1rem' }}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email Address
                 </label>
@@ -105,20 +103,6 @@ export default function ContactForm() {
                   type="email"
                   name="email"
                   value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/50 text-sm"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  name="subject"
-                  value={formData.subject}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/50 text-sm"
                   required

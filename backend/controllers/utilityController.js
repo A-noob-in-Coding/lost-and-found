@@ -17,14 +17,14 @@ export const getCategories = async(req,res) =>{
 };
 
 export const sendContactEmail = async (req, res) => {
-  const { name, email, subject, message } = req.body;
+  const { name, email, message } = req.body;
 
-  if (!name || !email || !subject || !message) {
+  if (!name || !email || !message) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
   try {
-    const result = await sendContactEmailService(name, email, subject, message);
+    const result = await sendContactEmailService(name, email, message);
     return res.status(200).json(result);
   } catch (error) {
     console.error('Error in sendContactEmail controller:', error);
