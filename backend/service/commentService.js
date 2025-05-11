@@ -153,4 +153,21 @@ export const deleteAdminFoundCommentService = async(fcommentID) =>{
     console.log(error.message)
     throw new Error(error.message)
   }
-} 
+}
+
+export const deleteUserCommentByTextService = async (rollNo, commentText, type) => {
+  try {
+    const query = type.toLowerCase() === 'lost'
+      ? 'DELETE FROM lostpostcomment WHERE rollno = $1 AND comment = $2 RETURNING l_comment_id'
+      : 'DELETE FROM foundpostcomment WHERE rollno = $1 AND comment = $2 RETURNING f_comment_id';
+    
+    const result = await pool.query(query, [rollNo, commentText]);
+    
+    if (result.rows.length === 0) {
+      throw new Error('Comment not found');
+    }
+  } catch (error) {
+    console.log(`Error deleting ${type} comment: ${error.message}`);
+    throw new Error(error.message);
+  }
+};

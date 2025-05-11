@@ -1,4 +1,4 @@
-import { addFoundCommentService, addLostCommentService, deleteFoundCommentService, deleteLostCommentService, getAllFoundCommentsService, getAllLostCommentsService, verifyFoundCommentService, verifyLostCommentService, getAdminAllCommentsService, deleteAdminFoundCommentService, deleteAdminLostCommentService} from "../service/commentService.js"
+import { addFoundCommentService, addLostCommentService, deleteFoundCommentService, deleteLostCommentService, getAllFoundCommentsService, getAllLostCommentsService, verifyFoundCommentService, verifyLostCommentService, getAdminAllCommentsService, deleteAdminFoundCommentService, deleteAdminLostCommentService, deleteUserCommentByTextService} from "../service/commentService.js"
 
 export const addLostComment = async(req,res) =>{
   const {lpostId,rollNo,comment} = req.body
@@ -161,4 +161,28 @@ export const getAdminAllComments = async(req,res) =>{
     return res.status(500).json({message:error.message})
   }
 }
+
+export const deleteUserCommentByText = async (req, res) => {
+  const { rollNo, comment, type } = req.body;
+  
+  try {
+    // Input validation
+    if (!rollNo || !comment || !type) {
+      return res.status(400).json({ message: "Please provide rollNo, comment text, and type (lost/found)" });
+    }
+    
+    if (!['lost', 'found'].includes(type.toLowerCase())) {
+      return res.status(400).json({ message: "Type must be either 'lost' or 'found'" });
+    }
+
+    await deleteUserCommentByTextService(rollNo, comment, type);
+    return res.status(200).json({ message: "Comment deleted successfully" });
+  } catch (error) {
+    console.log("Error in deleteUserCommentByText controller:", error.message);
+    if (error.message === 'Comment not found') {
+      return res.status(404).json({ message: error.message });
+    }
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 

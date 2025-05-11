@@ -2,7 +2,7 @@ import { useState } from "react";
 import CommentForm from "./commentForm";
 import { useAuth } from "../context/authContext";
 import toast from 'react-hot-toast';
-import { FaCheck, FaEllipsisV } from "react-icons/fa";
+import { FaCheck, FaEllipsisV, FaTrash } from "react-icons/fa";
 
 export default function ContentGrid({filteredItems, onDeletePost}) {
   const [showDropdown, setShowDropdown] = useState(null);
@@ -157,6 +157,37 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
     setSelectedFilter(filter);
     setShowFilters(false);
   };
+
+  const handleDeleteComment = async (comment, type) => {
+    try {
+      const response = await fetch('http://localhost:5000/comment/user/deletebytext', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rollNo: user.rollno,
+          comment: comment.text,
+          type: type.toLowerCase()
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to delete comment');
+        return;
+      }
+
+      toast.success('Comment deleted successfully');
+
+      // Refresh the comments by refreshing the page
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      toast.error('An error occurred while deleting the comment');
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
         {!filteredItems.length ? (
@@ -325,13 +356,23 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                                   </div>
                                 )}
                               </div>
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between">
+                              <div className="flex-1">                                <div className="flex items-center justify-between">
                                   <div className="text-xs font-medium">
                                     {comment.user.name}
                                   </div>
-                                  <div className="text-xs text-gray-400">
-                                    {new Date(comment.date).toLocaleString()}
+                                  <div className="flex items-center gap-2">
+                                    <div className="text-xs text-gray-400">
+                                      {new Date(comment.date).toLocaleString()}
+                                    </div>
+                                    {user && user.rollno && comment.user.name === user.name && (
+                                      <button style={{ marginLeft: "10px" }}
+                                        onClick={() => handleDeleteComment(comment, item.type)}
+                                        className="text-red-500 hover:text-red-700 transition-colors"
+                                        title="Delete comment"
+                                      >
+                                        <FaTrash size={12} />
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
                                 <div className="text-sm mt-1">
@@ -339,6 +380,7 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                                 </div>
                               </div>
                             </div>
+                          
                           </div>
                         ))
                       ) : (

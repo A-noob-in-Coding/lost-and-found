@@ -1,13 +1,18 @@
 import { useState } from "react";
 import { MdSend } from "react-icons/md";
 import { useAuth } from "../context/authContext";
+import toast from "react-hot-toast";
 
 export default function CommentForm({ item }) {
   const { user } = useAuth();
   const [commentText, setCommentText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddComment = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
     const token = localStorage.getItem("token");
 
     const isLost = item.type === "Lost";
@@ -39,13 +44,18 @@ export default function CommentForm({ item }) {
 
       if (response.ok) {
         setCommentText("");
-        console.log("Comment added successfully");
-        // Optional: trigger a state refresh to update comments
+        toast.success("Comment added successfully");
+        // Refresh the page to show the new comment
+        window.location.reload();
       } else {
-        console.error("Failed to add comment");
+        const errorData = await response.json();
+        toast.error(errorData.message || "Failed to add comment");
       }
     } catch (error) {
       console.error("Error sending comment:", error);
+      toast.error("An error occurred while adding the comment");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -65,12 +75,23 @@ export default function CommentForm({ item }) {
         value={commentText}
         onChange={(e) => setCommentText(e.target.value)}
         required
+        disabled={isSubmitting}
       />
       <button
         type="submit"
-        className="ml-2 px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200 transition-colors"
+        disabled={isSubmitting}
+        className={`ml-2 px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full transition-all transform ${
+          isSubmitting
+            ? "opacity-50 cursor-not-allowed"
+            : "hover:bg-gray-200 hover:scale-105 active:scale-95"
+        }`}
       >
-        <MdSend className="text-gray-500" size={24} />
+        <MdSend
+          className={`text-gray-500 transition-transform ${
+            isSubmitting ? "animate-spin" : ""
+          }`}
+          size={24}
+        />
       </button>
     </form>
   );
