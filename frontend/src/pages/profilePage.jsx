@@ -155,12 +155,12 @@ const ProfilePage = () => {
 
   return (
      <>
-       <div className="min-h-screen bg-white flex items-center justify-center font-sans">
+       <div className=" min-h-screen bg-white flex items-center justify-center font-sans">
          {/* Background with large text */}
          <BackgroundTypography />
  
          {/* Profile Card */}
-         <div className="bg-white rounded-xl shadow-lg w-[600px] p-8 z-10 relative">
+         <div className="bg-white rounded-xl shadow-lg w-[600px] p-8 z-5 relative">
            {/* Profile Image */}
                <div className="flex justify-center mb-6">
                        <div className="w-[128px] h-[128px] rounded-full overflow-hidden border-4 border-white shadow-md relative group">
@@ -248,10 +248,14 @@ const ProfilePage = () => {
            </div>
  
            {/* Action Buttons */}
-           <div className="mt-4 flex gap-6 flex-col">
+           <div  className="mt-4 flex gap-6 flex-col">
              <button
                className="text-sm w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center justify-center shadow-md hover:shadow-lg"
-               onClick={() => setShowChangePassword(true)}
+               onClick={() => {
+                //setting otp verification to true
+                localStorage.setItem('otpVerified', 'true');
+                setShowChangePassword(true);
+               }}
              >
                Change Password
              </button>
