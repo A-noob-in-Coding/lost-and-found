@@ -44,74 +44,91 @@ export default function HowItWorks() {
         
         {/* Process Steps */}
         <div className="bg-white rounded-xl shadow-sm p-8 mb-10">
-          <div className="grid gap-8 md:grid-cols-2">
-            {steps.map((step, index) => (
-              <div key={index} className="flex">
-                <div className="mr-4">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-black text-white">
-                    <i className={`fas ${step.icon}`}></i>
+          <div style={{ background: "white", marginBottom: "3vh", border: "1px solid black", borderRadius: "20px", color: "black", paddingLeft: "2vw", paddingTop: "2vh", paddingBottom: "2vh" }}>
+            <h2 className="text-2xl font-semibold mb-4">Getting Started</h2>
+            <div className="grid gap-8 md:grid-cols-2">
+              {steps.map((step, index) => (
+                <div key={index} className="flex">
+                  <div className="mr-4">
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-black text-white">
+                      <i className={`fas ${step.icon}`}></i>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
+                    <p className="text-gray-600">{step.description}</p>
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                  <p className="text-gray-600">{step.description}</p>
-                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* FAQ Section */}
+          <div style={{ background: "white", marginBottom: "3vh", border: "1px solid black", borderRadius: "20px", color: "black", paddingLeft: "2vw", paddingTop: "2vh", paddingBottom: "2vh" }}>
+            <h2 className="text-2xl font-semibold mb-4">Frequently Asked Questions</h2>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-medium mb-2">Who can use this platform?</h3>
+                <p className="text-gray-600">The Lost & Found platform is exclusively for FAST NUCES students, faculty, and staff. You must register with your university email address.</p>
               </div>
-            ))}
-          </div>
-        </div>
-        
-        {/* FAQ Section */}
-        <div className="bg-white rounded-xl shadow-sm p-8 mb-10">
-          <h2 className="text-2xl font-semibold mb-6">Frequently Asked Questions</h2>
-          
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium mb-2">Who can use this platform?</h3>
-              <p className="text-gray-600">The Lost & Found platform is exclusively for FAST NUCES students, faculty, and staff. You must register with your university email address.</p>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-medium mb-2">Is there a fee for using the service?</h3>
-              <p className="text-gray-600">No, our platform is completely free to use. It's our contribution to making campus life better.</p>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-medium mb-2">How do I ensure a safe meetup?</h3>
-              <p className="text-gray-600">Always arrange to meet in public places on campus during daylight hours. The cafeteria, library, and main lobby are good options.</p>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-medium mb-2">What if someone claims my found item falsely?</h3>
-              <p className="text-gray-600">We recommend asking for specific details about the item that only the true owner would know before handing it over.</p>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-medium mb-2">How long do posts stay active?</h3>
-              <p className="text-gray-600">Posts remain active for 30 days by default, but you can manually close them earlier once the item is recovered or extend them if needed.</p>
+              
+              <div>
+                <h3 className="text-lg font-medium mb-2">Is there a fee for using the service?</h3>
+                <p className="text-gray-600">No, our platform is completely free to use. It's our contribution to making campus life better.</p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-medium mb-2">How do I ensure a safe meetup?</h3>
+                <p className="text-gray-600">Always arrange to meet in public places on campus during daylight hours. The cafeteria, library, and main lobby are good options.</p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-medium mb-2">What if someone claims my found item falsely?</h3>
+                <p className="text-gray-600">We recommend asking for specific details about the item that only the true owner would know before handing it over.</p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-medium mb-2">How long do posts stay active?</h3>
+                <p className="text-gray-600">Posts remain active for 30 days by default, but you can manually close them earlier once the item is recovered or extend them if needed.</p>
+              </div>
             </div>
           </div>
+
+          {/* Testimonials */}
+          <div style={{ background: "white", marginBottom: "3vh", border: "1px solid black", borderRadius: "20px", color: "black", paddingLeft: "2vw", paddingTop: "2vh", paddingBottom: "2vh" }}>
+            <h2 className="text-2xl font-semibold mb-4">Success Stories</h2>
+            <div className="space-y-4">
+              <div className="border-l-4 border-black pl-4 py-2">
+                <p className="text-gray-600 italic mb-2">"I lost my laptop in the CS lab and was panicking about my assignments. Within hours of posting on the platform, someone had found it and messaged me. The process was so simple!"</p>
+                <p className="font-medium">— Aisha K., Computer Science</p>
+              </div>
+              
+              <div className="border-l-4 border-black pl-4 py-2">
+                <p className="text-gray-600 italic mb-2">"Found someone's wallet in the cafeteria and wasn't sure what to do. Posted it on Lost & Found and connected with the owner within minutes. They were so relieved!"</p>
+                <p className="font-medium">— Hassan T., Electrical Engineering</p>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        {/* Testimonials */}
-        <div className="bg-white rounded-xl shadow-sm p-8 mb-10">
-          <h2 className="text-2xl font-semibold mb-6">Success Stories</h2>
-          
-          <div className="grid gap-6">
-            <div className="border-l-4 border-black pl-4 py-2">
-              <p className="text-gray-600 italic mb-2">"I lost my laptop in the CS lab and was panicking about my assignments. Within hours of posting on the platform, someone had found it and messaged me. The process was so simple!"</p>
-              <p className="font-medium">— Aisha K., Computer Science</p>
-            </div>
-            
-            <div className="border-l-4 border-black pl-4 py-2">
-              <p className="text-gray-600 italic mb-2">"Found someone's wallet in the cafeteria and wasn't sure what to do. Posted it on Lost & Found and connected with the owner within minutes. They were so relieved!"</p>
-              <p className="font-medium">— Hassan T., Electrical Engineering</p>
-            </div>
+
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10" style={{ marginBottom: "3vh", marginLeft: "2.5vw", marginRight: "2.5vw" }}>
+          <div style={{ background: "black", border: "1px solid black", borderRadius: "20px", color: "white" }} className="p-6 rounded-xl shadow-sm text-center">
+            <div className="text-4xl font-bold mb-2">24/7</div>
+            <div>Platform Access</div>
+          </div>
+          <div style={{ background: "black", border: "1px solid black", borderRadius: "20px", color: "white" }} className="p-6 rounded-xl shadow-sm text-center">
+            <div className="text-4xl font-bold mb-2">5 min</div>
+            <div>Average Response</div>
+          </div>
+          <div style={{ background: "black", border: "1px solid black", borderRadius: "20px", color: "white" }} className="p-6 rounded-xl shadow-sm text-center">
+            <div className="text-4xl font-bold mb-2">100%</div>
+            <div>Free Service</div>
           </div>
         </div>
         
         {/* CTA Section */}
-        <div className="bg-black text-white rounded-xl p-8 text-center">
+        <div style={{ background: "black", border: "1px solid black", borderRadius: "20px", color: "white" , marginBottom:"3vh" }} className="p-8 text-center">
           <h2 className="text-2xl font-semibold mb-4">Ready to Get Started?</h2>
           <p className="mb-6">Join our community and help make FAST NUCES a more connected campus.</p>
           <div className="flex justify-center space-x-4">
