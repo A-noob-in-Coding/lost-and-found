@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaTimes } from "react-icons/fa";
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 export default function OtpPage({ 
   setShowOtpPage, 
@@ -12,6 +13,7 @@ export default function OtpPage({
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [email, setEmail] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Set email based on the mode we're in
@@ -131,7 +133,6 @@ export default function OtpPage({
         
         const registerResponse = await fetch('http://localhost:5000/api/users/register', {
           method: 'POST',
-          // Remove the Content-Type header to let the browser set it automatically with boundary info
           body: formDataToSend,
         });
         
@@ -140,6 +141,7 @@ export default function OtpPage({
         if (registerResponse.ok) {
           toast.success('Registration completed successfully');
           localStorage.removeItem('resetEmail'); // Clean up
+          navigate('/login'); // Navigate to login page after successful registration
           return true;
         } else {
           toast.error(registerData.message || 'Failed to complete registration');
