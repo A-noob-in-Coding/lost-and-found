@@ -1,15 +1,20 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
-export default function Navbar({ setShowPostModal , searchQuery, setSearchQuery }) {
+
+export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }) {
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [profileImgUrl, setProfileImgUrl] = useState("");
   const { user } = useAuth(); // call the hook inside the component
+
   useEffect(() => {
-    setProfileImgUrl(user.image_url)
-  }, []);
+    // Check if user exists and has an image_url property before setting it
+    if (user && user.image_url) {
+      setProfileImgUrl(user.image_url);
+    }
+  }, [user]); // Add user as a dependency to update when user changes
 
   const handleNotifications = () => {
     setShowNotifications(!showNotifications);
@@ -66,15 +71,27 @@ export default function Navbar({ setShowPostModal , searchQuery, setSearchQuery 
               </div>
             )}
           </div>
-          <div className="w-10 h-10 rounded-full bg-gray-200 cursor-pointer overflow-hidden">
-            <button onClick={()=>navigate("/profile")}>
-              
-            <img
-              src={profileImgUrl || "https://via.placeholder.com/40"}
-              alt="Profile"
-              className="w-full h-full object-cover"
-              />
-              </button>
+          <div 
+            className="w-10 h-10 rounded-full bg-gray-200 cursor-pointer overflow-hidden flex items-center justify-center"
+            onClick={() => navigate("/profile")}
+          >
+            {profileImgUrl ? (
+              <div className="w-full h-full relative">
+                <img
+                  src={profileImgUrl || "https://via.placeholder.com/40"}
+                  alt="Profile"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://via.placeholder.com/40";
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600">
+                <i className="fas fa-user"></i>
+              </div>
+            )}
           </div>
         </div>
       </div>
