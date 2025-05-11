@@ -48,10 +48,9 @@ Lost and Found is a centralized digital platform designed specifically for the F
   - **Roll Number:** 23L-3105
   - **GitHub:** [A-noob-in-coding](https://github.com/A-noob-in-Coding)
 
-  - **Muhammad Ahmad Butt**
+- **Muhammad Ahmad Butt**
   - **Roll Number:** 23L-3059
   - **GitHub:** [muhammadahmad0313](https://github.com/muhammadahmad0313)
-
 
 - **Muhammad Armgan**
   - **Roll Number:** 23L-3076
