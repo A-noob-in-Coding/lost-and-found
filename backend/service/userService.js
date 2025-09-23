@@ -89,7 +89,7 @@ export const getPasswordUserService = async(rollNo) =>{
 
 export const authenticateAdminService = async(username,password) =>{
   try{
-    if(password != process.env.ADMIN_PASS || username != process.env.ADMIN_USER){    
+    if(password !== process.env.ADMIN_PASS || username !== process.env.ADMIN_USER){    
       return false;
     }
     else{
