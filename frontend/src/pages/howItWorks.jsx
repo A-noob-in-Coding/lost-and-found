@@ -35,6 +35,11 @@ export default function HowItWorks() {
       title: "Close the Case",
       description: "Mark items as recovered and help us track successful reunions.",
       icon: "fa-check-circle"
+    },
+    {
+      title: "Build Community",
+      description: "Leave feedback and help improve our platform for everyone at FAST NUCES.",
+      icon: "fa-users"
     }
   ];
 
