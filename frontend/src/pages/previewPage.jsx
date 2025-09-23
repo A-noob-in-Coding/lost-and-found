@@ -133,10 +133,10 @@ const PreviewPage = () => {
       {/* Hero Section */}
       <section className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-black mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-black mt-10 mb-10">
             Reconnect with Your Belongings
           </h2>
-          <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
+          <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto mb-4">
             Browse lost items, report missing belongings, and help others at FAST 
             NUCES. Join our community-driven platform to reunite students with their 
             lost possessions.
@@ -148,7 +148,7 @@ const PreviewPage = () => {
       <section className="py-12 bg-white">
         <div className="max-w-5xl mx-auto px-4">
           <h3 className="text-3xl font-bold text-center mb-2 text-black">Recent Activity</h3>
-          <p className="text-gray-600 text-center mb-8">
+          <p className="text-gray-600 text-center mb-12">
             Latest lost and found items from the FAST NUCES community
           </p>
           

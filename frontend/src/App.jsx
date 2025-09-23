@@ -32,11 +32,11 @@ function App() {
           <Route path="/contact" element={<ContactForm />} />
           <Route path="/howitworks" element={<HowItWorks />} />
           <Route path="/admin/:password" element={<AdminPage />} />
+            <Route path="/feed" element={<Feed />} />
+            <Route path="/profile" element={<ProfilePage />} />
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoutes />}>
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/feed" element={<Feed />} />
           </Route>
         </Routes>
       </BrowserRouter>

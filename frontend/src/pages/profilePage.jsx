@@ -154,138 +154,195 @@ const ProfilePage = () => {
   }, [user]); // Make sure user is included in the dependency array
 
   return (
-     <>
-       <div className=" min-h-screen bg-white flex items-center justify-center font-sans">
-         {/* Background with large text */}
-         <BackgroundTypography />
- 
-         {/* Profile Card */}
-         <div className="bg-white rounded-xl shadow-lg w-[600px] p-8 z-5 relative">
-           {/* Profile Image */}
-               <div className="flex justify-center mb-6">
-                       <div className="w-[128px] h-[128px] rounded-full overflow-hidden border-4 border-white shadow-md relative group">
-                         {imageLoading ? (
-                           <div className="flex items-center justify-center w-full h-full bg-gray-200">
-                             <ClipLoader color="#e50914" loading={true} size={40} />
-                           </div>
-                         ) : (
-                           <>
-                             <img
-                               src={profileImage || "https://via.placeholder.com/100"}
-                               alt="Profile"
-                               className="w-full h-full object-cover"
-                             />
-                             <div 
-                               className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                               onClick={handleProfileImageClick}
-                             >
-                               <MdAddAPhoto className="text-white text-3xl" />
-                             </div>
-                             <input 
-                               type="file"
-                               accept="image/*"
-                               onChange={handleFileChange}
-                               ref={fileInputRef}
-                               className="hidden"
-                             />
-                           </>
-                         )}
-                       </div>
-                     </div>
- 
-           <h1 className="text-2xl font-bold text-center mb-2">User Profile</h1>
-           <p className="text-gray-500 text-center mb-8">
-             Manage your personal information
-           </p>
- 
-           {/* User Information */}
-           <div className="space-y-4">
-             <div className="bg-gray-100 rounded-md p-4">
-               <p className="text-sm text-gray-500 mb-1">Roll Number</p>
-               <p className="font-medium">{user?.rollno}</p>
-             </div>
- 
-             <div className="bg-gray-100 rounded-md p-4">
-               <div className="flex justify-between items-center mb-1">
-                 <p className="text-sm text-gray-500">Full Name</p>
-                 <button
-                   onClick={() => setIsEditingName((prev) => !prev)}
-                   className="text-2xl text-blue-600 hover:underline"
-                 >
-                   <MdEdit /> {/* Edit icon from react-icons */}
-                 </button>
-               </div>
- 
-               {isEditingName ? (
-                 <div className="flex items-center">
-                   <input
-                     type="text"
-                     value={username}
-                     onChange={(e) => setUsername(e.target.value)} // Ensure the username updates on change
-                     onBlur={() => setIsEditingName(false)} // auto-save on blur
-                     className="font-medium w-full border border-black/30 bg-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black transition"
-                     onKeyDown={(e) => {
-                       if (e.key === "Enter") {
-                         setisloading(true);
-                         handleNameSave(e);
-                       }
-                     }}
-                     autoFocus
-                   />
-                   {isloading && (
-                     <ClipLoader color="red" loading={isloading} size={20} className="ml-2" />
-                   )}
-                 </div>
-               ) : (
-                 <p className="font-medium">{username}</p>
-               )}
-             </div>
- 
-             <div className="bg-gray-100 rounded-md p-4">
-               <p className="text-sm text-gray-500 mb-1">Email Address</p>
-               <p className="font-medium">{user?.email}</p>
-             </div>
-           </div>
- 
-           {/* Action Buttons */}
-           <div  className="mt-4 flex gap-6 flex-col">
-             <button
-               className="text-sm w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center justify-center shadow-md hover:shadow-lg"
-               onClick={() => {
-                //setting otp verification to true
-                localStorage.setItem('otpVerified', 'true');
-                setShowChangePassword(true);
-               }}
-             >
-               Change Password
-             </button>
-             <button
-               className="text-sm w-full py-3 text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center justify-center shadow-md hover:shadow-lg"
-               style={{ background: "#e50914" }}
-               onClick={() => handleLogout()}
-             >
-               Log Out
-             </button>
-           </div>
- 
-           {/* Footer */}
-           <div className="mt-8 pt-6 border-t border-gray-200 text-center text-gray-500 text-sm">
-             © 2025 FAST NUCES Lost & Found System
-           </div>
-         </div>
+    <div className="min-h-screen bg-white">
+      {/* Header with Logo and Navigation */}
+      <header className="bg-white shadow-sm border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between w-full">
+          <div className="flex items-center space-x-3 ml-4">
+            <img 
+              src="/lf_logo.png" 
+              alt="Lost & Found Logo" 
+              className="h-10 w-10 rounded-full"
+            />
+            <h1 className="text-2xl font-bold text-black">FAST Lost & Found</h1>
+          </div>
+          <div className="flex-shrink-0 ml-auto mr-0">
+            <button
+              onClick={() => navigate("/feed")}
+              className="bg-black text-white px-10 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
+            >
+              Back to Feed
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Profile Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            {/* Profile Image */}
+            <div className="flex justify-center mb-8">
+              <div className="w-[128px] h-[128px] rounded-full overflow-hidden border-4 border-gray-200 shadow-md relative group">
+                {imageLoading ? (
+                  <div className="flex items-center justify-center w-full h-full bg-gray-200">
+                    <ClipLoader color="#000000" loading={true} size={40} />
+                  </div>
+                ) : (
+                  <>
+                    <img
+                      src={profileImage || "https://via.placeholder.com/100"}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full"
+                      onClick={handleProfileImageClick}
+                    >
+                      <MdAddAPhoto className="text-white text-3xl" />
+                    </div>
+                    <input 
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      ref={fileInputRef}
+                      className="hidden"
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* User Information Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
+                <p className="text-sm text-gray-500 mb-2 font-medium">Roll Number</p>
+                <p className="text-lg font-semibold text-black">{user?.rollno}</p>
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-sm text-gray-500 font-medium">Full Name</p>
+                  <button
+                    onClick={() => setIsEditingName((prev) => !prev)}
+                    className="text-xl text-black hover:text-gray-600 transition-colors"
+                  >
+                    <MdEdit />
+                  </button>
+                </div>
+
+                {isEditingName ? (
+                  <div className="flex items-center">
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      onBlur={() => setIsEditingName(false)}
+                      className="text-lg font-semibold w-full border border-gray-300 bg-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black transition"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          setisloading(true);
+                          handleNameSave(e);
+                        }
+                      }}
+                      autoFocus
+                    />
+                    {isloading && (
+                      <ClipLoader color="#000000" loading={isloading} size={20} className="ml-2" />
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-lg font-semibold text-black">{username}</p>
+                )}
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black md:col-span-2">
+                <p className="text-sm text-gray-500 mb-2 font-medium">Email Address</p>
+                <p className="text-lg font-semibold text-black">{user?.email}</p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                className="px-8 py-3 bg-black text-white font-semibold rounded-full hover:bg-gray-800 transition-all duration-300 hover:scale-105 transform shadow-md"
+                onClick={() => {
+                  localStorage.setItem('otpVerified', 'true');
+                  setShowChangePassword(true);
+                }}
+              >
+                Change Password
+              </button>
+              <button
+                className="px-8 py-3 text-white font-semibold rounded-full hover:bg-red-700 transition-all duration-300 hover:scale-105 transform shadow-md"
+                style={{ background: "#e50914" }}
+                onClick={() => handleLogout()}
+              >
+                Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Account Statistics Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <h3 className="text-3xl font-bold text-center mb-12 text-black">Account Statistics</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-black text-white rounded-2xl p-8 text-center">
+              <div className="text-4xl font-bold mb-2">0</div>
+              <div className="text-gray-300 text-sm">Posts Created</div>
+            </div>
+            <div className="bg-black text-white rounded-2xl p-8 text-center">
+              <div className="text-4xl font-bold mb-2">0</div>
+              <div className="text-gray-300 text-sm">Items Recovered</div>
+            </div>
+            <div className="bg-black text-white rounded-2xl p-8 text-center">
+              <div className="text-4xl font-bold mb-2">0</div>
+              <div className="text-gray-300 text-sm">Total Comments</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 bg-black text-white">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h3 className="text-3xl font-bold mb-4">Ready to Help Others?</h3>
+          <p className="text-gray-300 mb-8 text-lg">
+            Create a post to help someone find their lost item or report something you've found.
+          </p>
+          <div className="flex justify-center space-x-4">
+            <button 
+              onClick={() => navigate("/createPost")}
+              className="bg-white text-black px-8 py-3 rounded-full font-medium hover:bg-gray-100 transition-all duration-300 hover:scale-105 transform"
+            >
+              Create Post
+            </button>
+            <button 
+              onClick={() => navigate("/feed")}
+              className="border-2 border-white text-white px-8 py-3 rounded-full font-medium hover:bg-white hover:text-black transition-all duration-300 hover:scale-105 transform"
+            >
+              Browse Feed
+            </button>
+          </div>
+        </div>
+      </section>
          
-         {/* Change Password Modal */}
-         {showForgotPassword && (
-           <div className="fixed inset-0 flex items-center justify-center z-20 bg-black bg-opacity-50">
-             <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full">
-               <ChangePassword setShowChangePassword={setShowChangePassword} />
-             </div>
-           </div>
-         )}
-       </div>
-       <Footer />
-     </>
-   );
+      {/* Change Password Modal */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 flex items-center justify-center z-20 bg-black bg-opacity-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
+            <ChangePassword setShowChangePassword={setShowChangePassword} />
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <Footer />
+    </div>
+  );
  };
  
  export default ProfilePage;
