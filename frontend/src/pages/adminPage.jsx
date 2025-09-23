@@ -17,7 +17,6 @@ const AdminPage = () => {
   const [loginError, setLoginError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const ADMIN_PASSWORD = "admin";
 
   const loginAdmin = async (user, pass) => {
     try {
