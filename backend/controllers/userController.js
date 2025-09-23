@@ -10,7 +10,7 @@ export const authenticateAdmin = async(req,res) =>{
   }
   const result = await authenticateAdminService(username, password)
   console.log(result)
-  if(result == true){
+  if(result){
     return res.status(200).json({message: "User logged in"})
   }
   else{
