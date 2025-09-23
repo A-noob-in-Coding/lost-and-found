@@ -49,7 +49,6 @@ export default function Footer() {
             <ul className="text-sm text-gray-300 space-y-2">
               <li><a href="mailto:l233059@lhr.nu.edu.pk" className="hover:text-white">l233059@lhr.nu.edu.pk</a> - Muhammad Ahmad Butt</li>
               <li><a href="mailto:l233105@lhr.nu.edu.pk" className="hover:text-white">l233105@lhr.nu.edu.pk</a> - Abd ur Rehman</li>
-              <li><a href="mailto:l233076@lhr.nu.edu.pk" className="hover:text-white">l233076@lhr.nu.edu.pk</a> - Muhammad Armgan</li>
             </ul>
           </div>
         </div>

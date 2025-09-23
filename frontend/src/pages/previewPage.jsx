@@ -74,7 +74,7 @@ const PreviewPage = () => {
       {/* Header with Logo and Navigation */}
       <header className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between w-full">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 ml-4">
             <img 
               src="/lf_logo.png" 
               alt="Lost & Found Logo" 
@@ -82,10 +82,10 @@ const PreviewPage = () => {
             />
             <h1 className="text-2xl font-bold text-black">FAST Lost & Found</h1>
           </div>
-          <div className="flex-shrink-0 ml-auto">
+          <div className="flex-shrink-0 ml-auto mr-0">
             <button
               onClick={() => navigate("/login")}
-              className="bg-black text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-900 transition-colors"
+              className="bg-black text-white px-10 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300"
             >
               Login
             </button>
@@ -94,7 +94,7 @@ const PreviewPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-white py-12">
+      <section className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-black mb-4">
             Reconnect with Your Belongings
@@ -120,7 +120,7 @@ const PreviewPage = () => {
             {sampleItems.map((item) => (
               <div
                 key={item.id}
-                className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 overflow-hidden"
+                className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden hover:scale-105 transform cursor-pointer"
               >
                 {/* Item Badge */}
                 <div className="relative">
@@ -163,7 +163,7 @@ const PreviewPage = () => {
           <div className="text-center mt-8">
             <button
               onClick={() => navigate("/login")}
-              className="bg-black text-white px-8 py-3 rounded-full font-medium hover:bg-gray-900 transition-colors"
+              className="bg-black text-white px-8 py-3 rounded-full font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300"
             >
               View All Items
             </button>
@@ -195,16 +195,16 @@ const PreviewPage = () => {
       <Footer />
 
       {/* Fixed/Sticky Bottom Navbar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black text-white z-50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center w-full">
+      <div className="fixed bottom-0 left-0 right-0 bg-black text-white z-50 border-t border-gray-800">
+        <div className="px-6 py-3 flex justify-between items-center w-full">
           <div className="text-sm text-gray-400">
             Preview of Lost & Found
           </div>
-          <div className="flex items-center space-x-4 flex-shrink-0 ml-auto">
+          <div className="flex items-center space-x-3 mr-8">
             <span className="text-sm text-gray-300">Sign up to join our community</span>
             <button
               onClick={() => navigate("/register")}
-              className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
+              className="bg-white text-black px-10 py-2 rounded-full text-sm font-medium hover:bg-black hover:text-white border-2 border-white transition-all duration-300"
             >
               Sign Up
             </button>
