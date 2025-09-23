@@ -96,7 +96,8 @@ export const authenticateAdminService = async(username,password) =>{
       return true;
     }
   }catch(error){
-    console.log("Error authenticating user");
+    console.error("Error authenticating user:", error);
+    throw new Error(error.message);
   }
 }
 
