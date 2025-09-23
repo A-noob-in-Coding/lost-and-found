@@ -189,7 +189,7 @@ const CategoryContainer = () => {
         </div>
         <button
           type="submit"
-          className="bg-blue-600 text-black px-6 py-2 rounded-md hover:bg-blue-700 transition-transform duration-200 hover:scale-105 hover:shadow-md flex items-center gap-2 font-medium"
+          className="bg-black text-white px-6 py-2 rounded-md hover:bg-gray-800 transition-transform duration-200 hover:scale-105 hover:shadow-md flex items-center gap-2 font-medium"
         >
           <MdAdd size={18} />
           Add Category
