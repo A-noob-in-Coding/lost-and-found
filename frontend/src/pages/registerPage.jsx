@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import BackgroundTypography from "../components/backgroundTypography.jsx";
 import RegisterForm from "../components/registerForm.jsx";
 import OtpPage from "../components/otpPage.jsx";
 
@@ -15,20 +14,20 @@ export const Register = () => {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-        {/* Background Typography */}
-        <BackgroundTypography />
-        <div className="max-w-md w-full bg-white shadow-2xl rounded-2xl overflow-hidden z-10 transition-all duration-300 hover:shadow-3xl">
-          <div className="p-2">
-            <div className="flex justify-center mb-8">
-              {/* <div className="h-16 w-16 rounded-full bg-black flex items-center justify-center shadow-lg">
-                <i className="fas fa-search text-white text-2xl"></i>
-              </div> */}
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-200">
+          <div className="p-6">
+            <div className="flex justify-center mb-6">
+              <img 
+                src="/lf_logo.png" 
+                alt="Lost & Found Logo" 
+                className="h-16 w-16 rounded-full"
+              />
             </div>
             <h1 className="text-3xl font-bold text-center tracking-tight">
               FAST Lost & Found
             </h1>
-            <p className="text-gray-500 text-center mt-2">
+            <p className="text-gray-500 text-center mt-2 mb-6">
               Reconnect with your belongings
             </p>
             {!showOtpPage ? (
@@ -43,9 +42,9 @@ export const Register = () => {
                 formData={formData}
               />
             )}
-            {/* <div className="mt-2 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
+            <div className="mt-6 pt-4 border-t border-gray-200 text-center text-xs text-gray-500">
               © 2025 FAST NUCES Lost & Found System
-            </div> */}
+            </div>
           </div>
         </div>
       </div>

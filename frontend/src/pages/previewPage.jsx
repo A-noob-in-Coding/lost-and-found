@@ -1,9 +1,46 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../utilities/footer.jsx";
 
 const PreviewPage = () => {
   const navigate = useNavigate();
+
+  // Animation states for counters
+  const [itemsCount, setItemsCount] = useState(0);
+  const [usersCount, setUsersCount] = useState(0);
+  const [recoveryRate, setRecoveryRate] = useState(0);
+
+  // Animated counter function
+  const animateCounter = (start, end, duration, setter) => {
+    const range = end - start;
+    const increment = range / (duration / 16); // 16ms per frame (60fps)
+    let current = start;
+    
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= end) {
+        current = end;
+        clearInterval(timer);
+      }
+      setter(Math.floor(current));
+    }, 16);
+    
+    return timer;
+  };
+
+  // Start animations when component mounts
+  useEffect(() => {
+    const timer1 = animateCounter(0, 500, 2000, setItemsCount);
+    const timer2 = animateCounter(0, 2000, 2500, setUsersCount);
+    const timer3 = animateCounter(0, 85, 2000, setRecoveryRate);
+
+    // Cleanup timers on unmount
+    return () => {
+      clearInterval(timer1);
+      clearInterval(timer2);
+      clearInterval(timer3);
+    };
+  }, []);
 
   // Sample items data matching the screenshots
   const sampleItems = [
@@ -177,15 +214,15 @@ const PreviewPage = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-black text-white rounded-2xl p-6 text-center">
-              <div className="text-3xl font-bold mb-2">500+</div>
+              <div className="text-3xl font-bold mb-2">{itemsCount}+</div>
               <div className="text-gray-300 text-sm">Items Recovered</div>
             </div>
             <div className="bg-black text-white rounded-2xl p-6 text-center">
-              <div className="text-3xl font-bold mb-2">2,000+</div>
+              <div className="text-3xl font-bold mb-2">{usersCount.toLocaleString()}+</div>
               <div className="text-gray-300 text-sm">Active Users</div>
             </div>
             <div className="bg-black text-white rounded-2xl p-6 text-center">
-              <div className="text-3xl font-bold mb-2">85%</div>
+              <div className="text-3xl font-bold mb-2">{recoveryRate}%</div>
               <div className="text-gray-300 text-sm">Recovery Rate</div>
             </div>
           </div>
