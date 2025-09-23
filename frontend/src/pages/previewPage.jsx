@@ -108,7 +108,7 @@ const PreviewPage = () => {
       </section>
 
       {/* Recent Activity Section */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-12 bg-white">
         <div className="max-w-5xl mx-auto px-4">
           <h3 className="text-2xl font-bold text-center mb-2 text-black">Recent Activity</h3>
           <p className="text-gray-600 text-center mb-8">
