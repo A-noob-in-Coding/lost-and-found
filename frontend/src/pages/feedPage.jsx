@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../utilities/footer.jsx";
 import Navbar from "../utilities/navbar.jsx";
-import BackgroundBrand from "../utilities/backgroundBrand.jsx";
 import Toast from "../utilities/toast.jsx";
 import ContentGrid from "../components/contentGrid.jsx";
 import Filter from "../components/filter.jsx";
@@ -410,7 +409,6 @@ const Feed = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <BackgroundBrand />
       <Navbar 
         setShowPostModal={setShowPostModal} 
         searchQuery={searchQuery}
