@@ -1,36 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import PostVerificationContainer from '../components/postVerificationContainer.jsx';
 import CommentVerificationContainer from '../components/commentVerificationContainer.jsx';
 import CategoryContainer from '../components/catagorySection.jsx';
 
 const AdminPage = () => {
-  const { password } = useParams();
   const navigate = useNavigate();
   const [authenticated, setAuthenticated] = useState(false);
+  const [showLoginForm, setShowLoginForm] = useState(true);
   const [activeTab, setActiveTab] = useState('posts');
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      title: "Lost Gold Watch",
-      location: "Central Park, New York",
-      description: "Vintage gold watch with leather strap. Has an engraving on the back saying 'To John, With Love'.",
-      image: "https://readdy.ai/api/search-image?query=A%20high-quality%20professional%20photograph%20of%20a%20vintage%20gold%20watch%20with%20brown%20leather%20strap%20on%20a%20clean%20white%20background%2C%20soft%20shadows%2C%20detailed%20texture%20of%20the%20leather%20and%20gold%20metal%2C%20studio%20lighting%2C%20product%20photography%20style%2C%20minimalist&width=400&height=300&seq=1&orientation=landscape",
-      status: "pending"
-    }
-  ]);
+  const [posts, setPosts] = useState([]);
+  const [loginData, setLoginData] = useState({
+    username: '',
+    password: ''
+  });
+  const [loginError, setLoginError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  //ADMIN PASSWORD
   const ADMIN_PASSWORD = "admin";
 
-  // Check if the provided password matches the admin password
-  useEffect(() => {
-    if (password === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-    } else {
-      navigate('/login');
+  const loginAdmin = async (user, pass) => {
+    try {
+      setIsLoading(true);
+      setLoginError('');
+      
+      const response = await fetch("http://localhost:5000/api/users/loginAdmin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username: user, password: pass }), 
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        setAuthenticated(true);
+        setShowLoginForm(false);
+      } else {
+        setLoginError(data.message || 'Invalid credentials');
+      }
+    } catch (err) {
+      console.error("Network or fetch error:", err);
+      setLoginError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-  }, [password, navigate]);
+  };
+
+  // Always show login form when component mounts
+  useEffect(() => {
+    setShowLoginForm(true);
+  }, []);
+
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    if (!loginData.username || !loginData.password) {
+      setLoginError('Please enter both username and password');
+      return;
+    }
+    await loginAdmin(loginData.username, loginData.password);
+  };
+
+  const handleInputChange = (e) => {
+    setLoginData({
+      ...loginData,
+      [e.target.name]: e.target.value
+    });
+    // Clear error when user starts typing
+    if (loginError) {
+      setLoginError('');
+    }
+  };
 
   const handlePostAction = (id, action) => {
     setPosts(posts.map(post =>
@@ -38,18 +78,75 @@ const AdminPage = () => {
     ));
   };
 
-  // Show loading or unauthorized message while checking password
+  // Show login form if not authenticated
   if (!authenticated) {
     return (
       <div className="min-h-screen bg-gray-100 p-6 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
-          <p className="text-gray-700">Invalid admin password. Redirecting to login page...</p>
+        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Admin Login</h2>
+          
+          <form onSubmit={handleLoginSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                Username
+              </label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={loginData.username}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                placeholder="Enter username"
+                disabled={isLoading}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={loginData.password}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                placeholder="Enter password"
+                disabled={isLoading}
+              />
+            </div>
+            
+            {loginError && (
+              <div className="text-red-600 text-sm mt-2">
+                {loginError}
+              </div>
+            )}
+            
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+          
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => navigate('/login')}
+              className="text-sm text-gray-600 hover:text-gray-800"
+            >
+              Back to Login Page
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
+  // Main admin dashboard (only shown when authenticated)
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
@@ -76,6 +173,16 @@ const AdminPage = () => {
             >
               <i className="fas fa-tags mr-2"></i>
               Categories
+            </button>
+            <button
+              onClick={() => {
+                setAuthenticated(false);
+                setShowLoginForm(true);
+                navigate('/login');
+              }}
+              className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700"
+            >
+              Logout
             </button>
           </div>
         </div>

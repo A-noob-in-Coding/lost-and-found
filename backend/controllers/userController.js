@@ -1,8 +1,22 @@
-import { authenticateUserService, changePasswordService, doesUserExist, getPasswordUserService, getUserByRollNoService, hashPassword, registerUserService, getUserImageService, updateUserNameService, updateUserImageService, getUserByEmailService } from "../service/userService.js";
+import { authenticateUserService, changePasswordService, doesUserExist, getPasswordUserService, getUserByRollNoService, hashPassword, registerUserService, getUserImageService, updateUserNameService, updateUserImageService, getUserByEmailService, authenticateAdminService } from "../service/userService.js";
 
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 
+export const authenticateAdmin = async(req,res) =>{
+  const {username,password} = req.body;
+  if(!password || !username){
+    return res.status(400).json({message: "All fields are required"})
+  }
+  const result = await authenticateAdminService(username, password)
+  console.log(result)
+  if(result == true){
+    return res.status(200).json({message: "User logged in"})
+  }
+  else{
+    return res.status(400).json({message: "Wrong Password"})
+  }
+}
 
 export const registerUser = async (req, res) => {
   const { rollNo, email, name, password } = req.body;
