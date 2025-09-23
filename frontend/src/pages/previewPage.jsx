@@ -120,6 +120,7 @@ const PreviewPage = () => {
             {sampleItems.map((item) => (
               <div
                 key={item.id}
+                onClick={() => navigate("/login")}
                 className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden hover:scale-105 transform cursor-pointer"
               >
                 {/* Item Badge */}
@@ -160,10 +161,10 @@ const PreviewPage = () => {
           </div>
 
           {/* View All Items Button */}
-          <div className="text-center mt-8">
+          <div className="text-center mt-10">
             <button
               onClick={() => navigate("/login")}
-              className="bg-black text-white px-8 py-3 rounded-full font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
+              className="bg-black text-white mt-4 px-8 py-3 rounded-full font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
             >
               View All Items
             </button>
@@ -173,19 +174,19 @@ const PreviewPage = () => {
 
       {/* Statistics Section */}
       <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-black mb-2">247</div>
-              <div className="text-gray-600">Items Reunited</div>
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-black text-white rounded-2xl p-6 text-center">
+              <div className="text-3xl font-bold mb-2">500+</div>
+              <div className="text-gray-300 text-sm">Items Recovered</div>
             </div>
-            <div>
-              <div className="text-4xl font-bold text-black mb-2">1,543</div>
-              <div className="text-gray-600">Active Users</div>
+            <div className="bg-black text-white rounded-2xl p-6 text-center">
+              <div className="text-3xl font-bold mb-2">2,000+</div>
+              <div className="text-gray-300 text-sm">Active Users</div>
             </div>
-            <div>
-              <div className="text-4xl font-bold text-black mb-2">98%</div>
-              <div className="text-gray-600">Success Rate</div>
+            <div className="bg-black text-white rounded-2xl p-6 text-center">
+              <div className="text-3xl font-bold mb-2">85%</div>
+              <div className="text-gray-300 text-sm">Recovery Rate</div>
             </div>
           </div>
         </div>
