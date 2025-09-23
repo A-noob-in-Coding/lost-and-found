@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import Footer from "../utilities/footer.jsx";
 
 const PreviewPage = () => {
   const navigate = useNavigate();
@@ -191,148 +192,25 @@ const PreviewPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-black text-white">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Brand Section */}
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <img 
-                  src="/lf_logo.png" 
-                  alt="Lost & Found Logo" 
-                  className="h-8 w-8 rounded-full"
-                />
-                <h3 className="text-xl font-bold">FAST Lost & Found</h3>
-              </div>
-              <p className="text-gray-300 text-sm">
-                Reconnecting students with their belongings at FAST NUCES.
-              </p>
-            </div>
+      <Footer />
 
-            {/* Quick Links */}
-            <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li>
-                  <button 
-                    onClick={() => navigate("/login")}
-                    className="hover:text-white transition-colors"
-                  >
-                    Browse Items
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => navigate("/login")}
-                    className="hover:text-white transition-colors"
-                  >
-                    Report Lost
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => navigate("/login")}
-                    className="hover:text-white transition-colors"
-                  >
-                    Report Found
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => navigate("/contact")}
-                    className="hover:text-white transition-colors"
-                  >
-                    Guidelines
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-            {/* Support */}
-            <div>
-              <h4 className="font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li>
-                  <button 
-                    onClick={() => navigate("/contact")}
-                    className="hover:text-white transition-colors"
-                  >
-                    Help Center
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => navigate("/contact")}
-                    className="hover:text-white transition-colors"
-                  >
-                    Contact Us
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => navigate("/contact")}
-                    className="hover:text-white transition-colors"
-                  >
-                    Guidelines
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-            {/* Connect Section */}
-            <div className="md:col-span-3 mt-8 pt-8 border-t border-gray-800">
-              <h4 className="font-semibold mb-4">Connect</h4>
-              <div className="flex flex-col space-y-2 text-sm text-gray-300">
-                <div className="flex items-center space-x-2">
-                  <i className="fab fa-facebook text-blue-500"></i>
-                  <span>Facebook</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <i className="fab fa-twitter text-blue-400"></i>
-                  <span>Twitter</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <i className="fab fa-instagram text-pink-500"></i>
-                  <span>Instagram</span>
-                </div>
-              </div>
-            </div>
+      {/* Fixed/Sticky Bottom Navbar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-black text-white z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center w-full">
+          <div className="text-sm text-gray-400">
+            Preview of Lost & Found
           </div>
-
-          {/* Bottom Footer */}
-          <div className="border-t border-gray-800 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
-            <div className="text-sm text-gray-400 mb-4 md:mb-0">
-              © 2025 FAST NUCES Lost & Found System. All rights reserved.
-            </div>
-            <div className="flex space-x-4">
-              <button
-                onClick={() => navigate("/login")}
-                className="bg-white text-black px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                Sign Up
-              </button>
-            </div>
+          <div className="flex items-center space-x-4 flex-shrink-0 ml-auto">
+            <span className="text-sm text-gray-300">Sign up to join our community</span>
+            <button
+              onClick={() => navigate("/register")}
+              className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
+            >
+              Sign Up
+            </button>
           </div>
         </div>
-
-        {/* Fixed/Sticky Bottom Navbar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-black text-white z-50">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center w-full">
-            <div className="text-sm text-gray-400">
-              Preview of Lost & Found
-            </div>
-            <div className="flex items-center space-x-4 flex-shrink-0 ml-auto">
-              <span className="text-sm text-gray-300">Sign up to join our community</span>
-              <button
-                onClick={() => navigate("/register")}
-                className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                Sign Up
-              </button>
-            </div>
-          </div>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 };
