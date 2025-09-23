@@ -85,7 +85,7 @@ const PreviewPage = () => {
           <div className="flex-shrink-0 ml-auto mr-0">
             <button
               onClick={() => navigate("/login")}
-              className="bg-black text-white px-10 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300"
+              className="bg-black text-white px-10 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
             >
               Login
             </button>
@@ -163,7 +163,7 @@ const PreviewPage = () => {
           <div className="text-center mt-8">
             <button
               onClick={() => navigate("/login")}
-              className="bg-black text-white px-8 py-3 rounded-full font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300"
+              className="bg-black text-white px-8 py-3 rounded-full font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
             >
               View All Items
             </button>
@@ -204,7 +204,7 @@ const PreviewPage = () => {
             <span className="text-sm text-gray-300">Sign up to join our community</span>
             <button
               onClick={() => navigate("/register")}
-              className="bg-white text-black px-10 py-2 rounded-full text-sm font-medium hover:bg-black hover:text-white border-2 border-white transition-all duration-300"
+              className="bg-white text-black px-10 py-2 rounded-full text-sm font-medium hover:bg-black hover:text-white border-2 border-white transition-all duration-300 hover:scale-110 transform"
             >
               Sign Up
             </button>
