@@ -103,16 +103,6 @@ const PreviewPage = () => {
       type: "Lost",
       image: "/icon.jpg",
       badge: "Lost"
-    },
-    {
-      id: 7,
-      title: "Silver Calculator",
-      description: "Found in the Math Department classroom",
-      location: "Math Department",
-      time: "3 hours ago",
-      type: "Found",
-      image: "/fast_nuces.png",
-      badge: "Found"
     }
   ];
 
