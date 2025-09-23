@@ -72,7 +72,7 @@ const PreviewPage = () => {
     <div className="min-h-screen bg-white pb-16">
       {/* Header with Logo and Navigation */}
       <header className="bg-white shadow-sm border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between w-full">
           <div className="flex items-center space-x-3">
             <img 
               src="/lf_logo.png" 
@@ -81,12 +81,14 @@ const PreviewPage = () => {
             />
             <h1 className="text-2xl font-bold text-black">FAST Lost & Found</h1>
           </div>
-          <button
-            onClick={() => navigate("/login")}
-            className="bg-black text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-900 transition-colors"
-          >
-            Login
-          </button>
+          <div className="flex-shrink-0 ml-auto">
+            <button
+              onClick={() => navigate("/login")}
+              className="bg-black text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-900 transition-colors"
+            >
+              Login
+            </button>
+          </div>
         </div>
       </header>
 
@@ -315,11 +317,11 @@ const PreviewPage = () => {
 
         {/* Fixed/Sticky Bottom Navbar */}
         <div className="fixed bottom-0 left-0 right-0 bg-black text-white z-50">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center w-full">
             <div className="text-sm text-gray-400">
               Preview of Lost & Found
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 flex-shrink-0 ml-auto">
               <span className="text-sm text-gray-300">Sign up to join our community</span>
               <button
                 onClick={() => navigate("/register")}
