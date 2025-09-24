@@ -10,8 +10,7 @@ import Utilrouter from './routes/utilityRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import notificationRouter from './routes/notificationRoutes.js';
 import categoryRouter from './routes/categoryRoutes.js';
-import campusRouter from './routes/campusRoutes.js';
-import { cleanupExpiredOTPs } from './service/otpService.js';
+import { cleanupExpiredOTPs } from './service/otpService.js'; //=====?
 import dotenv from 'dotenv';
 dotenv.config();
 
