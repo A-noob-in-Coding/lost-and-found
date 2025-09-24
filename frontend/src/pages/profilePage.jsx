@@ -6,6 +6,7 @@ import Footer from "../utilities/footer";
 import { useNavigate } from "react-router-dom";
 import { MdEdit, MdAddAPhoto } from "react-icons/md";
 import { ClipLoader } from "react-spinners";
+import toast from "react-hot-toast";
 
 const ProfilePage = () => {
   const [isloading, setisloading] = useState(false);
@@ -16,7 +17,19 @@ const ProfilePage = () => {
   const [profileImage, setProfileImage] = useState("");
   const [showForgotPassword, setShowChangePassword] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingCampus, setIsEditingCampus] = useState(false);
+  const [selectedCampusId, setSelectedCampusId] = useState("");
+  const [loadingCampuses, setLoadingCampuses] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Sample campus data (not using API for now)
+  const campuses = [
+    { id: 1, name: "FAST NUCES Karachi", location: "Karachi" },
+    { id: 2, name: "FAST NUCES Lahore", location: "Lahore" },
+    { id: 3, name: "FAST NUCES Islamabad", location: "Islamabad" },
+    { id: 4, name: "FAST NUCES Peshawar", location: "Peshawar" },
+    { id: 5, name: "FAST NUCES Chiniot-Faisalabad", location: "Chiniot-Faisalabad" }
+  ];
 
   const resizeImage = (imageUrl) => {
     return new Promise((resolve, reject) => {
@@ -84,6 +97,25 @@ const ProfilePage = () => {
     setisloading(false);
   };
 
+  const handleCampusSave = async (campusId) => {
+    try {
+      setisloading(true);
+      // Add your campus update API call here
+      console.log("Updating campus to:", campusId);
+      // This would be the actual API call:
+      // await updateUserCampus(campusId);
+      
+      setSelectedCampusId(campusId);
+      setIsEditingCampus(false);
+      toast.success("Campus updated successfully!");
+    } catch (error) {
+      console.error("Error updating campus:", error);
+      toast.error("Failed to update campus");
+    } finally {
+      setisloading(false);
+    }
+  };
+
   const handleLogout = () => {
     logout();
     navigate("/login");
@@ -148,6 +180,7 @@ const ProfilePage = () => {
         }
       }
       setUsername(user?.name || "");
+      setSelectedCampusId(user?.campus_id || "");
     };
 
     loadAndResizeImage();
@@ -256,7 +289,64 @@ const ProfilePage = () => {
                 )}
               </div>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black md:col-span-2">
+              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-sm text-gray-500 font-medium">Campus</p>
+                  <button
+                    onClick={() => setIsEditingCampus((prev) => !prev)}
+                    className="text-xl text-black hover:text-gray-600 transition-colors"
+                    disabled={loadingCampuses}
+                  >
+                    <MdEdit />
+                  </button>
+                </div>
+
+                {isEditingCampus ? (
+                  <div className="flex items-center">
+                    <select
+                      value={selectedCampusId}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          handleCampusSave(e.target.value);
+                        }
+                      }}
+                      onBlur={() => setIsEditingCampus(false)}
+                      className="text-lg font-semibold w-full border border-gray-300 bg-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black transition appearance-none"
+                      disabled={loadingCampuses}
+                      autoFocus
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                        backgroundPosition: 'right 0.5rem center',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: '1.5em 1.5em',
+                        paddingRight: '2.5rem'
+                      }}
+                    >
+                      <option value="">Select Campus</option>
+                      {campuses.map((campus) => (
+                        <option key={campus.id} value={campus.id}>
+                          {campus.name} {campus.location && `- ${campus.location}`}
+                        </option>
+                      ))}
+                    </select>
+                    {isloading && (
+                      <ClipLoader color="#000000" loading={isloading} size={20} className="ml-2" />
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-lg font-semibold text-black">
+                    {selectedCampusId ? 
+                      (campuses.find(c => c.id.toString() === selectedCampusId?.toString())?.name + 
+                       (campuses.find(c => c.id.toString() === selectedCampusId?.toString())?.location ? 
+                        ` - ${campuses.find(c => c.id.toString() === selectedCampusId?.toString())?.location}` : '')) ||
+                      user?.campus_name || 
+                      "Not specified" : 
+                      "Not specified"}
+                  </p>
+                )}
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
                 <p className="text-sm text-gray-500 mb-2 font-medium">Email Address</p>
                 <p className="text-lg font-semibold text-black">{user?.email}</p>
               </div>

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -19,6 +19,15 @@ export default function RegisterForm({
 
   const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
+
+  // Sample campus data (not using API for now)
+  const campuses = [
+    { id: 1, name: "FAST NUCES Karachi", location: "Karachi" },
+    { id: 2, name: "FAST NUCES Lahore", location: "Lahore" },
+    { id: 3, name: "FAST NUCES Islamabad", location: "Islamabad" },
+    { id: 4, name: "FAST NUCES Peshawar", location: "Peshawar" },
+    { id: 5, name: "FAST NUCES Chiniot-Faisalabad", location: "Chiniot-Faisalabad" }
+  ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -134,6 +143,7 @@ export default function RegisterForm({
       formDataToSend.append("rollNo", formData.studentId);
       formDataToSend.append("email", formData.email);
       formDataToSend.append("password", formData.password);
+      formDataToSend.append("campus_id", formData.campusId);
       formDataToSend.append("imageFile", formData.imageFile);
 
       // Store email in local storage for OTP verification
@@ -255,6 +265,30 @@ export default function RegisterForm({
             className="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
             required
           />        </div>
+
+        <div className="relative">
+          <i className="fas fa-university absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          <select
+            name="campusId"
+            value={formData.campusId || ""}
+            onChange={handleInputChange}
+            className="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all appearance-none"
+            style={{ 
+              color: formData.campusId ? '#000000' : '#9CA3AF'
+            }}
+            required
+          >
+            <option value="" disabled style={{ color: '#9CA3AF' }}>
+              Select Campus
+            </option>
+            {campuses.map((campus) => (
+              <option key={campus.id} value={campus.id} style={{ color: '#000000' }}>
+                {campus.name} {campus.location && `- ${campus.location}`}
+              </option>
+            ))}
+          </select>
+          <i className="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+        </div>
         <div className="relative space-y-2">
           <div className="relative">
             <i className="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>

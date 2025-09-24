@@ -15,6 +15,8 @@ const Feed = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
+  const [campusFilter, setCampusFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [showPostModal, setShowPostModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [showDropdown, setShowDropdown] = useState(null);
@@ -336,7 +338,9 @@ const Feed = () => {
         const matchesFilter = activeFilter === "All" || item.type === activeFilter;
         const matchesSearch = item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                               item.description?.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesFilter && matchesSearch;
+        const matchesCampus = !campusFilter || item.campus_id?.toString() === campusFilter.toString();
+        const matchesCategory = !categoryFilter || item.category_id?.toString() === categoryFilter.toString();
+        return matchesFilter && matchesSearch && matchesCampus && matchesCategory;
       });
 
   // Handle "My Posts" filter when user is not logged in - just show empty instead of redirecting
@@ -417,7 +421,15 @@ const Feed = () => {
       
       {/* Filter component with proper spacing */}
       <div className="pt-16">
-        <Filter setActiveFilter={setActiveFilter} activeFilter={effectiveFilter} onRefresh={onRefresh}/>
+        <Filter 
+          setActiveFilter={setActiveFilter} 
+          activeFilter={effectiveFilter} 
+          onRefresh={onRefresh}
+          campusFilter={campusFilter}
+          setCampusFilter={setCampusFilter}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+        />
       </div>
     
       <main className="flex-grow">
