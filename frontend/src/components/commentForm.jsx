@@ -22,41 +22,40 @@ export default function CommentForm({ item }) {
     const token = localStorage.getItem("token");
 
     const isLost = item.type === "Lost";
-    // const url = isLost
-    //   ? "http://localhost:5000/comment/addlostcomment"
-    //   : "http://localhost:5000/comment/addfoundcomment";
+    const url = isLost
+      ? "http://localhost:5000/comment/addlostcomment"
+      : "http://localhost:5000/comment/addfoundcomment";
 
-    // const body = isLost
-    //   ? {
-    //       lpostId: item.id,
-    //       rollNo: user.rollno,
-    //       comment: commentText,
-    //     }
-    //   : {
-    //       fpostId: item.id,
-    //       rollNo: user.rollno,
-    //       comment: commentText,
-    //     };
+    const body = isLost
+      ? {
+          lpostId: item.id,
+          rollNo: user.rollno,
+          comment: commentText,
+        }
+      : {
+          fpostId: item.id,
+          rollNo: user.rollno,
+          comment: commentText,
+        };
 
     try {
-      // const response = await fetch(url, {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify(body),
-      // });
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
 
-      // if (response.ok) {
+      if (response.ok) {
         setCommentText("");
-        toast.success("Comment added successfully (Simulated for testing)");
-        // Refresh the page to show the new comment
-        // window.location.reload();
-      // } else {
-      //   const errorData = await response.json();
-      //   toast.error(errorData.message || "Failed to add comment");
-      // }
+        toast.success("Comment added successfully");
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Failed to add comment");
+      }
     } catch (error) {
       console.error("Error sending comment:", error);
       toast.error("An error occurred while adding the comment");
