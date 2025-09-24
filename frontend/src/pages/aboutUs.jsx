@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../utilities/footer.jsx";
+import MobileSidebarNav from "../components/mobileSidebarNav.jsx";
 
 export default function AboutUs() {
   const navigate = useNavigate();
@@ -8,6 +9,8 @@ export default function AboutUs() {
   const teamMembers = [
     {
       name: "Abd Ur Rehman",
+      rollNumber: "23L-3105",
+      campus: "Lahore Campus",
       role: "",
       linkedin: "https://www.linkedin.com/in/a-noob-in-coding",
       github: "https://github.com/A-noob-in-Coding",
@@ -15,6 +18,8 @@ export default function AboutUs() {
     },
     {
       name: "Muhammad Ahmad Butt",
+      rollNumber: "23L-3059",
+      campus: "Lahore Campus",
       role: "",
       linkedin: "https://www.linkedin.com/in/muhammad-ahmad-butt-0324b036a",
       github: "https://github.com/A-git-nerd",
@@ -36,12 +41,15 @@ export default function AboutUs() {
             <h1 className="text-2xl font-bold text-black">FAST Lost & Found</h1>
           </div>
           <div className="flex-shrink-0 ml-auto mr-0">
+            {/* Desktop Home Button - Hidden on mobile */}
             <button
               onClick={() => navigate("/")}
-              className="bg-black text-white px-10 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
+              className="hidden md:block bg-black text-white px-10 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
             >
               Home
             </button>
+            {/* Mobile Sidebar Navigation */}
+            <MobileSidebarNav />
           </div>
         </div>
       </header>
@@ -106,7 +114,9 @@ export default function AboutUs() {
                     <i className={`fas ${member.icon} text-xl`}></i>
                   </div>
                 </div>
-                <h4 className="text-xl font-semibold text-black mb-4">{member.name}</h4>
+                <h4 className="text-xl font-semibold text-black mb-2">{member.name}</h4>
+                <p className="text-gray-600 text-sm mb-1">{member.rollNumber}</p>
+                <p className="text-gray-500 text-xs mb-4">{member.campus}</p>
                 <div className="flex justify-center space-x-3">
                   <a 
                     href={member.linkedin} 
@@ -181,7 +191,7 @@ export default function AboutUs() {
           <p className="text-gray-300 mb-8 text-lg">
             Help us build a more connected and responsible campus community.
           </p>
-          <div className="flex justify-center space-x-4">
+          <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             <button 
               onClick={() => navigate("/register")}
               className="bg-white text-black px-8 py-3 rounded-full font-medium hover:bg-gray-100 transition-all duration-300 hover:scale-105 transform"
@@ -189,7 +199,7 @@ export default function AboutUs() {
               Register Now
             </button>
             <button 
-              onClick={() => navigate("/howItWorks")}
+              onClick={() => navigate("/contact")}
               className="border-2 border-white text-white px-8 py-3 rounded-full font-medium hover:bg-white hover:text-black transition-all duration-300 hover:scale-105 transform"
             >
               Learn More

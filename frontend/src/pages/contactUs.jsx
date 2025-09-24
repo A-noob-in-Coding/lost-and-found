@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Toast from "../utilities/toast.jsx";
 import Footer from "../utilities/footer.jsx";
+import MobileSidebarNav from "../components/mobileSidebarNav.jsx";
 
 export default function ContactUs() {
   const navigate = useNavigate();
@@ -102,12 +103,15 @@ export default function ContactUs() {
             <h1 className="text-2xl font-bold text-black">FAST Lost & Found</h1>
           </div>
           <div className="flex-shrink-0 ml-auto mr-0">
+            {/* Desktop Home Button - Hidden on mobile */}
             <button
               onClick={() => navigate("/")}
-              className="bg-black text-white px-10 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
+              className="hidden md:block bg-black text-white px-10 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
             >
               Home
             </button>
+            {/* Mobile Sidebar Navigation */}
+            <MobileSidebarNav />
           </div>
         </div>
       </header>
