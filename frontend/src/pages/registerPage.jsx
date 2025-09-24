@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import RegisterForm from "../components/registerForm.jsx";
 import OtpPage from "../components/otpPage.jsx";
 
 export const Register = () => {
+  const navigate = useNavigate();
   const [showOtpPage, setShowOtpPage] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -17,6 +19,17 @@ export const Register = () => {
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-200">
           <div className="p-6">
+            {/* Back Button */}
+            <div className="flex justify-start mb-4">
+              <button
+                onClick={() => navigate("/")}
+                className="flex items-center text-gray-600 hover:text-black transition-colors duration-200"
+              >
+                <i className="fas fa-arrow-left mr-2"></i>
+                <span className="text-sm">Back to Preview</span>
+              </button>
+            </div>
+            
             <div className="flex justify-center mb-6">
               <img 
                 src="/lf_logo.png" 

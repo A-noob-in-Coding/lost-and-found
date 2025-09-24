@@ -675,6 +675,31 @@ video {
   -webkit-line-clamp: 2;
 }
 
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Custom responsive utilities */
+@media (max-width: 640px) {
+  .mobile-full {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Ensure proper scaling on mobile */
+@media (max-width: 480px) {
+  .text-responsive {
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
+  }
+  
+  .text-responsive-lg {
+    font-size: clamp(1.25rem, 5vw, 2rem);
+  }
+}
+
 .block {
   display: block;
 }

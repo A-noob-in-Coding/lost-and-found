@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import LoginForm from "../components/loginForm.jsx";
 import ForgotPassword from "../components/forgotPassword.jsx";
@@ -6,6 +7,7 @@ import OtpPage from "../components/otpPage.jsx";
 import ChangePassword from "../components/changePassword.jsx";
 
 export const Login = () => {
+  const navigate = useNavigate();
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showOtpPage, setShowOtpPage] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -16,6 +18,17 @@ export const Login = () => {
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-200">
           <div className="p-8">
+            {/* Back Button */}
+            <div className="flex justify-start mb-4">
+              <button
+                onClick={() => navigate("/")}
+                className="flex items-center text-gray-600 hover:text-black transition-colors duration-200"
+              >
+                <i className="fas fa-arrow-left mr-2"></i>
+                <span className="text-sm">Back to Preview</span>
+              </button>
+            </div>
+            
             <div className="flex justify-center mb-8">
               <img 
                 src="/lf_logo.png" 
