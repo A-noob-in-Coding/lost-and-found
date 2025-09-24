@@ -1,85 +1,128 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import {  useNavigate } from 'react-router-dom';
 import PostVerificationContainer from '../components/postVerificationContainer.jsx';
 import CommentVerificationContainer from '../components/commentVerificationContainer.jsx';
 import CategoryContainer from '../components/catagorySection.jsx';
 import Footer from '../utilities/footer.jsx';
 
 const AdminPage = () => {
-  const { password } = useParams();
   const navigate = useNavigate();
   const [authenticated, setAuthenticated] = useState(false);
+  const [showLoginForm, setShowLoginForm] = useState(true);
   const [activeTab, setActiveTab] = useState('posts');
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      title: "Lost Gold Watch",
-      location: "Central Park, New York",
-      description: "Vintage gold watch with leather strap. Has an engraving on the back saying 'To John, With Love'.",
-      image: "https://readdy.ai/api/search-image?query=A%20high-quality%20professional%20photograph%20of%20a%20vintage%20gold%20watch%20with%20brown%20leather%20strap%20on%20a%20clean%20white%20background%2C%20soft%20shadows%2C%20detailed%20texture%20of%20the%20leather%20and%20gold%20metal%2C%20studio%20lighting%2C%20product%20photography%20style%2C%20minimalist&width=400&height=300&seq=1&orientation=landscape",
-      status: "pending"
+  const [posts, setPosts] = useState([]);
+  const [loginData, setLoginData] = useState({
+    username: '',
+    password: ''
+  });
+  const [loginError, setLoginError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const loginAdmin = async (user, pass) => {
+    try {
+      setIsLoading(true);
+      setLoginError('');
+
+      const response = await fetch("http://localhost:5000/api/users/loginAdmin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username: user, password: pass }), 
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setAuthenticated(true);
+        setShowLoginForm(false);
+      } else {
+        setLoginError(data.message || 'Invalid credentials');
+      }
+    } catch (err) {
+      console.error("Network or fetch error:", err);
+      setLoginError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-  ]);
+  };
 
-  //ADMIN PASSWORD
-  const ADMIN_PASSWORD = "admin";
-
-  // Check if the provided password matches the admin password
+  // Always show login form when component mounts
   useEffect(() => {
-    if (password === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-    } else {
-      navigate('/login');
-    }
-  }, [password, navigate]);
+    setShowLoginForm(true);
+  }, []);
 
-  const handlePostAction = (id, action) => {
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    if (!loginData.username || !loginData.password) {
+      setLoginError('Please enter both username and password');
+      return;
+    }
+    await loginAdmin(loginData.username, loginData.password);
+  };
+
+  const handleInputChange = (e) => {
+    setLoginData({
+      ...loginData,
+      [e.target.name]: e.target.value
+    });
+    // Clear error when user starts typing
+    if (loginError) {
+      setLoginError('');
+    }
+  };
+    const handlePostAction = (id, action) => {
     setPosts(posts.map(post =>
       post.id === id ? { ...post, status: action } : post
     ));
   };
 
-  // Show loading or unauthorized message while checking password
   if (!authenticated) {
-    return (
-      <div className="min-h-screen bg-white">
-        {/* Header with Logo and Navigation */}
-        <header className="bg-white shadow-sm border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between w-full">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <img 
-                src="/lf_logo.png" 
-                alt="Lost & Found Logo" 
-                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full"
-              />
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-black">FAST Lost & Found</h1>
-            </div>
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Admin Login</h2>
+        <form onSubmit={handleLoginSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={loginData.username}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+              placeholder="Enter username"
+              disabled={isLoading}
+            />
           </div>
-        </header>
-
-        {/* Access Denied Section */}
-        <section className="py-12 sm:py-16 bg-gray-50">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8 border border-gray-100">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                <i className="fas fa-lock text-red-600 text-xl sm:text-2xl"></i>
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-red-600 mb-3 sm:mb-4">Access Denied</h2>
-              <p className="text-gray-600 mb-6 sm:mb-8 text-sm sm:text-base md:text-lg">Invalid admin password. Redirecting to login page...</p>
-              <button 
-                onClick={() => navigate('/login')}
-                className="bg-black text-white px-6 sm:px-8 py-3 rounded-full text-sm sm:font-medium hover:bg-gray-800 transition-all duration-300 hover:scale-105 transform"
-              >
-                Go to Login
-              </button>
-            </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={loginData.password}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+              placeholder="Enter password"
+              disabled={isLoading}
+            />
           </div>
-        </section>
-
-        <Footer />
+          {loginError && (
+            <div className="text-red-600 text-sm mt-2">{loginError}</div>
+          )}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
       </div>
-    );
-  }
+      <Footer />
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-white">
