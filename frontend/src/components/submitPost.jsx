@@ -29,22 +29,11 @@ export default function SubmitPost({ postType, setShowPostModal }) {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        // const response = await fetch(
-        //   "http://localhost:5000/utility/categories"
-        // );
-        // const data = await response.json();
-        // setCategories(data);
-        
-        // Using dummy categories for testing
-        const dummyCategories = [
-          { category_id: 1, category: "Personal Items" },
-          { category_id: 2, category: "Electronics" },
-          { category_id: 3, category: "Bags & Accessories" },
-          { category_id: 4, category: "Books & Stationery" },
-          { category_id: 5, category: "Sports Equipment" },
-          { category_id: 6, category: "Others" }
-        ];
-        setCategories(dummyCategories);
+        const response = await fetch(
+          "http://localhost:5000/utility/categories"
+        );
+        const data = await response.json();
+        setCategories(data);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -86,30 +75,29 @@ export default function SubmitPost({ postType, setShowPostModal }) {
       console.log(pair[0] + ": " + pair[1]);
     }
     
-    // Simulate successful post submission for testing
     try {
-      // let result = false;
-      // if (postType === "lost") {
-      //   result = await fetch("http://localhost:5000/api/user/posts/lost", {
-      //     method: "POST",
-      //     body: formDataToSend,
-      //   });
-      // } else {
-      //   result = await fetch("http://localhost:5000/api/user/posts/found", {
-      //     method: "POST",
-      //     body: formDataToSend,
-      //   });
-      // }
+      let result = false;
+      if (postType === "lost") {
+        result = await fetch("http://localhost:5000/api/user/posts/lost", {
+          method: "POST",
+          body: formDataToSend,
+        });
+      } else {
+        result = await fetch("http://localhost:5000/api/user/posts/found", {
+          method: "POST",
+          body: formDataToSend,
+        });
+      }
       
-      // if (result.ok) {
+      if (result.ok) {
         setTimeout(() => {
           toast.success(`${postType} item successfully posted (Simulated for testing)`);
           navigate("/feed");
         }, 1000);
-      // } else {
-      //   toast.error(result.message || "Failed to post item");
-      //   setIsFormSend(false);
-      // }
+      } else {
+        toast.error(result.message || "Failed to post item");
+        setIsFormSend(false);
+      }
     } catch (error) {
       console.error("Error posting item:", error);
       toast.error("An error occurred while posting the item");
