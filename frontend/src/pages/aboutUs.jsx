@@ -19,7 +19,7 @@ export default function AboutUs() {
     {
       name: "Abd Ur Rehman",
       rollNumber: "23L-3105",
-      campus: "Lahore Campus",
+      campus: "Lahore",
       email: "l233105@lhr.nu.edu.pk",
       role: "",
       linkedin: "https://www.linkedin.com/in/a-noob-in-coding",
@@ -29,7 +29,7 @@ export default function AboutUs() {
     {
       name: "Muhammad Ahmad Butt",
       rollNumber: "23L-3059",
-      campus: "Lahore Campus",
+      campus: "Lahore",
       email: "l233059@lhr.nu.edu.pk",
       role: "",
       linkedin: "https://www.linkedin.com/in/muhammad-ahmad-butt-0324b036a",

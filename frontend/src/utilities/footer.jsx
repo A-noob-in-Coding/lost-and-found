@@ -47,14 +47,12 @@ export default function Footer() {
           </div>
           <div>            <h4 className="font-semibold mb-4">Connect With Us</h4>
             <ul className="text-sm text-gray-300 space-y-2">
-              <li><a href="mailto:l233059@lhr.nu.edu.pk" className="hover:text-white">l233059@lhr.nu.edu.pk</a> - Muhammad Ahmad Butt</li>
-              <li><a href="mailto:l233105@lhr.nu.edu.pk" className="hover:text-white">l233105@lhr.nu.edu.pk</a> - Abd ur Rehman</li>
+              <li><a href="mailto:l233059@lhr.nu.edu.pk" className="hover:text-white">lostandfound.fastnuces@gmail.com</a></li>
             </ul>
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-6 text-sm text-gray-400 flex flex-col md:flex-row justify-between items-center">
           <p>© 2025 FAST NUCES Lost & Found System. All rights reserved.</p>
-        
         </div>
       </div>
     </footer>
