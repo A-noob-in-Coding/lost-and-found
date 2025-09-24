@@ -8,7 +8,8 @@ import {
   registerUser, 
   updateUserName,
   updateUserImage,
-  getUserByEmail
+  getUserByEmail,
+  authenticateAdmin
 } from '../controllers/userController.js';
 import upload from '../config/mutler.js';
 
@@ -24,4 +25,5 @@ userRouter.post('/changePassword',changePassword);
 userRouter.get('/image/:rollNo', getUserImage);
 userRouter.put('/updateusername', updateUserName);
 userRouter.post('/update-image', upload.single('imageFile'), updateUserImage);
+userRouter.post('/loginAdmin',authenticateAdmin);
 export default userRouter;

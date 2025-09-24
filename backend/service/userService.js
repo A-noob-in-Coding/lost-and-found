@@ -9,6 +9,7 @@ export const hashPassword = async (password) =>{
 }
 
 
+
 export const registerUserService = async (rollNo, email, name, password, image) => {
   const client = await pool.connect(); // Get a client from the pool
   try {
@@ -82,6 +83,20 @@ export const getPasswordUserService = async(rollNo) =>{
   }
   catch(error){
     console.error('Error fetching user password:', error);
+    throw new Error(error.message);
+  }
+}
+
+export const authenticateAdminService = async(username,password) =>{
+  try{
+    if(password !== process.env.ADMIN_PASS || username !== process.env.ADMIN_USER){    
+      return false;
+    }
+    else{
+      return true;
+    }
+  }catch(error){
+    console.error("Error authenticating user:", error);
     throw new Error(error.message);
   }
 }
