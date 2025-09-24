@@ -27,16 +27,17 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/createPost" element={<CreatePost />} />
           <Route path="/register" element={<Register />} />
-          <Route path='/createPost' element={<CreatePostPage/>} />
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/contact" element={<ContactForm />} />
           <Route path="/howitworks" element={<HowItWorks />} />
           <Route path="/admin/:password" element={<AdminPage />} />
-            <Route path="/feed" element={<Feed />} />
-            <Route path="/profile" element={<ProfilePage />} />
+            
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoutes />}>
+            <Route path="/feed" element={<Feed />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path='/createPost' element={<CreatePostPage/>} />
           </Route>
         </Routes>
       </BrowserRouter>
