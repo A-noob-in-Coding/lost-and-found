@@ -50,23 +50,22 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
   const handleDeletePost = async (postId, postType) => {
     setItemLoading(postId, true);
     try {
-      // If onDeletePost prop is provided, use it; otherwise, handle locally
       if (onDeletePost) {
         await onDeletePost(postId, postType);
       } else {
-        // const endpoint = `http://localhost:5000/api/user/posts/${postType.toLowerCase()}/${postId}`;
-        // const response = await fetch(endpoint, {
-        //   method: 'DELETE'
-        // });
+        const endpoint = `http://localhost:5000/api/user/posts/${postType.toLowerCase()}/${postId}`;
+        const response = await fetch(endpoint, {
+          method: 'DELETE'
+        });
         
-        // if (response.ok) {
-          toast.success("Post deleted successfully! (Simulated for testing)");
+        if (response.ok) {
+          toast.success("Post deleted successfully!");
           // Refresh the page to update the post list
-          // window.location.reload();
-        // } else {
-        //   const errorData = await response.json();
-        //   toast.error(errorData.message || "Failed to delete post");
-        // }
+          window.location.reload();
+        } else {
+          const errorData = await response.json();
+          toast.error(errorData.message || "Failed to delete post");
+        }
       }
     } catch (error) {
       console.error("Error deleting post:", error);
@@ -93,63 +92,62 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
       // Get receiver's email by making a request to the backend to fetch it by roll number
       const receiverRollno = item.user.rollNumber;
       
-      // Simulating notification sending for testing
-      // const userResponse = await fetch(`http://localhost:5000/api/users/${receiverRollno}`);
-      // if (!userResponse.ok) {
-      //   throw new Error('Failed to fetch receiver\'s information');
-      // }
+      const userResponse = await fetch(`http://localhost:5000/api/users/${receiverRollno}`);
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch receiver\'s information');
+      }
       
-      // const userData = await userResponse.json();
-      // const receiverEmail = userData.email;
+      const userData = await userResponse.json();
+      const receiverEmail = userData.email;
       
       if (action === "Found" && type === "Lost") {
         // Send found notification
-        // const response = await fetch('http://localhost:5000/api/notifications/found-item', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify({
-        //     senderEmail,
-        //     receiverEmail,
-        //     itemTitle
-        //   }),
-        // });
+        const response = await fetch('http://localhost:5000/api/notifications/found-item', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            senderEmail,
+            receiverEmail,
+            itemTitle
+          }),
+        });
         
-        // if (response.ok) {
-          toast.success('Owner notified that you found their item! (Simulated for testing)');
-        // } 
-        // else if(response.status === 400) {
-        //   const errorData = await response.json();
-        //   toast.error(errorData.message || 'Sender and receiver cannot be same.');
-        // }
-        // else {
-        //   toast.error('Failed to send notification. Please try again.');
-        // }
+        if (response.ok) {
+          toast.success('Owner notified that you found their item!');
+        } 
+        else if(response.status === 400) {
+          const errorData = await response.json();
+          toast.error(errorData.message || 'Sender and receiver cannot be same.');
+        }
+        else {
+          toast.error('Failed to send notification. Please try again.');
+        }
       } 
       else if (action === "Claim" && type === "Found") {
         // Send claim notification
-        // const response = await fetch('http://localhost:5000/api/notifications/claim-item', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify({
-        //     senderEmail,
-        //     receiverEmail,
-        //     itemTitle
-        //   }),
-        // });
+        const response = await fetch('http://localhost:5000/api/notifications/claim-item', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            senderEmail,
+            receiverEmail,
+            itemTitle
+          }),
+        });
         
-        // if (response.ok) {
-          toast.success('Finder notified that you claimed this item! (Simulated for testing)');
-        // } 
-        //  else if(response.status === 400) {
-        //   const errorData = await response.json();
-        //   toast.error(errorData.message || 'Sender and receiver cannot be same.');
-        // } else {
-        //   toast.error('Failed to send notification. Please try again.');
-        // }
+        if (response.ok) {
+          toast.success('Finder notified that you claimed this item!');
+        } 
+         else if(response.status === 400) {
+          const errorData = await response.json();
+          toast.error(errorData.message || 'Sender and receiver cannot be same.');
+        } else {
+          toast.error('Failed to send notification. Please try again.');
+        }
       }
       setShowDropdown(null);
     } catch (error) {
@@ -173,28 +171,28 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
         return;
       }
 
-      // const response = await fetch('http://localhost:5000/comment/user/deletebytext', {
-      //   method: 'DELETE',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     rollNo: user.rollno,
-      //     comment: comment.text,
-      //     type: type.toLowerCase()
-      //   }),
-      // });
+      const response = await fetch('http://localhost:5000/comment/user/deletebytext', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rollNo: user.rollno,
+          comment: comment.text,
+          type: type.toLowerCase()
+        }),
+      });
 
-      // if (!response.ok) {
-      //   const errorData = await response.json();
-      //   toast.error(errorData.message || 'Failed to delete comment');
-      //   return;
-      // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Failed to delete comment');
+        return;
+      }
 
-      toast.success('Comment deleted successfully (Simulated for testing)');
+      toast.success('Comment deleted successfully');
 
       // Refresh the comments by refreshing the page
-      // window.location.reload();
+      window.location.reload();
     } catch (error) {
       console.error('Error deleting comment:', error);
       toast.error('An error occurred while deleting the comment');
