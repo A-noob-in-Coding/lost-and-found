@@ -78,7 +78,7 @@ export default function HowItWorks() {
               alt="Lost & Found Logo" 
               className="h-10 w-10 rounded-full"
             />
-            <h1 className="text-2xl font-bold text-black">FAST Lost & Found</h1>
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-black">FAST Lost & Found</h1>
           </div>
           <div className="flex-shrink-0 ml-auto mr-0">
             {/* Desktop Home Button - Hidden on mobile */}

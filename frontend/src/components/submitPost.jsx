@@ -15,6 +15,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
   const [formData, setFormData] = useState({
     title: "",
     location: "",
+    campus: "",
     category_id: "",
     rollNo: "",
     description: "",
@@ -74,6 +75,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
     formDataToSend.append("location", formData.location);
+    formDataToSend.append("campus", formData.campus);
     formDataToSend.append("description", formData.description);
     formDataToSend.append("image", formData.imageFile);
     formDataToSend.append("category_id", formData.category_id);
@@ -221,6 +223,28 @@ export default function SubmitPost({ postType, setShowPostModal }) {
               {category.category}
             </option>
           ))}
+        </select>
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Campus
+        </label>
+        <select
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black text-sm appearance-none bg-white"
+          required
+          onChange={handleInputChange}
+          name="campus"
+          defaultValue=""
+        >
+          <option value="" disabled>
+            Select campus
+          </option>
+          <option value="Lahore">Lahore Campus</option>
+          <option value="Karachi">Karachi Campus</option>
+          <option value="Islamabad">Islamabad Campus</option>
+          <option value="Peshawar">Peshawar Campus</option>
+          <option value="Chiniot-Faisalabad">Chiniot-Faisalabad Campus</option>
         </select>
       </div>
 

@@ -49,6 +49,7 @@ const PreviewPage = () => {
       title: "Black Leather Wallet",
       description: "Found near the main library entrance",
       location: "Main Library",
+      campus: "Lahore Campus",
       time: "2 hours ago",
       type: "Found",
       image: "/fast_nuces.png",
@@ -59,6 +60,7 @@ const PreviewPage = () => {
       title: "Keys with University Keychain",
       description: "Lost somewhere in the cafeteria area",
       location: "Cafeteria",
+      campus: "Karachi Campus",
       time: "4 hours ago",
       type: "Lost",
       image: "/icon.jpg",
@@ -69,6 +71,7 @@ const PreviewPage = () => {
       title: "Blue Notebook",
       description: "Found in Computer Science Department",
       location: "CS Department",
+      campus: "Islamabad Campus",
       time: "6 hours ago",
       type: "Found",
       image: "/fast_nuces.png",
@@ -79,6 +82,7 @@ const PreviewPage = () => {
       title: "Black Backpack",
       description: "Lost near the parking area",
       location: "Parking Area",
+      campus: "Lahore Campus",
       time: "8 hours ago",
       type: "Lost",
       image: "/icon.jpg",
@@ -89,6 +93,7 @@ const PreviewPage = () => {
       title: "White Earphones",
       description: "Found in the gymnasium locker room",
       location: "Gymnasium",
+      campus: "Peshawar Campus",
       time: "12 hours ago",
       type: "Found",
       image: "/fast_nuces.png",
@@ -99,6 +104,7 @@ const PreviewPage = () => {
       title: "Red Water Bottle",
       description: "Lost during the morning lecture",
       location: "Lecture Hall 1",
+      campus: "Chiniot-Faisalabad Campus",
       time: "1 day ago",
       type: "Lost",
       image: "/icon.jpg",
@@ -153,16 +159,16 @@ const PreviewPage = () => {
           </p>
           
           {/* Items Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 justify-items-center">
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-4 lg:gap-6">
             {sampleItems.map((item) => (
               <div
                 key={item.id}
                 onClick={() => navigate("/login")}
-                className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden hover:scale-105 transform cursor-pointer w-full max-w-sm"
+                className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden hover:scale-105 transform cursor-pointer w-[77%] sm:w-[49.5%] lg:w-[30%] max-w-xs sm:max-w-sm"
               >
                 {/* Item Badge */}
                 <div className="relative">
-                  <div className="h-32 sm:h-40 overflow-hidden rounded-t-2xl">
+                  <div className="h-34 sm:h-26 lg:h-35 xl:h-44 overflow-hidden rounded-t-lg sm:rounded-t-xl lg:rounded-t-2xl">
                     <img
                       src={item.image}
                       alt={item.title}
@@ -170,7 +176,7 @@ const PreviewPage = () => {
                     />
                   </div>
                   <span
-                    className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-semibold text-white ${
+                    className={`absolute top-0.5 right-0.5 sm:top-1 sm:right-1 lg:top-2 lg:right-2 px-1 py-0.5 sm:px-1.5 sm:py-0.5 lg:px-2 lg:py-1 rounded-full text-xs font-semibold text-white ${
                       item.type === "Found" ? "bg-green-500" : "bg-red-500"
                     }`}
                   >
@@ -179,13 +185,19 @@ const PreviewPage = () => {
                 </div>
 
                 {/* Item Content */}
-                <div className="p-3 sm:p-4">
-                  <h4 className="text-sm sm:text-base font-semibold text-black mb-1">{item.title}</h4>
-                  <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{item.description}</p>
+                <div className="p-2 sm:p-3 lg:p-4">
+                  <h4 className="text-sm sm:text-sm lg:text-base font-semibold text-black mb-1 line-clamp-1">{item.title}</h4>
+                  <p className="text-gray-600 text-xs sm:text-sm mb-1 line-clamp-1 sm:line-clamp-2">{item.description}</p>
                   
-                  <div className="flex items-center text-gray-500 text-xs mb-1">
-                    <i className="fas fa-map-marker-alt mr-1"></i>
-                    <span className="truncate">{item.location}</span>
+                  <div className="flex items-center justify-between text-gray-500 text-xs mb-1">
+                    <div className="flex items-center flex-1 min-w-0">
+                      <i className="fas fa-map-marker-alt mr-1 flex-shrink-0"></i>
+                      <span className="truncate text-xs">{item.location}</span>
+                    </div>
+                    <div className="flex items-center ml-1 flex-shrink-0">
+                      <i className="fas fa-university mr-1"></i>
+                      <span className="text-xs truncate max-w-20 sm:max-w-24 lg:max-w-none">{item.campus}</span>
+                    </div>
                   </div>
                   
                   <div className="flex items-center text-gray-500 text-xs">

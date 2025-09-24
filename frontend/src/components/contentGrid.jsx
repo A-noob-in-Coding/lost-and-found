@@ -271,6 +271,10 @@ export default function ContentGrid({filteredItems, onDeletePost}) {
                 <div className="flex flex-col flex-grow">
                   <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
                   <div className="flex items-center text-gray-600 text-sm mb-2">
+                    <i className="fas fa-university mr-2"></i>
+                    {item.campus || 'Campus not specified'}
+                  </div>
+                  <div className="flex items-center text-gray-600 text-sm mb-2">
                     <i className="fas fa-map-marker-alt mr-2"></i>
                     {item.location}
                   </div>
