@@ -8,17 +8,23 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-4">Lost & Found</h3>
+            <div className="flex items-center space-x-3 mb-4">
+              <img 
+                src="/lf_logo.png" 
+                alt="Lost & Found Logo" 
+                className="h-8 w-8 rounded-full"
+              />
+              <h3 className="text-xl font-bold">FAST Lost & Found</h3>
+            </div>
             <p className="text-gray-300 text-sm">
-              Helping our community reconnect with their lost belongings since
-              2023.
+              Reconnecting students with their belongings at FAST NUCES.
             </p>
           </div>
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm text-gray-300">
               <li>
-                <a href="/feed" className="hover:text-white">
+                <a href="/" className="hover:text-white">
                   Home
                 </a>
               </li>
@@ -41,15 +47,12 @@ export default function Footer() {
           </div>
           <div>            <h4 className="font-semibold mb-4">Connect With Us</h4>
             <ul className="text-sm text-gray-300 space-y-2">
-              <li><a href="mailto:l233059@lhr.nu.edu.pk" className="hover:text-white">l233059@lhr.nu.edu.pk</a> - Muhammad Ahmad Butt</li>
-              <li><a href="mailto:l233105@lhr.nu.edu.pk" className="hover:text-white">l233105@lhr.nu.edu.pk</a> - Abd ur Rehman</li>
-              <li><a href="mailto:l233076@lhr.nu.edu.pk" className="hover:text-white">l233076@lhr.nu.edu.pk</a> - Muhammad Armgan</li>
+              <li><a href="mailto:l233059@lhr.nu.edu.pk" className="hover:text-white">lostandfound.fastnuces@gmail.com</a></li>
             </ul>
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-6 text-sm text-gray-400 flex flex-col md:flex-row justify-between items-center">
-          <p>© 2025 Lost & Found. All rights reserved.</p>
-        
+          <p>© 2025 FAST NUCES Lost & Found System. All rights reserved.</p>
         </div>
       </div>
     </footer>

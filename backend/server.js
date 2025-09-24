@@ -10,7 +10,7 @@ import Utilrouter from './routes/utilityRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import notificationRouter from './routes/notificationRoutes.js';
 import categoryRouter from './routes/categoryRoutes.js';
-import { cleanupExpiredOTPs } from './service/otpService.js';
+import { cleanupExpiredOTPs } from './service/otpService.js'; //=====?
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -27,6 +27,7 @@ app.use('/api/admin/posts', adminPostRouter);
 app.use('/utility',Utilrouter)
 app.use('/api/notifications', notificationRouter)
 app.use('/api/categories', categoryRouter)
+app.use('/api/campuses', campusRouter)
 app.get('/', (req, res) => {
   res.send('Express PostgreSQL Cloudinary API is running');
 });

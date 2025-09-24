@@ -15,6 +15,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
   const [formData, setFormData] = useState({
     title: "",
     location: "",
+    campus: "",
     category_id: "",
     rollNo: "",
     description: "",
@@ -39,8 +40,13 @@ export default function SubmitPost({ postType, setShowPostModal }) {
     };
 
     fetchCategories();
-    console.log(user.rollno);
-  }, []);
+    // Check if user exists before accessing rollno
+    if (user && user.rollno) {
+      console.log(user.rollno);
+    } else {
+      console.log("User not logged in or rollno not available");
+    }
+  }, [user]);
 
   const handleSubmitPost = async (e) => {
     if (isFormSend) return; // Prevent multiple submissions
@@ -48,9 +54,17 @@ export default function SubmitPost({ postType, setShowPostModal }) {
     setIsFormSend(true); // Set to true to prevent multiple submissions
     setError("");
     
+    // Check if user exists before accessing rollno
+    if (!user || !user.rollno) {
+      toast.error("Please log in to post an item");
+      setIsFormSend(false);
+      return;
+    }
+    
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
     formDataToSend.append("location", formData.location);
+    formDataToSend.append("campus", formData.campus);
     formDataToSend.append("description", formData.description);
     formDataToSend.append("image", formData.imageFile);
     formDataToSend.append("category_id", formData.category_id);
@@ -61,24 +75,32 @@ export default function SubmitPost({ postType, setShowPostModal }) {
       console.log(pair[0] + ": " + pair[1]);
     }
     
-    let result = false;
-    if (postType === "lost") {
-      result = await fetch("http://localhost:5000/api/user/posts/lost", {
-        method: "POST",
-        body: formDataToSend,
-      });
-    } else {
-      result = await fetch("http://localhost:5000/api/user/posts/found", {
-        method: "POST",
-        body: formDataToSend,
-      });
-    }
-    
-    if (result.ok) {
-      toast.success("Item successfully posted");
-      navigate("/feed");
-    } else {
-      toast.error(result.message || "Failed to post item");
+    try {
+      let result = false;
+      if (postType === "lost") {
+        result = await fetch("http://localhost:5000/api/user/posts/lost", {
+          method: "POST",
+          body: formDataToSend,
+        });
+      } else {
+        result = await fetch("http://localhost:5000/api/user/posts/found", {
+          method: "POST",
+          body: formDataToSend,
+        });
+      }
+      
+      if (result.ok) {
+        setTimeout(() => {
+          toast.success(`${postType} item successfully posted (Simulated for testing)`);
+          navigate("/feed");
+        }, 1000);
+      } else {
+        toast.error(result.message || "Failed to post item");
+        setIsFormSend(false);
+      }
+    } catch (error) {
+      console.error("Error posting item:", error);
+      toast.error("An error occurred while posting the item");
       setIsFormSend(false);
     }
   };
@@ -189,6 +211,28 @@ export default function SubmitPost({ postType, setShowPostModal }) {
               {category.category}
             </option>
           ))}
+        </select>
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Campus
+        </label>
+        <select
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black text-sm appearance-none bg-white"
+          required
+          onChange={handleInputChange}
+          name="campus"
+          defaultValue=""
+        >
+          <option value="" disabled>
+            Select campus
+          </option>
+          <option value="Lahore">Lahore Campus</option>
+          <option value="Karachi">Karachi Campus</option>
+          <option value="Islamabad">Islamabad Campus</option>
+          <option value="Peshawar">Peshawar Campus</option>
+          <option value="Chiniot-Faisalabad">Chiniot-Faisalabad Campus</option>
         </select>
       </div>
 

@@ -1,27 +1,40 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import LoginForm from "../components/loginForm.jsx";
-import BackgroundTypography from "../components/backgroundTypography.jsx";
 import ForgotPassword from "../components/forgotPassword.jsx";
 import OtpPage from "../components/otpPage.jsx";
-import ChangePassword from "../components/changePassword.jsx"; // Import ChangePassword component
+import ChangePassword from "../components/changePassword.jsx";
 
-export const Login = () => {  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [showOtpPage, setShowOtpPage] = useState(false); // State to show OTP page
-  const [showChangePassword, setShowChangePassword] = useState(false); // State to show ChangePassword page
+export const Login = () => {
+  const navigate = useNavigate();
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showOtpPage, setShowOtpPage] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
   const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-        {/* Background Typography */}
-        <BackgroundTypography />
-        <div className="max-w-md w-full bg-white shadow-2xl rounded-2xl overflow-hidden z-10 transition-all duration-300 hover:shadow-3xl">
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-200">
           <div className="p-8">
+            {/* Back Button */}
+            <div className="flex justify-start mb-4">
+              <button
+                onClick={() => navigate("/")}
+                className="flex items-center text-gray-600 hover:text-black transition-colors duration-200"
+              >
+                <i className="fas fa-arrow-left mr-2"></i>
+                <span className="text-sm">Back to Preview</span>
+              </button>
+            </div>
+            
             <div className="flex justify-center mb-8">
-              <div className="h-16 w-16 rounded-full bg-black flex items-center justify-center shadow-lg">
-                <i className="fas fa-search text-white text-2xl"></i>
-              </div>
+              <img 
+                src="/lf_logo.png" 
+                alt="Lost & Found Logo" 
+                className="h-16 w-16 rounded-full"
+              />
             </div>
             <h1 className="text-3xl font-bold text-center mb-2 tracking-tight">
               FAST Lost & Found
@@ -54,7 +67,7 @@ export const Login = () => {  const [showForgotPassword, setShowForgotPassword] 
       {showForgotPassword && (
         <ForgotPassword
           setShowForgotPassword={setShowForgotPassword}
-          setShowOtpPage={setShowOtpPage} // Pass function to show OTP page
+          setShowOtpPage={setShowOtpPage}
         />
       )}
     </div>

@@ -7,6 +7,7 @@ import AboutUs from './pages/aboutUs.jsx';
 import ContactForm from './pages/contactUs.jsx';
 import HowItWorks from './pages/howItWorks.jsx';
 import Register from './pages/registerPage';
+import PreviewPage from './pages/previewPage.jsx';
 import { Toaster } from 'react-hot-toast';
 import ProfilePage from './pages/profilePage';
 import CreatePost from './pages/createPost.jsx';
@@ -21,20 +22,22 @@ function App() {
         <Toaster position="top-right" />
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<PreviewPage />} />
+          <Route path="/preview" element={<PreviewPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/createPost" element={<CreatePost />} />
           <Route path="/register" element={<Register />} />
-          <Route path='/createPost' element={<CreatePostPage/>} />
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/contact" element={<ContactForm />} />
           <Route path="/howitworks" element={<HowItWorks />} />
           <Route path="/admin/:password" element={<AdminPage />} />
+            
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoutes />}>
-            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/feed" element={<Feed />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path='/createPost' element={<CreatePostPage/>} />
           </Route>
         </Routes>
       </BrowserRouter>
