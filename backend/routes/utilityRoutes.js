@@ -1,8 +1,8 @@
-import { getCategories, sendContactEmail } from "../controllers/utilityController.js";
+import { getAllCampus, getCategories, sendContactEmail } from "../controllers/utilityController.js";
 import express from 'express';
-const Utilrouter = express.Router()
+const utilrouter = express.Router()
 
-Utilrouter.get('/categories',getCategories);
-Utilrouter.post('/contact', sendContactEmail);
-
-export default Utilrouter
+utilrouter.get('/categories', getCategories);
+utilrouter.post('/contact', sendContactEmail);
+utilrouter.get('/campus', getAllCampus)
+export default utilrouter
