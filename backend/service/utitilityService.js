@@ -58,9 +58,9 @@ export const sendContactEmailService = async (name, email, message) => {
 
 export const getAllCampusService = async () => {
   try {
-    const query = `select "campusName" from campus`
+    const query = `select * from campus`
     const result = await pool.query(query)
-    return result.rows.map(row => row.campusName)
+    return result.rows
   } catch (error) {
     throw new Error(`error while fetching campus, ${error.message}`)
   }

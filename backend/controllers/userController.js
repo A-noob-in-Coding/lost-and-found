@@ -3,35 +3,35 @@ import { authenticateUserService, changePasswordService, doesUserExist, getPassw
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 
-export const authenticateAdmin = async(req,res) =>{
-  const {username,password} = req.body;
-  if(!password || !username){
-    return res.status(400).json({message: "All fields are required"})
+export const authenticateAdmin = async (req, res) => {
+  const { username, password } = req.body;
+  if (!password || !username) {
+    return res.status(400).json({ message: "All fields are required" })
   }
   const result = await authenticateAdminService(username, password)
   console.log(result)
-  if(result){
-    return res.status(200).json({message: "User logged in"})
+  if (result) {
+    return res.status(200).json({ message: "User logged in" })
   }
-  else{
-    return res.status(400).json({message: "Invalid credentials"})
+  else {
+    return res.status(400).json({ message: "Invalid credentials" })
   }
 }
 
 export const registerUser = async (req, res) => {
-  const { rollNo, email, name, password } = req.body;
+  const { rollNo, email, name, password, campusID } = req.body;
   let imageFile = req.file
 
   if (!rollNo || !email || !name || !password) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
-  if(!imageFile){
+  if (!imageFile) {
     imageFile = null
   }
 
   // Validate image file type
-  if (imageFile &&!ALLOWED_FILE_TYPES.includes(imageFile.mimetype)) {
+  if (imageFile && !ALLOWED_FILE_TYPES.includes(imageFile.mimetype)) {
     return res.status(400).json({ message: "Invalid file type. Only JPEG, PNG, and WEBP are allowed." });
   }
 
@@ -41,7 +41,7 @@ export const registerUser = async (req, res) => {
   }
 
   try {
-    const newUser = await registerUserService(rollNo, email, name, password, imageFile);
+    const newUser = await registerUserService(rollNo, email, name, password, imageFile, campusID);
     return res.status(201).json({ message: 'User registered successfully', user: newUser });
   } catch (error) {
     return res.status(400).json({ message: error.message });
@@ -74,15 +74,15 @@ export const authenticateUser = async (req, res) => {
   }
 };
 
-export const changePassword = async(req,res) =>{
-  const {email, password} = req.body
-  
-  try{
-    await changePasswordService(email,password);
-    return res.status(200).json({message:"Password changed successfully"})
+export const changePassword = async (req, res) => {
+  const { email, password } = req.body
+
+  try {
+    await changePasswordService(email, password);
+    return res.status(200).json({ message: "Password changed successfully" })
   }
-  catch(error){
-    return res.status(500).json({message:"Internal server error while changing password"})
+  catch (error) {
+    return res.status(500).json({ message: "Internal server error while changing password" })
   }
 }
 
@@ -99,7 +99,7 @@ export const getUserImage = async (req, res) => {
 
 export const checkUserByEmail = async (req, res) => {
   const { email } = req.query;
-  
+
   if (!email) {
     return res.status(400).json({ message: 'Email is required', exists: false });
   }
@@ -114,18 +114,18 @@ export const checkUserByEmail = async (req, res) => {
   }
 };
 
-export const updateUserName = async(req,res) =>{
-  const {rollno,username} = req.body
-  if(!rollno | !username){
-    return res.status(400).json({message:"please provide all fields"})
+export const updateUserName = async (req, res) => {
+  const { rollno, username } = req.body
+  if (!rollno | !username) {
+    return res.status(400).json({ message: "please provide all fields" })
   }
-  try{
-    await updateUserNameService(rollno,username) 
-    return res.status(200).json({message:"username successfully changed"})
+  try {
+    await updateUserNameService(rollno, username)
+    return res.status(200).json({ message: "username successfully changed" })
   }
-  catch(error){
+  catch (error) {
     console.log(error.message)
-    return res.status(500).json({message:"internal server error"})
+    return res.status(500).json({ message: "internal server error" })
   }
 }
 
@@ -148,9 +148,9 @@ export const updateUserImage = async (req, res) => {
   }
   try {
     const newImageUrl = await updateUserImageService(rollno, imageFile);
-    return res.status(200).json({ 
+    return res.status(200).json({
       message: "Profile image updated successfully",
-      image_url: newImageUrl 
+      image_url: newImageUrl
     });
   } catch (error) {
     console.error("Error updating profile image:", error);
@@ -160,7 +160,7 @@ export const updateUserImage = async (req, res) => {
 
 export const getUserByEmail = async (req, res) => {
   const { email } = req.query;
-  
+
   if (!email) {
     return res.status(400).json({ message: 'Email is required' });
   }
@@ -173,7 +173,7 @@ export const getUserByEmail = async (req, res) => {
       rollno: user.rollno,
       image_url: user.image_url
     };
-    return res.json({message:"Email already exists!"});
+    return res.json({ message: "Email already exists!" });
   } catch (error) {
     return res.status(404).json({ message: error.message });
   }
