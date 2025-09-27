@@ -41,10 +41,14 @@ export const registerUserService = async (rollNo, email, name, password, image, 
 // Function to get user by rollNo
 export const getUserByRollNoService = async (rollNo) => {
   try {
-    const query = 'SELECT * FROM "User" WHERE rollNo = $1';
+    const query = `
+SELECT u.rollno, u.email, u.name, u.image_url, u."campusID", c."campusName"
+FROM "User" u
+JOIN campus c ON u."campusID" = c."campusID"
+where u.rollno =$1 
+`
     const result = await pool.query(query, [rollNo]);
 
-    // Ensure that result.rows exists before accessing it
     if (result && result.rows && result.rows.length > 0) {
       return result.rows[0]; // return the user object
     } else {
@@ -218,3 +222,15 @@ export const getUserByEmailService = async (email) => {
     throw new Error(error.message);
   }
 };
+
+export const updateUserCampusService = async (rollno, campusID) => {
+  try {
+    const query = `Update "User" set "campusID" = $1 where rollno = $2`
+    const result = await pool.query(query, [campusID, rollno])
+    return
+  }
+  catch (error) {
+    console.log("Error while updating campus: ", error)
+    throw new Error(error.message)
+  }
+}

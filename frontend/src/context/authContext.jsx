@@ -1,3 +1,4 @@
+import axios from "axios";
 import { createContext, useContext, useState, useEffect } from "react";
 import toast from 'react-hot-toast';
 
@@ -17,7 +18,9 @@ export const AuthProvider = ({ children }) => {
         name: user.name,
         email: user.email,
         rollNo: user.rollno,
-        imageUrl: user.image_url
+        imageUrl: user.image_url,
+        campusID: user.campusID,
+        campusName: user.campusName
       });
     }
   }, [user]); // This will run whenever user state changes
@@ -39,12 +42,12 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      
+
       // Update user state with new image URL
       const updatedUser = { ...user, image_url: data.image_url };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
-      
+
       toast.success('Profile picture updated successfully!');
       return data.image_url;
     } catch (error) {
@@ -80,7 +83,24 @@ export const AuthProvider = ({ children }) => {
       toast.error(error.message);
     }
   };
+  const updateCampus = async (campusID, campusName) => {
+    try {
+      await axios.post('http://localhost:5000/api/users/update/campus', {
+        rollno: user.rollno,
+        campusID: campusID
+      })
+      toast.success("Campus updated")
+      setUser((prevUser) => ({
+        ...prevUser,
+        campusName: campusName,
+        campusID: campusID,
+      }));
+    }
+    catch (error) {
+      toast.error("Could not update campus")
+    }
 
+  }
   const login = async (rollno, password) => {
     setLoading(true);
     try {
@@ -111,7 +131,9 @@ export const AuthProvider = ({ children }) => {
         rollno: userDetails.rollno,
         email: userDetails.email,
         name: userDetails.name,
-        image_url: userDetails.image_url
+        image_url: userDetails.image_url,
+        campusID: userDetails.campusID,
+        campusName: userDetails.campusName
       };
 
       setUser(userData);
@@ -141,6 +163,7 @@ export const AuthProvider = ({ children }) => {
       loading,
       updateUsername,
       updateProfileImage,
+      updateCampus,
       isAuthenticated: !!user
     }}>
       {children}
@@ -155,3 +178,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

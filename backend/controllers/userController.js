@@ -1,4 +1,4 @@
-import { authenticateUserService, changePasswordService, doesUserExist, getPasswordUserService, getUserByRollNoService, hashPassword, registerUserService, getUserImageService, updateUserNameService, updateUserImageService, getUserByEmailService, authenticateAdminService } from "../service/userService.js";
+import { authenticateUserService, changePasswordService, doesUserExist, getPasswordUserService, getUserByRollNoService, hashPassword, registerUserService, getUserImageService, updateUserNameService, updateUserImageService, getUserByEmailService, authenticateAdminService, updateUserCampusService } from "../service/userService.js";
 
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
@@ -175,6 +175,21 @@ export const getUserByEmail = async (req, res) => {
     };
     return res.json({ message: "Email already exists!" });
   } catch (error) {
-    return res.status(404).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
+
+export const updatUserCampus = async (req, res) => {
+
+  const { rollno, campusID } = req.body
+  if (!rollno || !campusID) {
+    return res.status(400).json({ message: "Roll number and campus is required" });
+  }
+  try {
+    await updateUserCampusService(rollno, campusID)
+    return res.status(200).json({ message: "Updated user campus" })
+  }
+  catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}
