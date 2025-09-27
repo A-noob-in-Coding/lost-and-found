@@ -5,10 +5,10 @@ import pool from "../config/db.js";
 export const getLostPostService = async (flag) => {
   const client = await pool.connect();
   let is_verified
-  if(flag){
-    is_verified = true    
+  if (flag) {
+    is_verified = true
   }
-  else{
+  else {
     is_verified = false
   }
   try {
@@ -20,7 +20,7 @@ JOIN category c ON i.category_id = c.category_id
 where is_verified=$1
 ORDER BY lp.created_at DESC
     `;
-    const result = await client.query(query,[is_verified]);
+    const result = await client.query(query, [is_verified]);
     return result.rows;
   } catch (error) {
     console.error("Database connection error:", error);
@@ -30,8 +30,8 @@ ORDER BY lp.created_at DESC
   }
 };
 
-export const getAdminPostsService = async() =>{
-  try{
+export const getAdminPostsService = async () => {
+  try {
     const query = `
   SELECT 
       'l' AS post_type,
@@ -66,7 +66,7 @@ export const getAdminPostsService = async() =>{
     const result = await pool.query(query)
     return result.rows
   }
-  catch(error){
+  catch (error) {
     console.log(error.message)
     throw new Error(error.message)
   }
@@ -76,10 +76,10 @@ export const getAdminPostsService = async() =>{
 export const getFoundPostService = async (flag) => {
   const client = await pool.connect();
   let is_verified
-  if(flag){
-    is_verified = true    
+  if (flag) {
+    is_verified = true
   }
-  else{
+  else {
     is_verified = false
   }
   try {
@@ -91,7 +91,7 @@ JOIN category c ON i.category_id = c.category_id
 where is_verified=$1
 ORDER BY fp.created_at DESC
     `;
-    const result = await client.query(query,[is_verified]);
+    const result = await client.query(query, [is_verified]);
     return result.rows;
   } catch (error) {
     console.error("Database connection error:", error);
@@ -148,7 +148,7 @@ const getImageUrlFoundPost = async (postID) => {
 };
 
 
-export const createLostPostService = async (rollno, title, location, description, image, category_id) => {
+export const createLostPostService = async (rollno, title, location, description, image, category_id, campusID) => {
   const client = await pool.connect();
   try {
     let image_url = ""
@@ -168,11 +168,11 @@ export const createLostPostService = async (rollno, title, location, description
 
     // Insert into the `lostpost` table
     const lostPostQuery = `
-      INSERT INTO lostpost (rollno, created_at, item_id)
-      VALUES ($1, NOW(), $2)
+      INSERT INTO lostpost (rollno, created_at, item_id, "campusID")
+      VALUES ($1, NOW(), $2, $3)
       RETURNING *
     `;
-    const lostPostResult = await client.query(lostPostQuery, [rollno, itemId]);
+    const lostPostResult = await client.query(lostPostQuery, [rollno, itemId, campusID]);
 
     await client.query("COMMIT");
     return lostPostResult.rows[0];
@@ -190,7 +190,7 @@ export const updateLostPostService = async (post_id) => {
   try {
 
     const query = "UPDATE lostpost SET is_verified = true WHERE lpost_id = $1"
-    await pool.query(query,[post_id])
+    await pool.query(query, [post_id])
     return { message: "Lost post updated successfully" };
   } catch (error) {
     console.error("Error updating found post:", error);
@@ -232,7 +232,7 @@ export const deleteLostPostService = async (postId) => {
   }
 };
 
-export const createFoundPostService = async (rollno, title, location, description, image, category_id) => {
+export const createFoundPostService = async (rollno, title, location, description, image, category_id, campusID) => {
   const client = await pool.connect();
   try {
     let image_url = ""
@@ -252,11 +252,11 @@ export const createFoundPostService = async (rollno, title, location, descriptio
 
     // Insert into the `foundpost` table
     const foundPostQuery = `
-      INSERT INTO foundpost (rollno, created_at, item_id)
-      VALUES ($1, NOW(), $2)
+      INSERT INTO foundpost (rollno, created_at, item_id,"campusID")
+      VALUES ($1, NOW(), $2, $3)
       RETURNING *
     `;
-    const foundPostResult = await client.query(foundPostQuery, [rollno, itemId]);
+    const foundPostResult = await client.query(foundPostQuery, [rollno, itemId, campusID]);
 
     await client.query("COMMIT");
     return foundPostResult.rows[0];
@@ -274,7 +274,7 @@ export const updateFoundPostService = async (post_id) => {
   try {
 
     const query = "UPDATE foundpost SET is_verified = true WHERE f_post_id = $1"
-    await pool.query(query,[post_id])
+    await pool.query(query, [post_id])
     return { message: "Found post updated successfully" };
   } catch (error) {
     console.error("Error updating found post:", error);
@@ -299,8 +299,8 @@ export const deleteFoundPostService = async (postId) => {
   }
 };
 
-export const getPostDataService = async() =>{
-  try{
+export const getPostDataService = async () => {
+  try {
     const getAllVerifiedPostsQuery = `
   SELECT
     lp.lpost_id AS id,
@@ -370,17 +370,17 @@ export const getPostDataService = async() =>{
 
   ORDER BY date DESC;
 `;
-  
+
     const result = await pool.query(getAllVerifiedPostsQuery)
     return result.rows
   }
-  catch(error){
-    console.log("error fetching post data"+ error.message)
+  catch (error) {
+    console.log("error fetching post data" + error.message)
     throw new Error(error.message)
   }
 }
 
-export const getPostsByRollNoService = async(rollno) => {
+export const getPostsByRollNoService = async (rollno) => {
   try {
     // Simple query to get just the post IDs for a specific roll number
     const getPostIdsQuery = `
@@ -394,7 +394,7 @@ export const getPostsByRollNoService = async(rollno) => {
       FROM foundpost 
       WHERE rollno = $1
     `;
-    
+
     const { rows } = await pool.query(getPostIdsQuery, [rollno]);
     return rows;
   } catch (error) {
@@ -403,7 +403,7 @@ export const getPostsByRollNoService = async(rollno) => {
   }
 };
 
-export const getUnverifiedPostsByRollNoService = async(rollno) => {
+export const getUnverifiedPostsByRollNoService = async (rollno) => {
   try {
     const query = `
       SELECT 
@@ -446,7 +446,7 @@ export const getUnverifiedPostsByRollNoService = async(rollno) => {
       
       ORDER BY created_at DESC
     `;
-    
+
     const { rows } = await pool.query(query, [rollno]);
     return rows;
   } catch (error) {
