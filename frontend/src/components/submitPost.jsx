@@ -1,13 +1,13 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/authContext";
+import { useUtil } from "../context/utilContext";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 export default function SubmitPost({ postType, setShowPostModal }) {
   const [isFormSend, setIsFormSend] = useState(false);
   const { user } = useAuth();
   const fileInputRef = useRef(null);
-  const [campuses, setCampuses] = useState([])
+  const { campuses, categories } = useUtil()
   const [imagePreview, setImagePreview] = useState(null);
   const [error, setError] = useState("");
   const [isDragging, setIsDragging] = useState(false);
@@ -25,30 +25,6 @@ export default function SubmitPost({ postType, setShowPostModal }) {
 
   const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
-  const [categories, setCategories] = useState([]);
-
-  const fetchCampuses = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/utility/campus");
-      setCampuses(res.data);
-    } catch (err) {
-      console.error("Error fetching campuses:", err);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/utility/categories");
-      setCategories(res.data);
-    } catch (err) {
-      console.error("Error fetching categories:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchCampuses();
-    fetchCategories();
-  }, []);
 
   const handleSubmitPost = async (e) => {
     if (isFormSend) return; // Prevent multiple submissions

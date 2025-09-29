@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import toast from "react-hot-toast";
+import { useUtil } from "../context/utilContext.jsx";
 export default function RegisterForm({ setShowOtpPage,
   formData,
   setFormData, }
@@ -13,27 +14,9 @@ export default function RegisterForm({ setShowOtpPage,
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [campuses, setCampuses] = useState([])
-
+  const { campuses } = useUtil()
   const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
-
-  useEffect(() => {
-    fetch('http://localhost:5000/utility/campus')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        setCampuses(data)
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-  }, [])
-
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import BackgroundTypography from "../components/backgroundTypography";
 import ChangePassword from "../components/changePassword";
 import { useAuth } from "../context/authContext";
+import { useUtil } from "../context/utilContext";
 import Footer from "../utilities/footer";
 import { useNavigate } from "react-router-dom";
 import { MdEdit, MdAddAPhoto } from "react-icons/md";
-import axios from "axios";
 import { ClipLoader } from "react-spinners";
-import toast from "react-hot-toast";
 
 const ProfilePage = () => {
+  const { campuses } = useUtil()
   const [isloading, setisloading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
   const [username, setUsername] = useState("");
@@ -20,18 +19,7 @@ const ProfilePage = () => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingCampus, setIsEditingCampus] = useState(false);
   const [selectedCampusId, setSelectedCampusId] = useState("");
-  const [loadingCampuses, setLoadingCampuses] = useState(false);
-  const [campuses, setCampuses] = useState([])
   const fileInputRef = useRef(null);
-  const fetchCampuses = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/utility/campus");
-      setCampuses(res.data);
-    } catch (err) {
-      console.error("Error fetching campuses:", err);
-    }
-  };
-
 
   const resizeImage = (imageUrl) => {
     return new Promise((resolve, reject) => {
@@ -42,7 +30,6 @@ const ProfilePage = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
-        // Calculate new dimensions while maintaining aspect ratio
         const maxSize = 128; // Match the container size
         let width = img.width;
         let height = img.height;
@@ -163,11 +150,8 @@ const ProfilePage = () => {
       setImageLoading(false);
     }
   };
+
   useEffect(() => {
-    fetchCampuses()
-  }, [])
-  useEffect(() => {
-    // Fetch and resize the profile image from the backend
     const loadAndResizeImage = async () => {
       if (user?.image_url) {
         try {
@@ -178,8 +162,7 @@ const ProfilePage = () => {
           setProfileImage(user.image_url); // Fallback to original image
         }
       }
-      setUsername(user?.name || "");
-      setSelectedCampusId(user?.campus_id || "");
+      setUsername(user?.name || ""); setSelectedCampusId(user?.campus_id || "");
     };
 
     loadAndResizeImage();
@@ -247,12 +230,12 @@ const ProfilePage = () => {
 
             {/* User Information Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
+              <div className="bg-gray-50 rounded-2xl p-6 ">
                 <p className="text-sm text-gray-500 mb-2 font-medium">Roll Number</p>
                 <p className="text-lg font-semibold text-black">{user?.rollno}</p>
               </div>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
+              <div className="bg-gray-50 rounded-2xl p-6 ">
                 <div className="flex justify-between items-center mb-2">
                   <p className="text-sm text-gray-500 font-medium">Full Name</p>
                   <button
@@ -288,13 +271,12 @@ const ProfilePage = () => {
                 )}
               </div>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
+              <div className="bg-gray-50 rounded-2xl p-6 ">
                 <div className="flex justify-between items-center mb-2">
                   <p className="text-sm text-gray-500 font-medium">Campus</p>
                   <button
                     onClick={() => setIsEditingCampus((prev) => !prev)}
                     className="text-xl text-black hover:text-gray-600 transition-colors"
-                    disabled={loadingCampuses}
                   >
                     <MdEdit />
                   </button>
@@ -313,7 +295,6 @@ const ProfilePage = () => {
                         }
                       }} onBlur={() => setIsEditingCampus(false)}
                       className="text-lg font-semibold w-full border border-gray-300 bg-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black transition appearance-none"
-                      disabled={loadingCampuses}
                       autoFocus
                       style={{
                         backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
@@ -341,7 +322,7 @@ const ProfilePage = () => {
                 )}
               </div>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
+              <div className="bg-gray-50 rounded-2xl p-6 ">
                 <p className="text-sm text-gray-500 mb-2 font-medium">Email Address</p>
                 <p className="text-lg font-semibold text-black">{user?.email}</p>
               </div>
