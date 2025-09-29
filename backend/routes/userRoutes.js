@@ -1,15 +1,16 @@
 import express from 'express';
-import { 
-  authenticateUser, 
-  changePassword, 
-  checkUserByEmail, 
-  getUserByRollNo, 
-  getUserImage, 
-  registerUser, 
+import {
+  authenticateUser,
+  changePassword,
+  checkUserByEmail,
+  getUserByRollNo,
+  getUserImage,
+  registerUser,
   updateUserName,
   updateUserImage,
   getUserByEmail,
-  authenticateAdmin
+  authenticateAdmin,
+  updatUserCampus
 } from '../controllers/userController.js';
 import upload from '../config/mutler.js';
 
@@ -20,10 +21,11 @@ userRouter.post('/register', registerUser);
 userRouter.get('/check-email', checkUserByEmail); //For OTP verification
 userRouter.get('/:rollNo', getUserByRollNo);
 userRouter.get('/email/get-user', getUserByEmail);
-userRouter.post('/login',authenticateUser);
-userRouter.post('/changePassword',changePassword);
+userRouter.post('/login', authenticateUser);
+userRouter.post('/changePassword', changePassword);
 userRouter.get('/image/:rollNo', getUserImage);
 userRouter.put('/updateusername', updateUserName);
 userRouter.post('/update-image', upload.single('imageFile'), updateUserImage);
-userRouter.post('/loginAdmin',authenticateAdmin);
+userRouter.post('/loginAdmin', authenticateAdmin);
+userRouter.post('/update/campus', updatUserCampus)
 export default userRouter;

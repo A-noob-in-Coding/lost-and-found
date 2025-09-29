@@ -1,12 +1,13 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/authContext";
+import { useUtil } from "../context/utilContext";
 import { useNavigate } from "react-router-dom";
-
 export default function SubmitPost({ postType, setShowPostModal }) {
   const [isFormSend, setIsFormSend] = useState(false);
   const { user } = useAuth();
   const fileInputRef = useRef(null);
+  const { campuses, categories } = useUtil()
   const [imagePreview, setImagePreview] = useState(null);
   const [error, setError] = useState("");
   const [isDragging, setIsDragging] = useState(false);
@@ -15,66 +16,43 @@ export default function SubmitPost({ postType, setShowPostModal }) {
   const [formData, setFormData] = useState({
     title: "",
     location: "",
-    campus: "",
+    campusID: "",
     category_id: "",
     rollNo: "",
     description: "",
     imageFile: null,
   });
-  
+
   const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
-  const [categories, setCategories] = useState([]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/utility/categories"
-        );
-        const data = await response.json();
-        setCategories(data);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-
-    fetchCategories();
-    // Check if user exists before accessing rollno
-    if (user && user.rollno) {
-      console.log(user.rollno);
-    } else {
-      console.log("User not logged in or rollno not available");
-    }
-  }, [user]);
 
   const handleSubmitPost = async (e) => {
     if (isFormSend) return; // Prevent multiple submissions
     e.preventDefault();
     setIsFormSend(true); // Set to true to prevent multiple submissions
     setError("");
-    
+
     // Check if user exists before accessing rollno
     if (!user || !user.rollno) {
       toast.error("Please log in to post an item");
       setIsFormSend(false);
       return;
     }
-    
+    console.log(formData.campusID)
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
     formDataToSend.append("location", formData.location);
-    formDataToSend.append("campus", formData.campus);
+    formDataToSend.append("campusID", formData.campusID);
     formDataToSend.append("description", formData.description);
     formDataToSend.append("image", formData.imageFile);
     formDataToSend.append("category_id", formData.category_id);
     formDataToSend.append("rollno", user.rollno);
-    
+
     console.log("FormData entries:");
     for (let pair of formDataToSend.entries()) {
       console.log(pair[0] + ": " + pair[1]);
     }
-    
+
     try {
       let result = false;
       if (postType === "lost") {
@@ -88,7 +66,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
           body: formDataToSend,
         });
       }
-      
+
       if (result.ok) {
         setTimeout(() => {
           toast.success(`${postType} item successfully posted (Simulated for testing)`);
@@ -116,7 +94,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
   const triggerFileInput = () => {
     fileInputRef.current.click();
   };
-  
+
   const validateFile = (file) => {
     if (!file) return false;
 
@@ -175,7 +153,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
       }));
     }
   };
-  
+
   return (
     <form onSubmit={handleSubmitPost} className="space-y-6">
       <div className="mb-4">
@@ -222,17 +200,15 @@ export default function SubmitPost({ postType, setShowPostModal }) {
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black text-sm appearance-none bg-white"
           required
           onChange={handleInputChange}
-          name="campus"
+          name="campusID"
           defaultValue=""
         >
-          <option value="" disabled>
-            Select campus
-          </option>
-          <option value="Lahore">Lahore Campus</option>
-          <option value="Karachi">Karachi Campus</option>
-          <option value="Islamabad">Islamabad Campus</option>
-          <option value="Peshawar">Peshawar Campus</option>
-          <option value="Chiniot-Faisalabad">Chiniot-Faisalabad Campus</option>
+          <option value="" disabled>Select your campus</option>
+          {campuses.map((campus) => (
+            <option key={campus.campusID} value={campus.campusID}>
+              {campus.campusName}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -249,7 +225,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
           name="location"
         />
       </div>
-      
+
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Description
@@ -263,17 +239,16 @@ export default function SubmitPost({ postType, setShowPostModal }) {
           onChange={handleInputChange}
         ></textarea>
       </div>
-      
+
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
           Item Image (JPEG, PNG, or WEBP, max 3MB)
         </label>
         <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-            isDragging
-              ? "border-blue-500 bg-blue-50"
-              : "border-gray-300 hover:border-gray-400"
-          }`}
+          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${isDragging
+            ? "border-blue-500 bg-blue-50"
+            : "border-gray-300 hover:border-gray-400"
+            }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -286,7 +261,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
             accept="image/jpeg,image/png,image/webp"
             onChange={handleImageChange}
           />
-          
+
           {imagePreview ? (
             <div className="relative flex justify-center items-center h-auto w-40 mx-auto">
               <img
@@ -333,7 +308,7 @@ export default function SubmitPost({ postType, setShowPostModal }) {
         </div>
         {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
       </div>
-      
+
       <div className="flex space-x-4 mt-6">
         <button
           type="button"

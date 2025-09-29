@@ -2,26 +2,26 @@ import bcrypt from 'bcrypt'
 import pool from "../config/db.js"
 import { uploadToCloudinary, deleteFromCloudinary } from '../config/cloudinary.js';
 
-export const hashPassword = async (password) =>{
+export const hashPassword = async (password) => {
   const saltRound = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRound);
-    return hashedPassword;
+  const hashedPassword = await bcrypt.hash(password, saltRound);
+  return hashedPassword;
 }
 
 
 
-export const registerUserService = async (rollNo, email, name, password, image) => {
+export const registerUserService = async (rollNo, email, name, password, image, campusID) => {
   const client = await pool.connect(); // Get a client from the pool
   try {
     await client.query('BEGIN'); // Start transaction
     let image_url = ""
-    if(image){
+    if (image) {
       image_url = await uploadToCloudinary(image)
     }
 
     const hashedPassword = await hashPassword(password);
-    const query = 'INSERT INTO "User" (rollNo, email, name, password, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *';
-    const result = await client.query(query, [rollNo, email, name, hashedPassword, image_url]);
+    const query = `INSERT INTO "User" (rollNo, email, name, password, image_url, "campusID") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
+    const result = await client.query(query, [rollNo, email, name, hashedPassword, image_url, campusID]);
 
     if (result && result.rows) {
       await client.query('COMMIT'); // Commit transaction
@@ -41,10 +41,14 @@ export const registerUserService = async (rollNo, email, name, password, image) 
 // Function to get user by rollNo
 export const getUserByRollNoService = async (rollNo) => {
   try {
-    const query = 'SELECT * FROM "User" WHERE rollNo = $1';
+    const query = `
+SELECT u.rollno, u.email, u.name, u.image_url, u."campusID", c."campusName"
+FROM "User" u
+JOIN campus c ON u."campusID" = c."campusID"
+where u.rollno =$1 
+`
     const result = await pool.query(query, [rollNo]);
 
-    // Ensure that result.rows exists before accessing it
     if (result && result.rows && result.rows.length > 0) {
       return result.rows[0]; // return the user object
     } else {
@@ -56,112 +60,112 @@ export const getUserByRollNoService = async (rollNo) => {
   }
 };
 
-export const doesUserExist = async(email)=>{
-  try{
+export const doesUserExist = async (email) => {
+  try {
     const query = 'select count(*) from "User" where email = $1'
-    const result = await pool.query(query,[email])
-    if(result && result.rows && result.rows.length > 0) {
+    const result = await pool.query(query, [email])
+    if (result && result.rows && result.rows.length > 0) {
       return parseInt(result.rows[0].count) > 0;
     }
     return false;
   }
-  catch(error){
-    console.log("Error while checking existence of user : ",error.message)
+  catch (error) {
+    console.log("Error while checking existence of user : ", error.message)
     throw new Error(error.message)
   }
 }
 
-export const getPasswordUserService = async(rollNo) =>{
-  try{
+export const getPasswordUserService = async (rollNo) => {
+  try {
     const query = 'Select password from "User" where rollno = $1';
-    const result = await pool.query(query,[rollNo]);
+    const result = await pool.query(query, [rollNo]);
     if (result && result.rows && result.rows.length > 0) {
       return result.rows[0].password; // return the user object
     } else {
       throw new Error('User not found');
     }
   }
-  catch(error){
+  catch (error) {
     console.error('Error fetching user password:', error);
     throw new Error(error.message);
   }
 }
 
-export const authenticateAdminService = async(username,password) =>{
-  try{
-    if(password !== process.env.ADMIN_PASS || username !== process.env.ADMIN_USER){    
+export const authenticateAdminService = async (username, password) => {
+  try {
+    if (password !== process.env.ADMIN_PASS || username !== process.env.ADMIN_USER) {
       return false;
     }
-    else{
+    else {
       return true;
     }
-  }catch(error){
+  } catch (error) {
     console.error("Error authenticating user:", error);
     throw new Error(error.message);
   }
 }
 
-export const authenticateUserService = async(rollNo,password) =>{
-  try{
+export const authenticateUserService = async (rollNo, password) => {
+  try {
     const pass = await getPasswordUserService(rollNo);
-    const result = await bcrypt.compare(password,pass);
-    if(result){
+    const result = await bcrypt.compare(password, pass);
+    if (result) {
       return true;
     }
-    else{
+    else {
       return false;
     }
   }
-  catch(error){
+  catch (error) {
     console.error('Error authenticating user :', error);
     throw new Error(error.message);
   }
 };
 
-export const changePasswordService = async(email,password) =>{
-  try{
+export const changePasswordService = async (email, password) => {
+  try {
     console.log(email)
     console.log(password)
     const result = doesUserExist(email)
-    if(result){
-      const newPass =  await hashPassword(password)
+    if (result) {
+      const newPass = await hashPassword(password)
       const query = 'Update "User" set password = $1 where email = $2';
-      await pool.query(query,[newPass,email])
+      await pool.query(query, [newPass, email])
       return
-    } 
-    else{
+    }
+    else {
       throw new Error("User does not exist");
     }
   }
-  catch(error){
-    console.log("Error while changing password : ",error.message);
+  catch (error) {
+    console.log("Error while changing password : ", error.message);
     throw new Error(error.message);
   }
 }
 
-export const getUserImageService = async(rollNo) =>{
-  try{
+export const getUserImageService = async (rollNo) => {
+  try {
     const query = 'Select image_url from "User" where rollno = $1';
-    const result = await pool.query(query,[rollNo]);
+    const result = await pool.query(query, [rollNo]);
     if (result && result.rows && result.rows.length > 0) {
       return result.rows[0].image_url; // return the user object
     } else {
       throw new Error('User not found');
     }
   }
-  catch(error){
+  catch (error) {
     console.error('Error fetching user password:', error);
     throw new Error(error.message);
   }
 }
 
-export const updateUserNameService = async(rollno,username) =>{
-  try{
+export const updateUserNameService = async (rollno, username) => {
+  try {
     const query = 'UPDATE "User" SET name = $1 WHERE rollno = $2'
-    await pool.query(query,[username,rollno])
+    await pool.query(query, [username, rollno])
   }
-  catch(error){
-    console.log("error while changing username"+error.message)
+  catch (error) {
+    console.log("error while changing username" + error.message)
     throw new Error(error.message)
   }
 }
@@ -203,7 +207,7 @@ export const updateUserImageService = async (rollno, image) => {
   }
 };
 
-export const getUserByEmailService = async(email) => {
+export const getUserByEmailService = async (email) => {
   try {
     const query = 'SELECT * FROM "User" WHERE email = $1';
     const result = await pool.query(query, [email]);
@@ -218,3 +222,15 @@ export const getUserByEmailService = async(email) => {
     throw new Error(error.message);
   }
 };
+
+export const updateUserCampusService = async (rollno, campusID) => {
+  try {
+    const query = `Update "User" set "campusID" = $1 where rollno = $2`
+    const result = await pool.query(query, [campusID, rollno])
+    return
+  }
+  catch (error) {
+    console.log("Error while updating campus: ", error)
+    throw new Error(error.message)
+  }
+}

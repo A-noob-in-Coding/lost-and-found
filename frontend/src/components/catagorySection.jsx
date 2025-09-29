@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   MdOutlineListAlt,
   MdAdd,
@@ -10,38 +10,10 @@ import {
 import { BiCategory } from "react-icons/bi";
 import toast from "react-hot-toast";
 
-const CategoryContainer = () => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+const CategoryContainer = ({ categories, loading, onAddCategory, onUpdateCategory, onDeleteCategory }) => {
   const [newCategory, setNewCategory] = useState("");
   const [editCategory, setEditCategory] = useState({ id: null, name: "" });
   const [isEditing, setIsEditing] = useState(false);
-  const [error, setError] = useState(null);
-
-  // API base URL
-  const API_BASE_URL = "http://localhost:5000/api/categories";
-
-  // Fetch all categories
-  const fetchCategories = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetch(API_BASE_URL);
-      if (!res.ok) throw new Error("Failed to fetch categories");
-      const data = await res.json();
-      setCategories(data);
-    } catch (error) {
-      console.error("Error fetching categories:", error.message);
-      setError("Failed to load categories. Please check your API connection.");
-      toast.error("Failed to load categories");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
 
   // Add new category
   const handleAddCategory = async (e) => {
@@ -50,23 +22,14 @@ const CategoryContainer = () => {
 
     const addPromise = new Promise(async (resolve, reject) => {
       try {
-        const res = await fetch(API_BASE_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ category: newCategory }),
-        });
-
-        if (!res.ok) throw new Error("Failed to add category");
-
-        const data = await res.json();
-        setCategories([...categories, data]);
-        setNewCategory("");
-        resolve(`Category "${newCategory}" added successfully`);
+        const result = await onAddCategory(newCategory);
+        if (result.success) {
+          setNewCategory("");
+          resolve(result.message);
+        } else {
+          reject(result.message);
+        }
       } catch (error) {
-        console.error("Error adding category:", error.message);
-        setError("Failed to add category. Please try again.");
         reject("Failed to add category");
       }
     });
@@ -80,21 +43,15 @@ const CategoryContainer = () => {
 
   // Delete category
   const handleDeleteCategory = async (id) => {
-    const categoryToDelete = categories.find((cat) => cat.category_id === id);
-
     const deletePromise = new Promise(async (resolve, reject) => {
       try {
-        const res = await fetch(`${API_BASE_URL}/${id}`, {
-          method: "DELETE",
-        });
-
-        if (!res.ok) throw new Error("Failed to delete category");
-
-        setCategories(categories.filter((cat) => cat.category_id !== id));
-        resolve(`Category "${categoryToDelete?.category}" deleted`);
+        const result = await onDeleteCategory(id);
+        if (result.success) {
+          resolve(result.message);
+        } else {
+          reject(result.message);
+        }
       } catch (error) {
-        console.error("Error deleting category:", error.message);
-        setError("Failed to delete category. Please try again.");
         reject("Failed to delete category");
       }
     });
@@ -126,30 +83,15 @@ const CategoryContainer = () => {
 
     const updatePromise = new Promise(async (resolve, reject) => {
       try {
-        const res = await fetch(`${API_BASE_URL}/${editCategory.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ category: editCategory.name }),
-        });
-
-        if (!res.ok) throw new Error("Failed to update category");
-
-        setCategories(
-          categories.map((cat) =>
-            cat.category_id === editCategory.id
-              ? { ...cat, category: editCategory.name }
-              : cat
-          )
-        );
-
-        setIsEditing(false);
-        setEditCategory({ id: null, name: "" });
-        resolve(`Category updated to "${editCategory.name}"`);
+        const result = await onUpdateCategory(editCategory.id, editCategory.name);
+        if (result.success) {
+          setIsEditing(false);
+          setEditCategory({ id: null, name: "" });
+          resolve(result.message);
+        } else {
+          reject(result.message);
+        }
       } catch (error) {
-        console.error("Error updating category:", error.message);
-        setError("Failed to update category. Please try again.");
         reject("Failed to update category");
       }
     });
@@ -166,13 +108,6 @@ const CategoryContainer = () => {
       <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
         Manage Categories
       </h2>
-
-      {/* Error Display */}
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-md text-sm">
-          {error}
-        </div>
-      )}
 
       {/* Add Category Form */}
       <form onSubmit={handleAddCategory} className="mb-6 sm:mb-8 flex flex-col sm:flex-row gap-3 sm:gap-2">
@@ -195,7 +130,7 @@ const CategoryContainer = () => {
           Add Category
         </button>
       </form>
-      
+
       {/* Edit Category Form */}
       {isEditing && (
         <form

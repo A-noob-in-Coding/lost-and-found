@@ -3,11 +3,11 @@ import { FaTimes } from "react-icons/fa";
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-export default function OtpPage({ 
-  setShowOtpPage, 
+export default function OtpPage({
+  setShowOtpPage,
   setShowChangePassword,
-  formData, 
-  mode = "register" 
+  formData,
+  mode = "register"
 }) {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [isLoading, setIsLoading] = useState(false);
@@ -27,11 +27,11 @@ export default function OtpPage({
 
   const handleChange = (element, index) => {
     if (isNaN(element.value)) return;
-    
+
     const newOtp = [...otp];
     newOtp[index] = element.value;
     setOtp(newOtp);
-    
+
     // Move to next input if current field is filled
     if (element.nextSibling && element.value) {
       element.nextSibling.focus();
@@ -51,18 +51,18 @@ export default function OtpPage({
   const handlePaste = (e) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text').trim();
-    
+
     // Check if pasted content is all numbers and proper length
     if (/^\d+$/.test(pastedData) && pastedData.length <= 6) {
       const newOtp = [...otp];
-      
+
       // Fill in the OTP fields
       for (let i = 0; i < Math.min(pastedData.length, 6); i++) {
         newOtp[i] = pastedData[i];
       }
-      
+
       setOtp(newOtp);
-      
+
       // Focus the field after the last filled input
       const inputs = document.querySelectorAll('input[type="text"]');
       const lastIndex = Math.min(pastedData.length, 6) - 1;
@@ -80,7 +80,7 @@ export default function OtpPage({
     }
 
     setIsResending(true);
-    
+
     try {
       const response = await fetch('http://localhost:5000/api/otp/send-otp', {
         method: 'POST',
@@ -91,7 +91,7 @@ export default function OtpPage({
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
         toast.success('OTP resent successfully');
       } else {
@@ -118,26 +118,25 @@ export default function OtpPage({
           otp: enteredOtp
         }),
       });
-      
+
       const verifyData = await verifyResponse.json();
-      
+
       if (verifyResponse.ok) {
-        // If OTP is verified, proceed to complete the registration
-        // Create a FormData object for file upload
         const formDataToSend = new FormData();
         formDataToSend.append("name", formData.fullName);
         formDataToSend.append("rollNo", formData.studentId);
         formDataToSend.append("email", formData.email);
         formDataToSend.append("password", formData.password);
         formDataToSend.append("imageFile", formData.imageFile);
-        
+        formDataToSend.append("campusID", formData.campusId);
+
         const registerResponse = await fetch('http://localhost:5000/api/users/register', {
           method: 'POST',
           body: formDataToSend,
         });
-        
+
         const registerData = await registerResponse.json();
-        
+
         if (registerResponse.ok) {
           toast.success('Registration completed successfully');
           localStorage.removeItem('resetEmail'); // Clean up
@@ -171,9 +170,9 @@ export default function OtpPage({
           otp: enteredOtp
         }),
       });
-      
+
       const verifyData = await verifyResponse.json();
-      
+
       if (verifyResponse.ok) {
         // If OTP is verified, allow user to reset password
         toast.success('OTP verified successfully');
@@ -200,18 +199,18 @@ export default function OtpPage({
       toast.error("Please enter the complete OTP");
       return;
     }
-    
+
     setIsLoading(true);
     const enteredOtp = otp.join('');
-    
+
     let success = false;
-    
+
     if (mode === "register") {
       success = await handleRegisterSubmit(enteredOtp);
     } else if (mode === "reset") {
       success = await handleResetSubmit(enteredOtp);
     }
-    
+
     setIsLoading(false);
     return success;
   };
@@ -229,12 +228,12 @@ export default function OtpPage({
           <FaTimes />
         </button>
       </div>
-      
+
       <p className="text-gray-600 mb-6 text-center">
         Enter the 6-digit OTP sent to{" "}
         <span className="font-medium">{email}</span>
       </p>
-      
+
       <div className="flex justify-center items-center gap-3 mb-6">
         {otp.map((data, index) => (
           <input
@@ -249,7 +248,7 @@ export default function OtpPage({
           />
         ))}
       </div>
-      
+
       <button
         className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-300 cursor-pointer flex items-center justify-center space-x-2 shadow-md hover:shadow-lg"
         onClick={handleSubmit}
@@ -264,9 +263,9 @@ export default function OtpPage({
           "Verify OTP"
         )}
       </button>
-      
+
       <div className="mt-4 text-center">
-        <button 
+        <button
           className="text-sm text-gray-500 hover:text-black transition-colors flex items-center justify-center mx-auto"
           onClick={handleResendOtp}
           disabled={isResending}

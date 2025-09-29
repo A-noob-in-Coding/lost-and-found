@@ -3,13 +3,13 @@
 import pool from "../config/db.js"
 import nodemailer from 'nodemailer';
 
-export const getCategoriesService = async() =>{
-  try{  
+export const getCategoriesService = async () => {
+  try {
     const query = 'select * from category'
     const result = await pool.query(query)
     return result.rows
   }
-  catch(error){
+  catch (error) {
     console.log("error fetching categories")
     throw error
   }
@@ -20,7 +20,7 @@ export const sendContactEmailService = async (name, email, message) => {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       throw new Error('Email credentials not configured in environment variables');
     }
-    
+
     // Create a transporter
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -29,7 +29,7 @@ export const sendContactEmailService = async (name, email, message) => {
         pass: process.env.EMAIL_PASS
       }
     });
-    
+
     // Email options
     const mailOptions = {
       from: email,
@@ -47,7 +47,7 @@ export const sendContactEmailService = async (name, email, message) => {
         </div>
       `
     };
-    
+
     await transporter.sendMail(mailOptions);
     return { success: true, message: 'Contact form email sent successfully' };
   } catch (error) {
@@ -55,3 +55,13 @@ export const sendContactEmailService = async (name, email, message) => {
     throw new Error(`Failed to send contact form email: ${error.message}`);
   }
 };
+
+export const getAllCampusService = async () => {
+  try {
+    const query = `select * from campus`
+    const result = await pool.query(query)
+    return result.rows
+  } catch (error) {
+    throw new Error(`error while fetching campus, ${error.message}`)
+  }
+}

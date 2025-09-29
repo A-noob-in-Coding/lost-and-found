@@ -22,19 +22,19 @@ const MAX_FILE_SIZE = 3 * 1024 * 1024; // 5MB
 // Create a lost post
 export const userCreateLostPost = async (req, res) => {
   try {
-    const { rollno, title, location, description, category_id } = req.body;
+    const { rollno, title, location, description, category_id, campusID } = req.body;
     let imageFile = req.file; // Get uploaded image from multer
 
-    if (!rollno || !title || !location || !description || !category_id) {
+    if (!rollno || !title || !location || !description || !category_id || !campusID) {
       return res.status(400).json({ message: "All fields including image are required" });
     }
 
-    if(!imageFile){
+    if (!imageFile) {
       imageFile = null;
     }
 
     // Validate image file type
-    if (imageFile &&!ALLOWED_FILE_TYPES.includes(imageFile.mimetype)) {
+    if (imageFile && !ALLOWED_FILE_TYPES.includes(imageFile.mimetype)) {
       return res.status(400).json({ message: "Invalid file type. Only JPEG, PNG, and WEBP are allowed." });
     }
 
@@ -44,7 +44,7 @@ export const userCreateLostPost = async (req, res) => {
     }
 
     // Save post in database with image URL
-    const lostPost = await createLostPostService(rollno, title, location, description, imageFile, category_id);
+    const lostPost = await createLostPostService(rollno, title, location, description, imageFile, category_id, campusID);
 
     return res.status(201).json({ message: "Lost post created successfully", lostPost });
   } catch (error) {
@@ -83,20 +83,20 @@ export const userGetLostPost = async (req, res) => {
 // Create a found post
 export const userCreateFoundPost = async (req, res) => {
   try {
-    const { rollno, title, location, description, category_id } = req.body;
+    const { rollno, title, location, description, category_id, campusID } = req.body;
     let imageFile = req.file; // Get uploaded image from multer
 
-    if(!imageFile){
+    if (!imageFile) {
       imageFile = null
     }
 
-    if (!rollno || !title || !location || !description || !category_id) {
+    if (!rollno || !title || !location || !description || !category_id || !campusID) {
       return res.status(400).json({ message: "All fields including image are required" });
     }
 
 
     // Validate image file type
-    if (imageFile &&!ALLOWED_FILE_TYPES.includes(imageFile.mimetype)) {
+    if (imageFile && !ALLOWED_FILE_TYPES.includes(imageFile.mimetype)) {
       return res.status(400).json({ message: "Invalid file type. Only JPEG, PNG, and WEBP are allowed." });
     }
 
@@ -106,7 +106,7 @@ export const userCreateFoundPost = async (req, res) => {
     }
 
     // Save post in database with image URL
-    const lostPost = await createFoundPostService(rollno, title, location, description, imageFile, category_id);
+    const lostPost = await createFoundPostService(rollno, title, location, description, imageFile, category_id, campusID);
 
     return res.status(201).json({ message: "Found post created successfully", lostPost });
   } catch (error) {
@@ -160,7 +160,7 @@ export const getAdminPosts = async (req, res) => {
 
 // Delete a lost post
 export const adminDeleteLostPost = async (req, res) => {
-  const postId  = req.query.id;
+  const postId = req.query.id;
 
   try {
     await deleteLostPostService(postId);
@@ -186,12 +186,12 @@ export const adminGetFoundPost = async (req, res) => {
 // Update a found post
 export const adminUpdateFoundPost = async (req, res) => {
   const post_id = req.query.id
-  if(!post_id){
-    return res.status(400).json({message:"must provide post id"})
+  if (!post_id) {
+    return res.status(400).json({ message: "must provide post id" })
   }
   try {
     await updateFoundPostService(post_id);
-    return res.json({ message: "Found post updated successfully"});
+    return res.json({ message: "Found post updated successfully" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -199,12 +199,12 @@ export const adminUpdateFoundPost = async (req, res) => {
 
 // Delete a found post
 export const adminDeleteFoundPost = async (req, res) => {
-  const postId  = req.query.id
-  if(!postId){
-    return res.status(400).json({message:"must provide post id"})
+  const postId = req.query.id
+  if (!postId) {
+    return res.status(400).json({ message: "must provide post id" })
   }
   try {
-    
+
     await deleteFoundPostService(postId);
     return res.json({ message: "Found post deleted successfully" });
   } catch (error) {
@@ -214,25 +214,25 @@ export const adminDeleteFoundPost = async (req, res) => {
 
 export const adminUpdateLostPost = async (req, res) => {
   const post_id = req.query.id
-  if(!post_id){
-    return res.status(400).json({message:"must provide post id"})
+  if (!post_id) {
+    return res.status(400).json({ message: "must provide post id" })
   }
   try {
     await updateLostPostService(post_id);
-    return res.json({ message: "Found post updated successfully"});
+    return res.json({ message: "Found post updated successfully" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
 
-export const getPostData = async(req,res) =>{
-  try{
+export const getPostData = async (req, res) => {
+  try {
     const result = await getPostDataService();
-  return res.status(200).json(result)
+    return res.status(200).json(result)
   }
-  catch(error){
-    console.log("error in getPostdata controller"+ error.message)
-    return res.status(500).json({message:"internal server error"})
+  catch (error) {
+    console.log("error in getPostdata controller" + error.message)
+    return res.status(500).json({ message: "internal server error" })
   }
 }
 
@@ -240,11 +240,11 @@ export const getPostData = async(req,res) =>{
 export const getPostsByRollNo = async (req, res) => {
   try {
     const { rollno } = req.params;
-    
+
     if (!rollno) {
       return res.status(400).json({ message: "Roll number is required" });
     }
-    
+
     const posts = await getPostsByRollNoService(rollno);
     return res.status(200).json(posts);
   } catch (error) {
@@ -257,11 +257,11 @@ export const getPostsByRollNo = async (req, res) => {
 export const getUnverifiedPostsByRollNo = async (req, res) => {
   try {
     const { rollno } = req.params;
-    
+
     if (!rollno) {
       return res.status(400).json({ message: "Roll number is required" });
     }
-    
+
     const posts = await getUnverifiedPostsByRollNoService(rollno);
     return res.status(200).json(posts);
   } catch (error) {

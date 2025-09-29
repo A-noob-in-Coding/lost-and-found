@@ -1,50 +1,39 @@
 import React, { useState, useEffect, useRef } from "react";
-import BackgroundTypography from "../components/backgroundTypography";
 import ChangePassword from "../components/changePassword";
 import { useAuth } from "../context/authContext";
+import { useUtil } from "../context/utilContext";
 import Footer from "../utilities/footer";
 import { useNavigate } from "react-router-dom";
 import { MdEdit, MdAddAPhoto } from "react-icons/md";
 import { ClipLoader } from "react-spinners";
-import toast from "react-hot-toast";
 
 const ProfilePage = () => {
+  const { campuses } = useUtil()
   const [isloading, setisloading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
   const [username, setUsername] = useState("");
-  const { user, logout, updateUsername, updateProfileImage } = useAuth();
+  const { user, logout, updateUsername, updateProfileImage, updateCampus } = useAuth();
   const navigate = useNavigate();
   const [profileImage, setProfileImage] = useState("");
   const [showForgotPassword, setShowChangePassword] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingCampus, setIsEditingCampus] = useState(false);
   const [selectedCampusId, setSelectedCampusId] = useState("");
-  const [loadingCampuses, setLoadingCampuses] = useState(false);
   const fileInputRef = useRef(null);
-
-  // Sample campus data (not using API for now)
-  const campuses = [
-    { id: 1, name: "FAST NUCES Karachi", location: "Karachi" },
-    { id: 2, name: "FAST NUCES Lahore", location: "Lahore" },
-    { id: 3, name: "FAST NUCES Islamabad", location: "Islamabad" },
-    { id: 4, name: "FAST NUCES Peshawar", location: "Peshawar" },
-    { id: 5, name: "FAST NUCES Chiniot-Faisalabad", location: "Chiniot-Faisalabad" }
-  ];
 
   const resizeImage = (imageUrl) => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.crossOrigin = "anonymous";  // Handle CORS issues
-      
+
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        
-        // Calculate new dimensions while maintaining aspect ratio
+
         const maxSize = 128; // Match the container size
         let width = img.width;
         let height = img.height;
-        
+
         if (width > height) {
           if (width > maxSize) {
             height *= maxSize / width;
@@ -56,22 +45,22 @@ const ProfilePage = () => {
             height = maxSize;
           }
         }
-        
+
         canvas.width = width;
         canvas.height = height;
-        
+
         // Draw resized image
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         // Convert to data URL
         const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
         resolve(resizedDataUrl);
       };
-      
+
       img.onerror = (error) => {
         reject(error);
       };
-      
+
       img.src = imageUrl;
     });
   };
@@ -82,13 +71,13 @@ const ProfilePage = () => {
     const bstr = atob(arr[1]);
     let n = bstr.length;
     const u8arr = new Uint8Array(n);
-    while(n--){
-        u8arr[n] = bstr.charCodeAt(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
     }
-    return new File([u8arr], filename, {type:mime});
+    return new File([u8arr], filename, { type: mime });
   };
 
-  const handleNameSave = async(e) => {
+  const handleNameSave = async (e) => {
     setisloading(true);
     if (e.key === "Enter") {
       e.preventDefault(); // Prevent form submission if inside a form
@@ -97,20 +86,15 @@ const ProfilePage = () => {
     setisloading(false);
   };
 
-  const handleCampusSave = async (campusId) => {
+  const handleCampusSave = async (campusId, campusName) => {
     try {
       setisloading(true);
-      // Add your campus update API call here
       console.log("Updating campus to:", campusId);
-      // This would be the actual API call:
-      // await updateUserCampus(campusId);
-      
+      await updateCampus(campusId, campusName);
       setSelectedCampusId(campusId);
       setIsEditingCampus(false);
-      toast.success("Campus updated successfully!");
     } catch (error) {
       console.error("Error updating campus:", error);
-      toast.error("Failed to update campus");
     } finally {
       setisloading(false);
     }
@@ -143,23 +127,23 @@ const ProfilePage = () => {
 
     try {
       setImageLoading(true);
-      
+
       // Create a temporary URL for the selected file
       const tempUrl = URL.createObjectURL(file);
-      
+
       // Resize the image
       const resizedImageDataUrl = await resizeImage(tempUrl);
-      
+
       // Convert the resized image data URL back to a File object
       const resizedImageFile = dataURLtoFile(resizedImageDataUrl, file.name);
-      
+
       // Revoke the temporary URL to free up memory
       URL.revokeObjectURL(tempUrl);
-      
+
       // Update profile with the resized image
       await updateProfileImage(resizedImageFile);
       setProfileImage(resizedImageDataUrl);
-      
+
     } catch (error) {
       console.error('Failed to update profile image:', error);
     } finally {
@@ -168,7 +152,6 @@ const ProfilePage = () => {
   };
 
   useEffect(() => {
-    // Fetch and resize the profile image from the backend
     const loadAndResizeImage = async () => {
       if (user?.image_url) {
         try {
@@ -179,8 +162,7 @@ const ProfilePage = () => {
           setProfileImage(user.image_url); // Fallback to original image
         }
       }
-      setUsername(user?.name || "");
-      setSelectedCampusId(user?.campus_id || "");
+      setUsername(user?.name || ""); setSelectedCampusId(user?.campus_id || "");
     };
 
     loadAndResizeImage();
@@ -192,9 +174,9 @@ const ProfilePage = () => {
       <header className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between w-full">
           <div className="flex items-center space-x-3 ml-4">
-            <img 
-              src="/lf_logo.png" 
-              alt="Lost & Found Logo" 
+            <img
+              src="/lf_logo.png"
+              alt="Lost & Found Logo"
               className="h-10 w-10 rounded-full"
             />
             <h1 className="text-2xl font-bold text-black">FAST Lost & Found</h1>
@@ -228,13 +210,13 @@ const ProfilePage = () => {
                       alt="Profile"
                       className="w-full h-full object-cover"
                     />
-                    <div 
+                    <div
                       className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full"
                       onClick={handleProfileImageClick}
                     >
                       <MdAddAPhoto className="text-white text-3xl" />
                     </div>
-                    <input 
+                    <input
                       type="file"
                       accept="image/*"
                       onChange={handleFileChange}
@@ -248,12 +230,12 @@ const ProfilePage = () => {
 
             {/* User Information Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
+              <div className="bg-gray-50 rounded-2xl p-6 ">
                 <p className="text-sm text-gray-500 mb-2 font-medium">Roll Number</p>
                 <p className="text-lg font-semibold text-black">{user?.rollno}</p>
               </div>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
+              <div className="bg-gray-50 rounded-2xl p-6 ">
                 <div className="flex justify-between items-center mb-2">
                   <p className="text-sm text-gray-500 font-medium">Full Name</p>
                   <button
@@ -289,13 +271,12 @@ const ProfilePage = () => {
                 )}
               </div>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
+              <div className="bg-gray-50 rounded-2xl p-6 ">
                 <div className="flex justify-between items-center mb-2">
                   <p className="text-sm text-gray-500 font-medium">Campus</p>
                   <button
                     onClick={() => setIsEditingCampus((prev) => !prev)}
                     className="text-xl text-black hover:text-gray-600 transition-colors"
-                    disabled={loadingCampuses}
                   >
                     <MdEdit />
                   </button>
@@ -306,13 +287,14 @@ const ProfilePage = () => {
                     <select
                       value={selectedCampusId}
                       onChange={(e) => {
-                        if (e.target.value) {
-                          handleCampusSave(e.target.value);
+                        const selectedId = e.target.value;
+                        const selectedName =
+                          e.target.options[e.target.selectedIndex].text;
+                        if (selectedId) {
+                          handleCampusSave(selectedId, selectedName);
                         }
-                      }}
-                      onBlur={() => setIsEditingCampus(false)}
+                      }} onBlur={() => setIsEditingCampus(false)}
                       className="text-lg font-semibold w-full border border-gray-300 bg-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black transition appearance-none"
-                      disabled={loadingCampuses}
                       autoFocus
                       style={{
                         backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
@@ -324,8 +306,8 @@ const ProfilePage = () => {
                     >
                       <option value="">Select Campus</option>
                       {campuses.map((campus) => (
-                        <option key={campus.id} value={campus.id}>
-                          {campus.name} {campus.location && `- ${campus.location}`}
+                        <option key={campus.campusID} value={campus.campusID}>
+                          {campus.campusName}
                         </option>
                       ))}
                     </select>
@@ -335,18 +317,12 @@ const ProfilePage = () => {
                   </div>
                 ) : (
                   <p className="text-lg font-semibold text-black">
-                    {selectedCampusId ? 
-                      (campuses.find(c => c.id.toString() === selectedCampusId?.toString())?.name + 
-                       (campuses.find(c => c.id.toString() === selectedCampusId?.toString())?.location ? 
-                        ` - ${campuses.find(c => c.id.toString() === selectedCampusId?.toString())?.location}` : '')) ||
-                      user?.campus_name || 
-                      "Not specified" : 
-                      "Not specified"}
+                    {user.campusName}
                   </p>
                 )}
               </div>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
+              <div className="bg-gray-50 rounded-2xl p-6 ">
                 <p className="text-sm text-gray-500 mb-2 font-medium">Email Address</p>
                 <p className="text-lg font-semibold text-black">{user?.email}</p>
               </div>
@@ -404,13 +380,13 @@ const ProfilePage = () => {
             Create a post to help someone find their lost item or report something you've found.
           </p>
           <div className="flex justify-center space-x-4">
-            <button 
+            <button
               onClick={() => navigate("/createPost")}
               className="bg-white text-black px-8 py-3 rounded-full font-medium hover:bg-gray-100 transition-all duration-300 hover:scale-105 transform"
             >
               Create Post
             </button>
-            <button 
+            <button
               onClick={() => navigate("/feed")}
               className="border-2 border-white text-white px-8 py-3 rounded-full font-medium hover:bg-white hover:text-black transition-all duration-300 hover:scale-105 transform"
             >
@@ -419,7 +395,7 @@ const ProfilePage = () => {
           </div>
         </div>
       </section>
-         
+
       {/* Change Password Modal */}
       {showForgotPassword && (
         <div className="fixed inset-0 flex items-center justify-center z-20 bg-black bg-opacity-50">
@@ -433,6 +409,6 @@ const ProfilePage = () => {
       <Footer />
     </div>
   );
- };
- 
- export default ProfilePage;
+};
+
+export default ProfilePage;

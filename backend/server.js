@@ -6,7 +6,7 @@ import otpRouter from './routes/otpRoutes.js';
 import userPostRouter from './routes/userPostRoutes.js';
 import adminPostRouter from './routes/adminPostRoutes.js';
 import userRouter from './routes/userRoutes.js';
-import Utilrouter from './routes/utilityRoutes.js';
+import utilrouter from './routes/utilityRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import notificationRouter from './routes/notificationRoutes.js';
 import categoryRouter from './routes/categoryRoutes.js';
@@ -18,16 +18,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-app.use('/comment',commentRoutes)
+app.use('/comment', commentRoutes)
 app.use('/upload', uploadRoutes);
-app.use('/api/users',userRouter);
-app.use('/api/otp',otpRouter);
-app.use('/api/user/posts', userPostRouter); 
+app.use('/api/users', userRouter);
+app.use('/api/otp', otpRouter);
+app.use('/api/user/posts', userPostRouter);
 app.use('/api/admin/posts', adminPostRouter);
-app.use('/utility',Utilrouter)
+app.use('/utility', utilrouter)
 app.use('/api/notifications', notificationRouter)
 app.use('/api/categories', categoryRouter)
-app.use('/api/campuses', campusRouter)
 app.get('/', (req, res) => {
   res.send('Express PostgreSQL Cloudinary API is running');
 });
