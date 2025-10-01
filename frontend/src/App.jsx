@@ -10,7 +10,6 @@ import Register from './pages/registerPage';
 import PreviewPage from './pages/previewPage.jsx';
 import { Toaster } from 'react-hot-toast';
 import ProfilePage from './pages/profilePage';
-import CreatePost from './pages/createPost.jsx';
 import AdminPage from './pages/adminPage.jsx'
 import { UtilProvider } from './context/utilContext.jsx';
 import CreatePostPage from './pages/createPost.jsx';

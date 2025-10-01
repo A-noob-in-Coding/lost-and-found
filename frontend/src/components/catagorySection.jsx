@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  MdOutlineListAlt,
   MdAdd,
   MdModeEdit,
   MdDelete,
@@ -8,61 +7,11 @@ import {
   MdCancel,
 } from "react-icons/md";
 import { BiCategory } from "react-icons/bi";
-import toast from "react-hot-toast";
 
 const CategoryContainer = ({ categories, loading, onAddCategory, onUpdateCategory, onDeleteCategory }) => {
   const [newCategory, setNewCategory] = useState("");
   const [editCategory, setEditCategory] = useState({ id: null, name: "" });
   const [isEditing, setIsEditing] = useState(false);
-
-  // Add new category
-  const handleAddCategory = async (e) => {
-    e.preventDefault();
-    if (!newCategory.trim()) return;
-
-    const addPromise = new Promise(async (resolve, reject) => {
-      try {
-        const result = await onAddCategory(newCategory);
-        if (result.success) {
-          setNewCategory("");
-          resolve(result.message);
-        } else {
-          reject(result.message);
-        }
-      } catch (error) {
-        reject("Failed to add category");
-      }
-    });
-
-    toast.promise(addPromise, {
-      loading: "Adding category...",
-      success: (message) => message,
-      error: (err) => err,
-    });
-  };
-
-  // Delete category
-  const handleDeleteCategory = async (id) => {
-    const deletePromise = new Promise(async (resolve, reject) => {
-      try {
-        const result = await onDeleteCategory(id);
-        if (result.success) {
-          resolve(result.message);
-        } else {
-          reject(result.message);
-        }
-      } catch (error) {
-        reject("Failed to delete category");
-      }
-    });
-
-    toast.promise(deletePromise, {
-      loading: "Deleting category...",
-      success: (message) => message,
-      error: (err) => err,
-    });
-  };
-
   // Start editing a category
   const startEdit = (category) => {
     setIsEditing(true);
@@ -73,35 +22,24 @@ const CategoryContainer = ({ categories, loading, onAddCategory, onUpdateCategor
   const cancelEdit = () => {
     setIsEditing(false);
     setEditCategory({ id: null, name: "" });
-    toast.dismiss();
   };
 
-  // Save edited category
-  const handleUpdateCategory = async (e) => {
+  const handleAddCategory = (e) => {
     e.preventDefault();
-    if (!editCategory.name.trim()) return;
+    if (newCategory.trim()) {
+      onAddCategory(newCategory);
+      setNewCategory("");
+    }
+  }
 
-    const updatePromise = new Promise(async (resolve, reject) => {
-      try {
-        const result = await onUpdateCategory(editCategory.id, editCategory.name);
-        if (result.success) {
-          setIsEditing(false);
-          setEditCategory({ id: null, name: "" });
-          resolve(result.message);
-        } else {
-          reject(result.message);
-        }
-      } catch (error) {
-        reject("Failed to update category");
-      }
-    });
-
-    toast.promise(updatePromise, {
-      loading: "Updating category...",
-      success: (message) => message,
-      error: (err) => err,
-    });
-  };
+  const handleUpdateCategory = (e) => {
+    e.preventDefault();
+    if (editCategory.name.trim()) {
+      onUpdateCategory(editCategory.id, editCategory.name);
+      setIsEditing(false);
+      setEditCategory({ id: null, name: "" });
+    }
+  }
 
   return (
     <section className="mb-6 sm:mb-10 bg-white rounded-lg shadow-md p-4 sm:p-6">
@@ -210,7 +148,7 @@ const CategoryContainer = ({ categories, loading, onAddCategory, onUpdateCategor
                           <MdModeEdit size={16} />
                         </button>
                         <button
-                          onClick={() => handleDeleteCategory(category.category_id)}
+                          onClick={() => onDeleteCategory(category.category_id)}
                           className="bg-red-500 text-white px-2.5 py-1.5 rounded hover:bg-red-600 transition-transform duration-200 hover:scale-105 hover:shadow-md flex items-center gap-1 text-sm"
                         >
                           <MdDelete size={16} />
@@ -234,7 +172,7 @@ const CategoryContainer = ({ categories, loading, onAddCategory, onUpdateCategor
                         <MdModeEdit size={18} />
                       </button>
                       <button
-                        onClick={() => handleDeleteCategory(category.category_id)}
+                        onClick={() => onDeleteCategory(category.category_id)}
                         className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition-transform duration-200 hover:scale-105 hover:shadow-md flex items-center gap-1"
                       >
                         <MdDelete size={18} />

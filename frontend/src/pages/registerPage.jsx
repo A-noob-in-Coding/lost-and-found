@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import RegisterForm from "../components/registerForm.jsx";
 import OtpPage from "../components/otpPage.jsx";
-import { useAuth } from "../context/authContext";
 export const Register = () => {
   const navigate = useNavigate();
   const [showOtpPage, setShowOtpPage] = useState(false);

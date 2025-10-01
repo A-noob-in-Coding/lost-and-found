@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Toast from "../utilities/toast.jsx";
 import Footer from "../utilities/footer.jsx";
 import MobileSidebarNav from "../components/mobileSidebarNav.jsx";
-
+import { utilityService } from "../services/utilService.js";
 export default function ContactUs() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -11,57 +11,43 @@ export default function ContactUs() {
     email: "",
     message: ""
   });
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("");
-  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    try {
-      const response = await fetch('http://localhost:5000/utility/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        setToastMessage("Message sent successfully! We'll get back to you soon.");
-        setToastType("success");
-        
-        // Reset form
-        setFormData({
-          name: "",
-          email: "",
-          message: ""
-        });
-      } else {
-        setToastMessage(data.message || "Failed to send message. Please try again.");
-        setToastType("error");
-      }
+    try {
+      await utilityService.sendContactMessage(formData);
+
+      setToastMessage("Message sent successfully! We'll get back to you soon.");
+      setToastType("success");
+
+      setFormData({
+        name: "",
+        email: "",
+        message: ""
+      });
     } catch (error) {
-      console.error('Error sending message:', error);
-      setToastMessage("An error occurred. Please try again later.");
+      console.error("Error sending message:", error);
+      setToastMessage(error.message || "Failed to send message. Please try again.");
       setToastType("error");
     } finally {
       setIsLoading(false);
       setShowToast(true);
     }
   };
-  
-  const closeToast = () => setShowToast(false);
+
 
   const contactMethods = [
     {
@@ -88,16 +74,16 @@ export default function ContactUs() {
     <div className="min-h-screen bg-white">
       {/* Toast notification */}
       {showToast && (
-        <Toast message={toastMessage} type={toastType} onClose={closeToast} />
+        <Toast message={toastMessage} type={toastType} onClose={setShowToast(false)} />
       )}
 
       {/* Header with Logo and Navigation */}
       <header className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between w-full">
           <div className="flex items-center space-x-3 ml-4">
-            <img 
-              src="/lf_logo.png" 
-              alt="Lost & Found Logo" 
+            <img
+              src="/lf_logo.png"
+              alt="Lost & Found Logo"
               className="h-10 w-10 rounded-full"
             />
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-black">FAST Lost & Found</h1>
@@ -157,10 +143,10 @@ export default function ContactUs() {
             <div className="space-y-6">
               <h3 className="text-3xl font-bold text-black">Send Us a Message</h3>
               <p className="text-gray-600 leading-relaxed">
-                Fill out the form and we'll get back to you as soon as possible. Whether you have a suggestion, 
+                Fill out the form and we'll get back to you as soon as possible. Whether you have a suggestion,
                 found a bug, or need help with the platform, we'd love to hear from you.
               </p>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
@@ -199,7 +185,7 @@ export default function ContactUs() {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email Address
@@ -213,7 +199,7 @@ export default function ContactUs() {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Message
@@ -227,7 +213,7 @@ export default function ContactUs() {
                     required
                   ></textarea>
                 </div>
-                
+
                 <button
                   type="submit"
                   disabled={isLoading}

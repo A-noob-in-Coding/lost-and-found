@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { FaTimes } from "react-icons/fa";
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-
+import { authService } from "../services/authService";
 export default function OtpPage({
   setShowOtpPage,
   setShowChangePassword,
@@ -78,25 +78,10 @@ export default function OtpPage({
       toast.error("Email not found. Please try again.");
       return;
     }
-
     setIsResending(true);
-
     try {
-      const response = await fetch('http://localhost:5000/api/otp/send-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success('OTP resent successfully');
-      } else {
-        toast.error(data.message || 'Failed to resend OTP');
-      }
+      await authService.resendOtp(email);
+      toast.success("OTP resent successfully");
     } catch (error) {
       toast.error('Error sending OTP');
       console.error(error);
@@ -107,51 +92,24 @@ export default function OtpPage({
 
   const handleRegisterSubmit = async (enteredOtp) => {
     try {
-      // First verify the OTP
-      const verifyResponse = await fetch('http://localhost:5000/api/otp/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          otp: enteredOtp
-        }),
-      });
+      await authService.verifyOtp(email, enteredOtp);
 
-      const verifyData = await verifyResponse.json();
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.fullName);
+      formDataToSend.append("rollNo", formData.studentId);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("password", formData.password);
+      formDataToSend.append("imageFile", formData.imageFile);
+      formDataToSend.append("campusID", formData.campusId);
 
-      if (verifyResponse.ok) {
-        const formDataToSend = new FormData();
-        formDataToSend.append("name", formData.fullName);
-        formDataToSend.append("rollNo", formData.studentId);
-        formDataToSend.append("email", formData.email);
-        formDataToSend.append("password", formData.password);
-        formDataToSend.append("imageFile", formData.imageFile);
-        formDataToSend.append("campusID", formData.campusId);
+      await authService.register(formDataToSend);
 
-        const registerResponse = await fetch('http://localhost:5000/api/users/register', {
-          method: 'POST',
-          body: formDataToSend,
-        });
-
-        const registerData = await registerResponse.json();
-
-        if (registerResponse.ok) {
-          toast.success('Registration completed successfully');
-          localStorage.removeItem('resetEmail'); // Clean up
-          navigate('/login'); // Navigate to login page after successful registration
-          return true;
-        } else {
-          toast.error(registerData.message || 'Failed to complete registration');
-          return false;
-        }
-      } else {
-        toast.error(verifyData.message || 'Invalid OTP');
-        return false;
-      }
+      toast.success("Registration completed successfully");
+      localStorage.removeItem("resetEmail");
+      navigate("/login"); // redirect
+      return true;
     } catch (error) {
-      toast.error('Failed to verify OTP');
+      toast.error(error.message || "Failed to complete registration");
       console.error(error);
       return false;
     }
@@ -159,35 +117,15 @@ export default function OtpPage({
 
   const handleResetSubmit = async (enteredOtp) => {
     try {
-      // First verify the OTP
-      const verifyResponse = await fetch('http://localhost:5000/api/otp/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          otp: enteredOtp
-        }),
-      });
+      await authService.verifyOtp(email, enteredOtp);
 
-      const verifyData = await verifyResponse.json();
-
-      if (verifyResponse.ok) {
-        // If OTP is verified, allow user to reset password
-        toast.success('OTP verified successfully');
-        // Store verification status in localStorage to use in reset password page
-        localStorage.setItem('otpVerified', 'true');
-        // Show password reset form
-        setShowOtpPage(false);
-        setShowChangePassword(true);
-        return true;
-      } else {
-        toast.error(verifyData.message || 'Invalid OTP');
-        return false;
-      }
+      toast.success("OTP verified successfully");
+      localStorage.setItem("otpVerified", "true"); // track verification
+      setShowOtpPage(false);
+      setShowChangePassword(true);
+      return true;
     } catch (error) {
-      toast.error('Failed to verify OTP');
+      toast.error(error.message || "Invalid OTP");
       console.error(error);
       return false;
     }

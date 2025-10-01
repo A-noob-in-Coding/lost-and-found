@@ -1,7 +1,6 @@
-import axios from "axios";
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 import toast from 'react-hot-toast';
-
+import { authService } from "../services/authService";
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -11,39 +10,10 @@ export const AuthProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(false);
 
-  // Add useEffect to monitor user state changes
-  useEffect(() => {
-    if (user) {
-      console.log('Updated User Details:', {
-        name: user.name,
-        email: user.email,
-        rollNo: user.rollno,
-        imageUrl: user.image_url,
-        campusID: user.campusID,
-        campusName: user.campusName
-      });
-    }
-  }, [user]); // This will run whenever user state changes
-
   const updateProfileImage = async (imageFile) => {
     try {
-      const formData = new FormData();
-      formData.append('imageFile', imageFile);
-      formData.append('rollno', user.rollno); // Changed rollNo to rollno to match backend
+      const data = await authService.updateProfileImage(user.rollno, imageFile);
 
-      const response = await fetch('http://localhost:5000/api/users/update-image', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to update profile image');
-      }
-
-      const data = await response.json();
-
-      // Update user state with new image URL
       const updatedUser = { ...user, image_url: data.image_url };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -56,24 +26,9 @@ export const AuthProvider = ({ children }) => {
       throw error;
     }
   };
-
   const updateUsername = async (newUsername) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/users/updateusername`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          rollno: user.rollno, // Send the rollno to identify the user
-          username: newUsername,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update username');
-      }
-
+      await authService.updateUsername(user.rollno, newUsername)
       const updatedUser = { ...user, name: newUsername };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -85,10 +40,7 @@ export const AuthProvider = ({ children }) => {
   };
   const updateCampus = async (campusID, campusName) => {
     try {
-      await axios.post('http://localhost:5000/api/users/update/campus', {
-        rollno: user.rollno,
-        campusID: campusID
-      })
+      await authService.updateCampus(user.rollno, campusID)
       toast.success("Campus updated")
       setUser((prevUser) => ({
         ...prevUser,
@@ -104,36 +56,17 @@ export const AuthProvider = ({ children }) => {
   const login = async (rollno, password) => {
     setLoading(true);
     try {
-      // First, authenticate the user
-      const loginResponse = await fetch('http://localhost:5000/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ rollno, password }),
-      });
+      await authService.login(rollno, password);
 
-      if (!loginResponse.ok) {
-        const errorData = await loginResponse.json();
-        throw new Error(errorData.message || 'Login failed');
-      }
+      const userDetails = await authService.getUserDetails(rollno);
 
-      // If authentication successful, fetch user details
-      const userDetailsResponse = await fetch(`http://localhost:5000/api/users/${rollno}`);
-      if (!userDetailsResponse.ok) {
-        throw new Error('Failed to fetch user details');
-      }
-
-      const userDetails = await userDetailsResponse.json();
-
-      // Store user data without password
       const userData = {
         rollno: userDetails.rollno,
         email: userDetails.email,
         name: userDetails.name,
         image_url: userDetails.image_url,
         campusID: userDetails.campusID,
-        campusName: userDetails.campusName
+        campusName: userDetails.campusName,
       };
 
       setUser(userData);
@@ -142,7 +75,7 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(error.message);
+      toast.error(error.message || 'Login failed');
       return false;
     } finally {
       setLoading(false);
