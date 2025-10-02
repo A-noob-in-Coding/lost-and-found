@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
 import { notificationService } from "../services/notificationService.js";
+import ConfirmationModal from "../components/confirmationModal";
 import toast from "react-hot-toast";
 
 export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }) {
@@ -13,6 +14,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
   const [notifications, setNotifications] = useState([]);
   const [notificationCount, setNotificationCount] = useState(0);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user, logout } = useAuth(); // call the hook inside the component
 
   useEffect(() => {
@@ -103,8 +105,13 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
   };
 
   const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
     logout();
     navigate("/login");
+    setShowLogoutModal(false);
   };
 
   const handleProfileClick = () => {
@@ -118,7 +125,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
 
   const handleLogoutFromDropdown = () => {
     setShowProfileDropdown(false);
-    handleLogout();
+    setShowLogoutModal(true);
   };
 
   return (
@@ -131,7 +138,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
             <img 
               src="/lf_logo.png" 
               alt="Lost & Found Logo" 
-              className="h-8 w-8 rounded-full"
+              className="h-12 w-12 rounded-full"
             />
             <div className="text-lg sm:text-xl font-bold">Lost & Found</div>
           </div>
@@ -161,7 +168,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
             <div className="relative notifications-container">
               <div className="relative">
                 <i
-                  className="fas fa-bell text-xl cursor-pointer hover:text-gray-600 transition-colors"
+                  className="fas fa-bell text-2xl cursor-pointer hover:text-gray-600 transition-colors"
                   onClick={handleNotifications}
                 ></i>
                 {/* Notification Count Badge */}
@@ -222,7 +229,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
             </div>
             <div className="relative profile-dropdown-container">
               <div 
-                className="w-10 h-10 rounded-full bg-gray-200 cursor-pointer overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-gray-300 transition-all"
+                className="w-12 h-12 rounded-full bg-gray-200 cursor-pointer overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-gray-300 transition-all"
                 onClick={handleProfileClick}
               >
                 {profileImgUrl ? (
@@ -239,7 +246,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
                   </div>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600">
-                    <i className="fas fa-user"></i>
+                    <i className="fas fa-user text-lg"></i>
                   </div>
                 )}
               </div>
@@ -250,14 +257,14 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
                     onClick={handleViewProfile}
                     className="w-full flex items-center px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors"
                   >
-                    <i className="fas fa-user mr-3"></i>
+                    <i className="fas fa-user mr-3 text-lg"></i>
                     View Profile
                   </button>
                   <button
                     onClick={handleLogoutFromDropdown}
                     className="w-full flex items-center px-4 py-2 text-left text-red-600 hover:bg-red-50 transition-colors"
                   >
-                    <i className="fas fa-sign-out-alt mr-3"></i>
+                    <i className="fas fa-sign-out-alt mr-3 text-lg"></i>
                     Logout
                   </button>
                 </div>
@@ -271,7 +278,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
               onClick={() => setShowMobileMenu(!showMobileMenu)}
               className="p-2 rounded-md text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"
             >
-              <i className="fas fa-bars text-xl"></i>
+              <i className="fas fa-bars text-2xl"></i>
             </button>
           </div>
         </div>
@@ -304,7 +311,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
                 }}
                 className="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <i className="fas fa-plus mr-3"></i>
+                <i className="fas fa-plus mr-3 text-lg"></i>
                 Create Post
               </button>
               <button
@@ -314,7 +321,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
                 }}
                 className="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors relative"
               >
-                <i className="fas fa-bell mr-3"></i>
+                <i className="fas fa-bell mr-3 text-lg"></i>
                 Notifications
                 {notificationCount > 0 && (
                   <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
@@ -329,7 +336,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
                 }}
                 className="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <i className="fas fa-user mr-3"></i>
+                <i className="fas fa-user mr-3 text-lg"></i>
                 View Profile
               </button>
               <button
@@ -339,13 +346,25 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
                 }}
                 className="w-full flex items-center px-3 py-2 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               >
-                <i className="fas fa-sign-out-alt mr-3"></i>
+                <i className="fas fa-sign-out-alt mr-3 text-lg"></i>
                 Logout
               </button>
             </div>
           </div>
         )}
       </nav>
+      
+      {/* Logout Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={confirmLogout}
+        title="Confirm Logout"
+        message="Are you sure you want to logout? You will be redirected to the login page."
+        confirmText="Logout"
+        cancelText="Cancel"
+        type="warning"
+      />
     </>
   );
 }
