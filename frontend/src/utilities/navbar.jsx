@@ -6,6 +6,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [profileImgUrl, setProfileImgUrl] = useState("");
   const { user, logout } = useAuth(); // call the hook inside the component
 
@@ -28,6 +29,21 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.profile-dropdown-container')) {
+        setShowProfileDropdown(false);
+      }
+      if (!event.target.closest('.notifications-container')) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   const handleNotifications = () => {
     setShowNotifications(!showNotifications);
   };
@@ -35,6 +51,20 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  const handleProfileClick = () => {
+    setShowProfileDropdown(!showProfileDropdown);
+  };
+
+  const handleViewProfile = () => {
+    navigate("/profile");
+    setShowProfileDropdown(false);
+  };
+
+  const handleLogoutFromDropdown = () => {
+    setShowProfileDropdown(false);
+    handleLogout();
   };
 
   return (
@@ -74,13 +104,13 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
             >
               Post
             </button>
-            <div className="relative">
+            <div className="relative notifications-container">
               <i
                 className="fas fa-bell text-xl cursor-pointer hover:text-gray-600 transition-colors"
                 onClick={handleNotifications}
               ></i>
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-100 p-4">
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-100 p-4 z-10">
                   <h3 className="font-semibold mb-2">Notifications</h3>
                   <div className="text-sm text-gray-600">
                     No new notifications
@@ -88,35 +118,49 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
                 </div>
               )}
             </div>
-            <div 
-              className="w-10 h-10 rounded-full bg-gray-200 cursor-pointer overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-gray-300 transition-all"
-              onClick={() => navigate("/profile")}
-            >
-              {profileImgUrl ? (
-                <div className="w-full h-full relative">
-                  <img
-                    src={profileImgUrl || "https://via.placeholder.com/40"}
-                    alt="Profile"
-                    className="absolute inset-0 w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "https://via.placeholder.com/40";
-                    }}
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600">
-                  <i className="fas fa-user"></i>
+            <div className="relative profile-dropdown-container">
+              <div 
+                className="w-10 h-10 rounded-full bg-gray-200 cursor-pointer overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-gray-300 transition-all"
+                onClick={handleProfileClick}
+              >
+                {profileImgUrl ? (
+                  <div className="w-full h-full relative">
+                    <img
+                      src={profileImgUrl || "https://via.placeholder.com/40"}
+                      alt="Profile"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "https://via.placeholder.com/40";
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600">
+                    <i className="fas fa-user"></i>
+                  </div>
+                )}
+              </div>
+              {/* Profile Dropdown */}
+              {showProfileDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-10">
+                  <button
+                    onClick={handleViewProfile}
+                    className="w-full flex items-center px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors"
+                  >
+                    <i className="fas fa-user mr-3"></i>
+                    View Profile
+                  </button>
+                  <button
+                    onClick={handleLogoutFromDropdown}
+                    className="w-full flex items-center px-4 py-2 text-left text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <i className="fas fa-sign-out-alt mr-3"></i>
+                    Logout
+                  </button>
                 </div>
               )}
             </div>
-            <button
-              onClick={handleLogout}
-              className="text-red-600 hover:text-red-700 transition-colors"
-              title="Log Out"
-            >
-              <i className="fas fa-sign-out-alt text-xl"></i>
-            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -179,7 +223,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
                 className="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <i className="fas fa-user mr-3"></i>
-                Profile
+                View Profile
               </button>
               <button
                 onClick={() => {
@@ -189,7 +233,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
                 className="w-full flex items-center px-3 py-2 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               >
                 <i className="fas fa-sign-out-alt mr-3"></i>
-                Log Out
+                Logout
               </button>
             </div>
           </div>

@@ -255,13 +255,6 @@ const ProfilePage = () => {
             >
               Back to Feed
             </button>
-            <button
-              onClick={handleLogout}
-              className="text-red-600 hover:text-red-700 transition-colors"
-              title="Log Out"
-            >
-              <i className="fas fa-sign-out-alt text-xl"></i>
-            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -288,16 +281,6 @@ const ProfilePage = () => {
               >
                 <i className="fas fa-home mr-3"></i>
                 Back to Feed
-              </button>
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setShowMobileMenu(false);
-                }}
-                className="w-full flex items-center px-3 py-2 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <i className="fas fa-sign-out-alt mr-3"></i>
-                Log Out
               </button>
             </div>
           </div>
