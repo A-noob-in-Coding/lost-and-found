@@ -11,6 +11,24 @@ export const postService = {
     }
   },
 
+  getRecent6Posts: async () => {
+    try {
+      const response = await API.get('/api/user/posts/recent6');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to fetch recent posts' };
+    }
+  },
+
+  getStatistics: async () => {
+    try {
+      const response = await API.get('/api/user/posts/statistics');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to fetch statistics' };
+    }
+  },
+
   createPost: async (formData, postType) => {
     try {
       const response = await API.post(`/api/user/posts/${postType}`, formData);
@@ -20,12 +38,21 @@ export const postService = {
     }
   },
 
-  getUserPosts: async (userId) => {
+  getUserPosts: async (rollno) => {
     try {
-      const response = await API.get(`/api/user/posts/user/${userId}`);
+      const response = await API.get(`/api/user/posts/rollno/${rollno}`);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Failed to fetch user posts' };
+    }
+  },
+
+  deletePost: async (postId, postType) => {
+    try {
+      const response = await API.delete(`/api/user/posts/${postType.toLowerCase()}/${postId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: `Failed to delete ${postType} post` };
     }
   }
 };

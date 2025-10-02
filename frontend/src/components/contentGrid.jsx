@@ -220,17 +220,11 @@ export default function ContentGrid({ filteredItems, onDeletePost }) {
               </span>
             )}
             <div className="aspect-square overflow-hidden rounded-t-xl">
-              {item.image ? (
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-full object-cover object-top"
-                />
-              ) : (
-                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-400">No image available</span>
-                </div>
-              )}
+              <img
+                src={item.image || "/no_prev_img.png"}
+                alt={item.title}
+                className="w-full h-full object-cover object-top"
+              />
             </div>
             <div className="p-4 flex-1 flex flex-col">
               <div className="flex items-center justify-between mb-3">

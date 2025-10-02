@@ -1,5 +1,5 @@
 import express from "express"
-import { addFoundComment, addLostComment, deleteFoundComment, deleteLostComment, getUserAllFoundComments,getUserAllLostComments,getAdminAllFoundComments,getAdminAllLostComments, verifyFoundComment, verifyLostComment, getAdminAllComments, deleteAdminFoundComment, deleteAdminLostComment, deleteUserCommentByText} from "../controllers/commentController.js"
+import { addFoundComment, addLostComment, deleteFoundComment, deleteLostComment, getUserAllFoundComments,getUserAllLostComments,getAdminAllFoundComments,getAdminAllLostComments, verifyFoundComment, verifyLostComment, getAdminAllComments, deleteAdminFoundComment, deleteAdminLostComment, deleteUserCommentByText, getUserComments} from "../controllers/commentController.js"
 const commentRoutes = express.Router()
 
 commentRoutes.post('/addlostcomment',addLostComment)
@@ -16,4 +16,5 @@ commentRoutes.get('/admin/foundcomments', getAdminAllFoundComments)
 commentRoutes.get('/admin/lostcomments', getAdminAllLostComments)
 commentRoutes.get('/getcomments',getAdminAllComments)
 commentRoutes.delete('/user/deletebytext', deleteUserCommentByText);
+commentRoutes.get('/user/rollno/:rollno', getUserComments);
 export default commentRoutes

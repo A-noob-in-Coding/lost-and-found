@@ -10,7 +10,9 @@ import {
   updateLostPostService,
   getPostDataService,
   getPostsByRollNoService,
-  getUnverifiedPostsByRollNoService
+  getUnverifiedPostsByRollNoService,
+  getRecent6PostsService,
+  getStatisticsService
 } from "../service/postService.js";
 
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -266,6 +268,26 @@ export const getUnverifiedPostsByRollNo = async (req, res) => {
     return res.status(200).json(posts);
   } catch (error) {
     console.error("Error in getUnverifiedPostsByRollNo controller:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getRecent6Posts = async (req, res) => {
+  try {
+    const posts = await getRecent6PostsService();
+    return res.status(200).json(posts);
+  } catch (error) {
+    console.error("Error in getRecent6Posts controller:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getStatistics = async (req, res) => {
+  try {
+    const statistics = await getStatisticsService();
+    return res.status(200).json(statistics);
+  } catch (error) {
+    console.error("Error in getStatistics controller:", error.message);
     return res.status(500).json({ message: "Internal server error" });
   }
 };

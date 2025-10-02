@@ -7,7 +7,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [profileImgUrl, setProfileImgUrl] = useState("");
-  const { user } = useAuth(); // call the hook inside the component
+  const { user, logout } = useAuth(); // call the hook inside the component
 
   useEffect(() => {
     // Check if user exists and has an image_url property before setting it
@@ -16,18 +16,31 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
     }
   }, [user]); // Add user as a dependency to update when user changes
 
+  // Close mobile menu when screen size changes
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) { // md breakpoint
+        setShowMobileMenu(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleNotifications = () => {
     setShowNotifications(!showNotifications);
   };
 
-  const toggleMobileMenu = () => {
-    setShowMobileMenu(!showMobileMenu);
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
   };
 
   return (
     <>
       {/* Desktop Navbar */}
-      <nav className="fixed top-0 left-0 right-0 h-[60px] bg-white shadow-sm z-50">
+      <nav className="fixed top-0 left-0 right-0 h-[60px] bg-white shadow-sm z-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
           {/* Logo - Always visible */}
           <div className="flex items-center space-x-3">
@@ -97,77 +110,91 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
                 </div>
               )}
             </div>
+            <button
+              onClick={handleLogout}
+              className="text-red-600 hover:text-red-700 transition-colors"
+              title="Log Out"
+            >
+              <i className="fas fa-sign-out-alt text-xl"></i>
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
             <button
-              onClick={toggleMobileMenu}
-              className="p-2 rounded-md text-gray-600 hover:text-black hover:bg-gray-100 transition-all"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="p-2 rounded-md text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"
             >
-              <i className={`fas ${showMobileMenu ? 'fa-times' : 'fa-bars'} text-xl`}></i>
+              <i className="fas fa-bars text-xl"></i>
             </button>
           </div>
         </div>
-      </nav>
 
-      {/* Mobile Menu Overlay */}
-      {showMobileMenu && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={toggleMobileMenu}>
-          <div className="fixed top-[60px] right-0 w-80 bg-white h-full shadow-lg" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 space-y-6">
-              {/* Mobile Search */}
+        {/* Mobile Menu Dropdown */}
+        {showMobileMenu && (
+          <div className="md:hidden bg-white border-t border-gray-100">
+            {/* Mobile Search */}
+            <div className="px-4 py-3 border-b border-gray-100">
               <div className="relative">
                 <input
                   type="text"
                   placeholder="Search for lost or found items..."
-                  className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:border-black text-sm"
+                  className="w-full px-4 py-2 pr-12 border border-gray-200 rounded-full focus:outline-none focus:border-black text-sm"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black rounded-full flex items-center justify-center">
                   <i className="fas fa-search text-white text-sm"></i>
                 </div>
               </div>
+            </div>
 
-              {/* Mobile Actions */}
-              <div className="space-y-4">
-                <button
-                  onClick={() => {
-                    navigate("/createPost");
-                    setShowMobileMenu(false);
-                  }}
-                  className="w-full bg-black text-white py-3 rounded-xl text-sm font-medium hover:bg-gray-900 transition-colors flex items-center justify-center space-x-2"
-                >
-                  <i className="fas fa-plus"></i>
-                  <span>Create Post</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    handleNotifications();
-                  }}
-                  className="w-full border border-gray-200 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2"
-                >
-                  <i className="fas fa-bell"></i>
-                  <span>Notifications</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    navigate("/profile");
-                    setShowMobileMenu(false);
-                  }}
-                  className="w-full border border-gray-200 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2"
-                >
-                  <i className="fas fa-user"></i>
-                  <span>Profile</span>
-                </button>
-              </div>
+            {/* Mobile Menu Items */}
+            <div className="px-4 py-3 space-y-2">
+              <button
+                onClick={() => {
+                  navigate("/createPost");
+                  setShowMobileMenu(false);
+                }}
+                className="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <i className="fas fa-plus mr-3"></i>
+                Create Post
+              </button>
+              <button
+                onClick={() => {
+                  handleNotifications();
+                  setShowMobileMenu(false);
+                }}
+                className="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <i className="fas fa-bell mr-3"></i>
+                Notifications
+              </button>
+              <button
+                onClick={() => {
+                  navigate("/profile");
+                  setShowMobileMenu(false);
+                }}
+                className="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <i className="fas fa-user mr-3"></i>
+                Profile
+              </button>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setShowMobileMenu(false);
+                }}
+                className="w-full flex items-center px-3 py-2 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <i className="fas fa-sign-out-alt mr-3"></i>
+                Log Out
+              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </nav>
     </>
   );
 }
