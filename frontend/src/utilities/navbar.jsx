@@ -15,6 +15,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
   const [notificationCount, setNotificationCount] = useState(0);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showMobileNotifications, setShowMobileNotifications] = useState(false);
   const { user, logout } = useAuth(); // call the hook inside the component
 
   useEffect(() => {
@@ -90,6 +91,13 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
       // Fetch notifications when opening the dropdown
       await fetchNotifications();
     }
+  };
+
+  const handleMobileNotifications = async () => {
+    setShowMobileNotifications(true);
+    setShowMobileMenu(false);
+    // Fetch notifications when opening mobile modal
+    await fetchNotifications();
   };
 
   const handleDeleteNotification = async (notificationId) => {
@@ -315,10 +323,7 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
                 Create Post
               </button>
               <button
-                onClick={() => {
-                  handleNotifications();
-                  setShowMobileMenu(false);
-                }}
+                onClick={handleMobileNotifications}
                 className="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors relative"
               >
                 <i className="fas fa-bell mr-3 text-lg"></i>
@@ -365,6 +370,67 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
         cancelText="Cancel"
         type="warning"
       />
+      
+      {/* Mobile Notifications Full Screen Modal */}
+      {showMobileNotifications && (
+        <div className="fixed inset-0 bg-white z-50 md:hidden">
+          {/* Header */}
+          <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
+            <button
+              onClick={() => setShowMobileNotifications(false)}
+              className="p-2 text-gray-500 hover:text-gray-700"
+            >
+              <i className="fas fa-times text-xl"></i>
+            </button>
+          </div>
+          
+          {/* Notifications Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {notificationsLoading ? (
+              <div className="text-center py-8">
+                <i className="fas fa-spinner fa-spin text-gray-400 text-2xl mb-4"></i>
+                <p className="text-gray-500">Loading notifications...</p>
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="text-center py-8">
+                <i className="fas fa-bell-slash text-gray-400 text-4xl mb-4"></i>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
+                <p className="text-gray-500">You're all caught up!</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900 mb-1">
+                          Notification from {notification.sender}
+                        </p>
+                        <p className="text-sm text-gray-600 mb-2">
+                          Kindly check your email for details.
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(notification.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteNotification(notification.id)}
+                        className="ml-3 p-2 text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <i className="fas fa-trash text-sm"></i>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }
