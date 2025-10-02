@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import CommentForm from "./commentForm";
 import { useAuth } from "../context/authContext";
+import { notificationService } from "../services/notificationService.js";
 import toast from 'react-hot-toast';
 import { FaCheck, FaEllipsisV, FaTrash } from "react-icons/fa";
 import { useUtil } from "../context/utilContext";
@@ -105,52 +106,29 @@ export default function ContentGrid({ filteredItems, onDeletePost }) {
       const receiverEmail = userData.email;
 
       if (action === "Found" && type === "Lost") {
-        // Send found notification
-        const response = await fetch('http://localhost:5000/api/notifications/found-item', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            senderEmail,
-            receiverEmail,
-            itemTitle
-          }),
-        });
-
-        if (response.ok) {
+        // Send found notification using service
+        try {
+          await notificationService.sendFoundItemNotification(senderEmail, receiverEmail, itemTitle);
           toast.success('Owner notified that you found their item!');
-        }
-        else if (response.status === 400) {
-          const errorData = await response.json();
-          toast.error(errorData.message || 'Sender and receiver cannot be same.');
-        }
-        else {
-          toast.error('Failed to send notification. Please try again.');
+        } catch (error) {
+          if (error.response?.status === 400) {
+            toast.error(error.response.data.message || 'Sender and receiver cannot be same.');
+          } else {
+            toast.error('Failed to send notification. Please try again.');
+          }
         }
       }
       else if (action === "Claim" && type === "Found") {
-        // Send claim notification
-        const response = await fetch('http://localhost:5000/api/notifications/claim-item', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            senderEmail,
-            receiverEmail,
-            itemTitle
-          }),
-        });
-
-        if (response.ok) {
+        // Send claim notification using service
+        try {
+          await notificationService.sendClaimItemNotification(senderEmail, receiverEmail, itemTitle);
           toast.success('Finder notified that you claimed this item!');
-        }
-        else if (response.status === 400) {
-          const errorData = await response.json();
-          toast.error(errorData.message || 'Sender and receiver cannot be same.');
-        } else {
-          toast.error('Failed to send notification. Please try again.');
+        } catch (error) {
+          if (error.response?.status === 400) {
+            toast.error(error.response.data.message || 'Sender and receiver cannot be same.');
+          } else {
+            toast.error('Failed to send notification. Please try again.');
+          }
         }
       }
       setShowDropdown(null);

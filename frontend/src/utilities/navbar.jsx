@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
+import { notificationService } from "../services/notificationService.js";
+import toast from "react-hot-toast";
 
 export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }) {
   const navigate = useNavigate();
@@ -8,6 +10,9 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [profileImgUrl, setProfileImgUrl] = useState("");
+  const [notifications, setNotifications] = useState([]);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
   const { user, logout } = useAuth(); // call the hook inside the component
 
   useEffect(() => {
@@ -15,7 +20,40 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
     if (user && user.image_url) {
       setProfileImgUrl(user.image_url);
     }
+    
+    // Fetch notification count when user is logged in
+    if (user && user.email) {
+      fetchNotificationCount();
+    }
   }, [user]); // Add user as a dependency to update when user changes
+
+  // Fetch notification count
+  const fetchNotificationCount = async () => {
+    if (!user?.email) return;
+    
+    try {
+      const count = await notificationService.getNotificationCount(user.email);
+      setNotificationCount(count);
+    } catch (error) {
+      console.error('Error fetching notification count:', error);
+    }
+  };
+
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    if (!user?.email) return;
+    
+    try {
+      setNotificationsLoading(true);
+      const userNotifications = await notificationService.getUserNotifications(user.email);
+      setNotifications(userNotifications);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      toast.error('Failed to load notifications');
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
 
   // Close mobile menu when screen size changes
   useEffect(() => {
@@ -44,8 +82,24 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const handleNotifications = () => {
+  const handleNotifications = async () => {
     setShowNotifications(!showNotifications);
+    if (!showNotifications) {
+      // Fetch notifications when opening the dropdown
+      await fetchNotifications();
+    }
+  };
+
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      await notificationService.deleteNotification(notificationId);
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      setNotificationCount(prev => Math.max(0, prev - 1));
+      toast.success('Notification removed');
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      toast.error('Failed to remove notification');
+    }
   };
 
   const handleLogout = () => {
@@ -105,16 +159,64 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
               Post
             </button>
             <div className="relative notifications-container">
-              <i
-                className="fas fa-bell text-xl cursor-pointer hover:text-gray-600 transition-colors"
-                onClick={handleNotifications}
-              ></i>
+              <div className="relative">
+                <i
+                  className="fas fa-bell text-xl cursor-pointer hover:text-gray-600 transition-colors"
+                  onClick={handleNotifications}
+                ></i>
+                {/* Notification Count Badge */}
+                {notificationCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
+                    {notificationCount > 99 ? '99+' : notificationCount}
+                  </span>
+                )}
+              </div>
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-100 p-4 z-10">
-                  <h3 className="font-semibold mb-2">Notifications</h3>
-                  <div className="text-sm text-gray-600">
-                    No new notifications
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-100 p-4 z-10 max-h-96 overflow-y-auto">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold">Notifications</h3>
+                    {notificationCount > 0 && (
+                      <span className="text-xs text-gray-500">{notificationCount} new</span>
+                    )}
                   </div>
+                  
+                  {notificationsLoading ? (
+                    <div className="text-center py-4">
+                      <i className="fas fa-spinner fa-spin text-gray-400"></i>
+                      <p className="text-sm text-gray-500 mt-2">Loading notifications...</p>
+                    </div>
+                  ) : notifications.length === 0 ? (
+                    <div className="text-center py-4">
+                      <i className="fas fa-bell-slash text-gray-400 text-2xl mb-2"></i>
+                      <p className="text-sm text-gray-600">No new notifications</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className="p-3 bg-gray-50 rounded-lg border border-gray-200 relative group"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-800 mb-1">
+                                Notification from {notification.sender}
+                              </p>
+                              <p className="text-xs text-gray-600">
+                                Kindly check your email for details.
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleDeleteNotification(notification.id)}
+                              className="ml-2 text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                            >
+                              <i className="fas fa-times text-xs"></i>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -210,10 +312,15 @@ export default function Navbar({ setShowPostModal, searchQuery, setSearchQuery }
                   handleNotifications();
                   setShowMobileMenu(false);
                 }}
-                className="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors relative"
               >
                 <i className="fas fa-bell mr-3"></i>
                 Notifications
+                {notificationCount > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
+                    {notificationCount > 99 ? '99+' : notificationCount}
+                  </span>
+                )}
               </button>
               <button
                 onClick={() => {
