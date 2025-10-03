@@ -1,76 +1,65 @@
 import { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import toast from 'react-hot-toast';
-import { useNavigate } from "react-router-dom";
-
+import { useAuth } from "../context/authContext";
+import { authService } from "../services/authService";
 export default function ChangePassword({ setShowChangePassword }) {
   const [password, setpassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const navigate = useNavigate();
-
+  const { user } = useAuth();
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate passwords
+
     if (password !== confirmPassword) {
       toast.error("Passwords don't match");
       return;
     }
-    
+
     if (password.length < 8) {
       toast.error("Password must be at least 8 characters long");
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
-      const email = localStorage.getItem('resetEmail');
-      
-      // Check if OTP has been verified
-      const isVerified = localStorage.getItem('otpVerified');
-      if (!isVerified || isVerified !== 'true') {
-        toast.error("OTP verification required");
-        setIsLoading(false);
-        return;
+      let email = "";
+      if (!user) {
+        email = localStorage.getItem('resetEmail');
+
+        // Check if OTP has been verified
+        const isVerified = localStorage.getItem('otpVerified');
+        if (!isVerified || isVerified !== 'true') {
+          toast.error("OTP verification required");
+          setIsLoading(false);
+          return;
+        }
+
       }
-      
-      const response = await fetch('http://localhost:5000/api/users/changePassword', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password
-        }),
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        toast.success('Password reset successful');
-        // Clean up localStorage
+
+      else {
+        email = user.email
+      }
+      await authService.changePassword(email, password)
+      toast.success('Password reset successful');
+      // Clean up localStorage
+      if (!user) {
         localStorage.removeItem('resetEmail');
         localStorage.removeItem('otpVerified');
-        
-        // Close the password change form and navigate to login
-        setShowChangePassword(false);
-        // No need to navigate since we're already in the login page
-      } else {
-        toast.error(data.message || 'Failed to reset password');
+
       }
+      // Close the password change form and navigate to login
+      setShowChangePassword(false);
     } catch (error) {
-      console.error('Error resetting password:', error);
-      toast.error('Failed to reset password');
+      toast.error(error.message || "Failed to reset password");
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="p-6 w-full">
       <div className="flex justify-between items-center mb-6">
@@ -82,7 +71,7 @@ export default function ChangePassword({ setShowChangePassword }) {
           <FaTimes />
         </button>
       </div>
-      
+
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-medium mb-2">
@@ -110,7 +99,7 @@ export default function ChangePassword({ setShowChangePassword }) {
             </button>
           </div>
         </div>
-        
+
         <div className="mb-6">
           <label className="block text-gray-700 text-sm font-medium mb-2">
             Confirm Password
@@ -137,7 +126,7 @@ export default function ChangePassword({ setShowChangePassword }) {
             </button>
           </div>
         </div>
-        
+
         <button
           type="submit"
           disabled={isLoading}
