@@ -15,28 +15,31 @@ export default function OtpPage({
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
 
+
   useEffect(() => {
-    // Set email based on the mode we're in
-    if (mode === "register") {
-      setEmail(formData?.email || "");
-    } else if (mode === "reset") {
-      const resetEmail = localStorage.getItem('resetEmail');
-      setEmail(resetEmail || "");
-    }
+    const run = async () => {
+      let resolvedEmail = "";
+
+      if (mode === "register") {
+        resolvedEmail = formData?.email || "";
+      } else if (mode === "reset") {
+        resolvedEmail = localStorage.getItem("resetEmail") || "";
+      }
+
+      setEmail(resolvedEmail);
+      console.log(resolvedEmail)
+      if (resolvedEmail) {
+        try {
+          await authService.resendOtp(resolvedEmail);
+          toast.success("OTP resent successfully");
+        } catch (err) {
+          toast.error('Error sending OTP');
+        }
+      }
+    };
+
+    run();
   }, [mode, formData]);
-
-  const handleChange = (element, index) => {
-    if (isNaN(element.value)) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = element.value;
-    setOtp(newOtp);
-
-    // Move to next input if current field is filled
-    if (element.nextSibling && element.value) {
-      element.nextSibling.focus();
-    }
-  };
 
   const handleKeyDown = (e, index) => {
     // Navigate to previous input on backspace if current field is empty
