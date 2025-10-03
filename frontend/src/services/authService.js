@@ -94,9 +94,12 @@ export const authService = {
       });
       return response.data;
     } catch (error) {
-      // rethrow with backend error message if available
       throw error.response?.data || { message: "Failed to reset password" };
     }
+  },
+  async getUserByRollNumber(rollNumber) {
+    const res = await API.get(`api/users/${rollNumber}`);
+    return res.data;
   },
 };
 
