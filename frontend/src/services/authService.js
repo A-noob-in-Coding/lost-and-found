@@ -86,6 +86,21 @@ export const authService = {
       throw error.response?.data || { message: "Failed to register" };
     }
   },
+  changePassword: async (email, password) => {
+    try {
+      const response = await API.post("/api/users/changePassword", {
+        email,
+        password,
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: "Failed to reset password" };
+    }
+  },
+  async getUserByRollNumber(rollNumber) {
+    const res = await API.get(`api/users/${rollNumber}`);
+    return res.data;
+  },
 };
 
 
