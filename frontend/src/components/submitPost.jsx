@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/authContext";
 import { useUtil } from "../context/utilContext";
 import { useNavigate } from "react-router-dom";
-export default function SubmitPost({ postType, setShowPostModal }) {
+import { postService } from "../services/postService";
+export default function SubmitPost({ postType }) {
   const [isFormSend, setIsFormSend] = useState(false);
   const { user } = useAuth();
   const fileInputRef = useRef(null);
@@ -22,7 +23,6 @@ export default function SubmitPost({ postType, setShowPostModal }) {
     description: "",
     imageFile: null,
   });
-
   const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 
@@ -32,13 +32,11 @@ export default function SubmitPost({ postType, setShowPostModal }) {
     setIsFormSend(true); // Set to true to prevent multiple submissions
     setError("");
 
-    // Check if user exists before accessing rollno
     if (!user || !user.rollno) {
       toast.error("Please log in to post an item");
       setIsFormSend(false);
       return;
     }
-    console.log(formData.campusID)
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
     formDataToSend.append("location", formData.location);
@@ -48,34 +46,11 @@ export default function SubmitPost({ postType, setShowPostModal }) {
     formDataToSend.append("category_id", formData.category_id);
     formDataToSend.append("rollno", user.rollno);
 
-    console.log("FormData entries:");
-    for (let pair of formDataToSend.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
-    }
-
     try {
-      let result = false;
-      if (postType === "lost") {
-        result = await fetch("http://localhost:5000/api/user/posts/lost", {
-          method: "POST",
-          body: formDataToSend,
-        });
-      } else {
-        result = await fetch("http://localhost:5000/api/user/posts/found", {
-          method: "POST",
-          body: formDataToSend,
-        });
-      }
-
-      if (result.ok) {
-        setTimeout(() => {
-          toast.success(`${postType} item successfully posted (Simulated for testing)`);
-          navigate("/feed");
-        }, 1000);
-      } else {
-        toast.error(result.message || "Failed to post item");
-        setIsFormSend(false);
-      }
+      await postService.createPost(formDataToSend, postType);
+      toast.success(`${postType} item successfully posted`);
+      navigate("/feed");
+      setIsFormSend(false);
     } catch (error) {
       console.error("Error posting item:", error);
       toast.error("An error occurred while posting the item");

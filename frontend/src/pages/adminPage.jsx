@@ -3,6 +3,9 @@ import PostVerificationContainer from '../components/postVerificationContainer.j
 import CommentVerificationContainer from '../components/commentVerificationContainer.jsx';
 import CategoryContainer from '../components/catagorySection.jsx';
 import Footer from '../utilities/footer.jsx';
+import { adminService } from '../services/adminService.js';
+import { utilityService } from '../services/utilService.js';
+import toast from 'react-hot-toast';
 
 const AdminPage = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -23,104 +26,82 @@ const AdminPage = () => {
   const loginAdmin = async (user, pass) => {
     try {
       setIsLoading(true);
-      setLoginError('');
-
-      const response = await fetch("http://localhost:5000/api/users/loginAdmin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username: user, password: pass }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setAuthenticated(true);
-      } else {
-        setLoginError(data.message || 'Invalid credentials');
-      }
+      setLoginError("");
+      await adminService.loginAdmin(user, pass);
+      setAuthenticated(true);
     } catch (err) {
-      console.error("Network or fetch error:", err);
-      setLoginError('Network error. Please try again.');
+      console.error("Admin login error:", err);
+      setLoginError(err.message || "Invalid credentials");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fetch posts when authenticated
-  useEffect(() => {
-    if (authenticated) {
-      const fetchPosts = async () => {
-        setPostsLoading(true);
-        try {
-          const response = await fetch('http://localhost:5000/api/admin/posts');
-          if (!response.ok) {
-            throw new Error('Failed to fetch posts');
-          }
-          const data = await response.json();
-          // Map each post to include a pending status
-          const withStatus = data.map(post => ({
-            ...post,
-            status: 'pending'
-          }));
-          setPosts(withStatus);
-        } catch (error) {
-          console.error('Error fetching posts:', error.message);
-        } finally {
-          setPostsLoading(false);
-        }
-      };
-      fetchPosts();
+  // Fetch posts function
+  const fetchPosts = async () => {
+    setPostsLoading(true);
+    try {
+      const data = await adminService.fetchPosts();
+      console.log(data)
+      const withStatus = data.map((post) => ({
+        ...post,
+        status: "pending",
+      }));
+      setPosts(withStatus);
+      console.log(withStatus)
+    } catch (error) {
+      console.error("Error fetching posts:", error.message || error);
+      toast.error("Failed to fetch posts");
+    } finally {
+      setPostsLoading(false);
     }
+  };
+
+  // Fetch comments function
+  const fetchComments = async () => {
+    setCommentsLoading(true);
+    try {
+      const data = await adminService.fetchComments();
+      const withStatus = data.map((comment) => ({
+        ...comment,
+        status: "pending",
+      }));
+      setComments(withStatus);
+    } catch (error) {
+      console.error("Error fetching comments:", error.message || error);
+      toast.error("Failed to fetch comments");
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
+  // Fetch categories function
+  const fetchCategories = async () => {
+    setCategoriesLoading(true);
+    try {
+      const data = await utilityService.fetchCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error("Error fetching categories:", error.message || error);
+      toast.error("Failed to fetch categories");
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!authenticated) return;
+    fetchPosts();
   }, [authenticated]);
 
-  // Fetch comments when authenticated
   useEffect(() => {
-    if (authenticated) {
-      const fetchComments = async () => {
-        setCommentsLoading(true);
-        try {
-          const response = await fetch('http://localhost:5000/comment/getcomments');
-          if (!response.ok) {
-            throw new Error('Failed to fetch comments');
-          }
-          const data = await response.json();
-          // Map each comment to include a pending status
-          const withStatus = data.map(comment => ({
-            ...comment,
-            status: 'pending'
-          }));
-          setComments(withStatus);
-        } catch (error) {
-          console.error('Error fetching comments:', error.message);
-        } finally {
-          setCommentsLoading(false);
-        }
-      };
-      fetchComments();
-    }
+    if (!authenticated) return;
+    fetchComments();
   }, [authenticated]);
 
-  // Fetch categories when authenticated
   useEffect(() => {
-    if (authenticated) {
-      const fetchCategories = async () => {
-        setCategoriesLoading(true);
-        try {
-          const response = await fetch('http://localhost:5000/api/categories');
-          if (!response.ok) {
-            throw new Error('Failed to fetch categories');
-          }
-          const data = await response.json();
-          setCategories(data);
-        } catch (error) {
-          console.error('Error fetching categories:', error.message);
-        } finally {
-          setCategoriesLoading(false);
-        }
-      };
-      fetchCategories();
-    }
+    if (!authenticated) return;
+    fetchCategories();
   }, [authenticated]);
 
   // Memoized pending comments
@@ -147,145 +128,100 @@ const AdminPage = () => {
       ...loginData,
       [e.target.name]: e.target.value
     });
-    // Clear error when user starts typing
     if (loginError) {
       setLoginError('');
     }
   };
 
-  const handlePostAction = (id, action) => {
-    setPosts(posts.map(post =>
-      post.id === id ? { ...post, status: action } : post
-    ));
+  const handlePostApprove = async (id, type) => {
+    console.log(`Post approval type: ${type}, id: ${id}`);
+    try {
+      await adminService.approvePost(id, type);
+      toast.success('Post approved successfully');
+      // Re-fetch posts to get live data
+      await fetchPosts();
+    } catch (error) {
+      console.error('Approval error:', error.message);
+      toast.error(error.message || 'Approval failed');
+    }
+  };
+
+  const handlePostReject = async (id, type) => {
+    console.log(`Post rejection type: ${type}, id: ${id}`);
+    try {
+      await adminService.rejectPost(id, type);
+      toast.success('Post rejected successfully');
+      // Re-fetch posts to get live data
+      await fetchPosts();
+    } catch (error) {
+      console.error('Rejection error:', error.message);
+      toast.error(error.message || 'Rejection failed');
+    }
   };
 
   const handleCommentApprove = async (commentId, commentType) => {
     try {
-      let url = '';
-      if (commentType === 'l') {
-        url = `http://localhost:5000/comment/verifylostcomment?id=${commentId}`;
-      } else if (commentType === 'f') {
-        url = `http://localhost:5000/comment/verifyfoundcomment?id=${commentId}`;
-      } else {
-        console.error('Unknown comment type:', commentType);
-        return;
-      }
-
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Failed to verify comment');
-      }
-
-      // Remove the verified comment from the list
-      setComments(prev =>
-        prev.map(comment =>
-          comment.comment_id === commentId ? { ...comment, status: 'verified' } : comment
-        )
-      );
+      await adminService.approveComment(commentId, commentType);
+      toast.success('Comment approved successfully');
+      // Re-fetch comments to get live data
+      await fetchComments();
     } catch (error) {
-      console.error('Error approving comment:', error.message);
+      console.error('Error approving comment:', error.message || error);
+      toast.error(error.message || 'Failed to approve comment');
     }
   };
 
   const handleCommentReject = async (commentId, commentType) => {
     try {
-      const url =
-        commentType === 'l'
-          ? `http://localhost:5000/comment/deleteadminlostcomment?id=${commentId}`
-          : `http://localhost:5000/comment/deleteadminfoundcomment?id=${commentId}`;
-
-      const response = await fetch(url, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete comment');
-      }
-
-      // Optional: Update UI by removing the comment from state
-      setComments(prev =>
-        prev.filter(comment => comment.comment_id !== commentId)
-      );
-
-      console.log(`Comment ${commentId} deleted successfully`);
+      await adminService.rejectComment(commentId, commentType);
+      toast.success('Comment rejected successfully');
+      // Re-fetch comments to get live data
+      await fetchComments();
     } catch (error) {
-      console.error('Error rejecting comment:', error.message);
+      console.error('Error rejecting comment:', error.message || error);
+      toast.error(error.message || 'Failed to reject comment');
     }
   };
 
   const handleAddCategory = async (categoryName) => {
     try {
-      const response = await fetch('http://localhost:5000/api/categories', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ category: categoryName }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add category');
-      }
-
-      const data = await response.json();
-      // Update categories state with the new category
-      setCategories(prev => [...prev, data]);
+      await adminService.addCategory(categoryName);
+      toast.success(`Category "${categoryName}" added successfully`);
+      // Re-fetch categories to get live data
+      await fetchCategories();
       return { success: true, message: `Category "${categoryName}" added successfully` };
     } catch (error) {
-      console.error('Error adding category:', error.message);
+      console.error('Error adding category:', error.message || error);
+      toast.error(error.message || 'Failed to add category');
       return { success: false, message: error.message || 'Failed to add category' };
     }
   };
 
   const handleUpdateCategory = async (categoryId, categoryName) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/categories/${categoryId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ category: categoryName }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update category');
-      }
-
-      // Update categories state
-      setCategories(prev =>
-        prev.map(cat =>
-          cat.category_id === categoryId
-            ? { ...cat, category: categoryName }
-            : cat
-        )
-      );
+      await adminService.updateCategory(categoryId, categoryName);
+      toast.success(`Category updated to "${categoryName}"`);
+      // Re-fetch categories to get live data
+      await fetchCategories();
       return { success: true, message: `Category updated to "${categoryName}"` };
     } catch (error) {
-      console.error('Error updating category:', error.message);
+      console.error('Error updating category:', error.message || error);
+      toast.error(error.message || 'Failed to update category');
       return { success: false, message: error.message || 'Failed to update category' };
     }
   };
 
   const handleDeleteCategory = async (categoryId) => {
     const categoryToDelete = categories.find(cat => cat.category_id === categoryId);
-
     try {
-      const response = await fetch(`http://localhost:5000/api/categories/${categoryId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete category');
-      }
-
-      // Update categories state
-      setCategories(prev => prev.filter(cat => cat.category_id !== categoryId));
+      await adminService.deleteCategory(categoryId);
+      toast.success(`Category "${categoryToDelete?.category}" deleted`);
+      // Re-fetch categories to get live data
+      await fetchCategories();
       return { success: true, message: `Category "${categoryToDelete?.category}" deleted` };
     } catch (error) {
-      console.error('Error deleting category:', error.message);
+      console.error('Error deleting category:', error.message || error);
+      toast.error(error.message || 'Failed to delete category');
       return { success: false, message: error.message || 'Failed to delete category' };
     }
   };
@@ -451,10 +387,9 @@ const AdminPage = () => {
               <PostVerificationContainer
                 posts={pendingPosts}
                 loading={postsLoading}
-                onApprove={(id) => handlePostAction(id, 'approve')}
-                onReject={(id) => handlePostAction(id, 'reject')}
-              />
-            )}
+                onApprove={handlePostApprove}
+                onReject={handlePostReject}
+              />)}
 
             {activeTab === 'comments' && (
               <CommentVerificationContainer

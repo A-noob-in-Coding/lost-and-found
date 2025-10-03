@@ -304,8 +304,10 @@ export const getPostDataService = async () => {
     const getAllVerifiedPostsQuery = `
   SELECT
     lp.lpost_id AS id,
+    lp."campusID",
     'Lost' AS type,
     i.title,
+    i.category_id,
     i.description,
     i.location,
     to_char(lp.created_at, 'YYYY-MM-DD HH24:MI:SS') AS date,
@@ -332,14 +334,16 @@ export const getPostDataService = async () => {
   LEFT JOIN lostpostcomment lc ON lc.l_post_id = lp.lpost_id AND lc.is_verified = true
   LEFT JOIN "User" cu ON lc.rollno = cu.rollno
   WHERE lp.is_verified = true
-  GROUP BY lp.lpost_id, i.title, i.description, i.location, i.image_url, lp.created_at, u.name, u.rollno, u.image_url
+  GROUP BY lp.lpost_id, lp."campusID", i.title, i.description, i.location, i.image_url,i.category_id, lp.created_at, u.name, u.rollno, u.image_url
 
   UNION ALL
 
   SELECT
     fp.f_post_id AS id,
+    fp."campusID",
     'Found' AS type,
     i.title,
+    i.category_id,
     i.description,
     i.location,
     to_char(fp.created_at, 'YYYY-MM-DD HH24:MI:SS') AS date,
@@ -366,7 +370,7 @@ export const getPostDataService = async () => {
   LEFT JOIN foundpostcomment fc ON fc.f_post_id = fp.f_post_id AND fc.is_verified = true
   LEFT JOIN "User" cu ON fc.rollno = cu.rollno
   WHERE fp.is_verified = true
-  GROUP BY fp.f_post_id, i.title, i.description, i.location, i.image_url, fp.created_at, u.name, u.rollno, u.image_url
+  GROUP BY fp.f_post_id, fp."campusID", i.title, i.description, i.location, i.image_url, i.category_id, fp.created_at, u.name, u.rollno, u.image_url
 
   ORDER BY date DESC;
 `;

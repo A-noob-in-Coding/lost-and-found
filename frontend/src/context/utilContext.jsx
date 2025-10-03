@@ -1,6 +1,5 @@
-import axios from "axios";
 import { createContext, useContext, useState, useEffect } from "react";
-
+import { utilityService } from "../services/utilService";
 const UtilContext = createContext();
 
 export const UtilProvider = ({ children }) => {
@@ -13,8 +12,8 @@ export const UtilProvider = ({ children }) => {
 
   const fetchCampuses = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/utility/campus");
-      setCampuses(res.data);
+      const res = await utilityService.fetchCampuses();
+      setCampuses(res);
     } catch (err) {
       console.error("Error fetching campuses:", err);
     }
@@ -22,8 +21,8 @@ export const UtilProvider = ({ children }) => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/categories");
-      setCategories(response.data);
+      const response = await utilityService.fetchCategories();
+      setCategories(response);
     } catch (error) {
       console.error("Error fetching categories:", error.response?.data || error.message);
     }

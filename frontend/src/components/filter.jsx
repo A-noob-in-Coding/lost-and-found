@@ -1,39 +1,21 @@
 import { useEffect, useState } from "react";
 import { MdRefresh, MdFilterList } from "react-icons/md";
 import { FaChevronDown } from "react-icons/fa";
-
-export default function Filter({ 
-  setActiveFilter, 
-  activeFilter, 
-  onRefresh, 
-  campusFilter, 
+import { useUtil } from "../context/utilContext.jsx"
+export default function Filter({
+  setActiveFilter,
+  activeFilter,
+  onRefresh,
+  campusFilter,
   setCampusFilter,
   categoryFilter,
-  setCategoryFilter 
+  setCategoryFilter
 }) {
   const [showPostTypeDropdown, setShowPostTypeDropdown] = useState(false);
   const [showCampusDropdown, setShowCampusDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-
-  // Sample data (not using APIs for now)
-  const campuses = [
-    { id: 1, name: "FAST NUCES Karachi", location: "Karachi" },
-    { id: 2, name: "FAST NUCES Lahore", location: "Lahore" },
-    { id: 3, name: "FAST NUCES Islamabad", location: "Islamabad" },
-    { id: 4, name: "FAST NUCES Peshawar", location: "Peshawar" },
-    { id: 5, name: "FAST NUCES Chiniot-Faisalabad", location: "Chiniot-Faisalabad" }
-  ];
-
-  const categories = [
-    { id: 1, category: "Personal Items" },
-    { id: 2, category: "Electronics" },
-    { id: 3, category: "Bags" },
-    { id: 4, category: "Books" },
-    { id: 5, category: "Clothing" },
-    { id: 6, category: "Accessories" }
-  ];
-
-  const postTypes = ["All", "Lost", "Found", "My Posts"];
+  const { campuses, categories } = useUtil()
+  const postTypes = ["All", "Lost", "Found"];
 
   useEffect(() => {
     console.log(activeFilter);
@@ -73,9 +55,8 @@ export default function Filter({
                         setActiveFilter(type);
                         setShowPostTypeDropdown(false);
                       }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors ${
-                        activeFilter === type ? 'bg-gray-100 font-medium' : ''
-                      }`}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors ${activeFilter === type ? 'bg-gray-100 font-medium' : ''
+                        }`}
                     >
                       {type}
                     </button>
@@ -85,6 +66,7 @@ export default function Filter({
             </div>
 
             {/* Campus Filter */}
+            {/* Campus Filter */}
             <div className="relative">
               <button
                 onClick={() => setShowCampusDropdown(!showCampusDropdown)}
@@ -92,10 +74,15 @@ export default function Filter({
               >
                 <div className="flex items-center">
                   <MdFilterList className="mr-2" />
-                  <span>{campusFilter ? `Campus: ${campuses.find(c => c.id.toString() === campusFilter.toString())?.name || campusFilter}` : "All Campuses"}</span>
+                  <span>
+                    {campusFilter
+                      ? `Campus: ${campuses.find(c => c.campusID.toString() === campusFilter.toString())?.campusName || campusFilter}`
+                      : "All Campuses"}
+                  </span>
                 </div>
                 <FaChevronDown className={`transition-transform ${showCampusDropdown ? 'rotate-180' : ''}`} />
               </button>
+
               {showCampusDropdown && (
                 <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   <button
@@ -103,27 +90,27 @@ export default function Filter({
                       setCampusFilter("");
                       setShowCampusDropdown(false);
                     }}
-                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors"
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors ${!campusFilter ? 'bg-gray-100 font-medium' : ''
+                      }`}
                   >
                     All Campuses
                   </button>
                   {campuses.map((campus) => (
                     <button
-                      key={campus.id}
+                      key={campus.campusID}
                       onClick={() => {
-                        setCampusFilter(campus.id.toString());
+                        setCampusFilter(campus.campusID.toString());
                         setShowCampusDropdown(false);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors"
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors ${campusFilter.toString() === campus.campusID.toString() ? 'bg-gray-100 font-medium' : ''
+                        }`}
                     >
-                      {campus.name} {campus.location && `- ${campus.location}`}
+                      {campus.campusName}
                     </button>
                   ))}
                 </div>
               )}
-            </div>
-
-            {/* Category Filter */}
+            </div>            {/* Category Filter */}
             <div className="relative">
               <button
                 onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
@@ -131,7 +118,7 @@ export default function Filter({
               >
                 <div className="flex items-center">
                   <MdFilterList className="mr-2" />
-                  <span>{categoryFilter ? `Category: ${categories.find(c => c.id.toString() === categoryFilter.toString())?.category || categoryFilter}` : "All Categories"}</span>
+                  <span>{categoryFilter ? `Category: ${categories.find(c => c.category_id.toString() === categoryFilter.toString())?.category || categoryFilter}` : "All Categories"}</span>
                 </div>
                 <FaChevronDown className={`transition-transform ${showCategoryDropdown ? 'rotate-180' : ''}`} />
               </button>
@@ -148,9 +135,9 @@ export default function Filter({
                   </button>
                   {categories.map((category) => (
                     <button
-                      key={category.id}
+                      key={category.category_id}
                       onClick={() => {
-                        setCategoryFilter(category.id.toString());
+                        setCategoryFilter(category.category_id.toString());
                         setShowCategoryDropdown(false);
                       }}
                       className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors"
@@ -162,7 +149,7 @@ export default function Filter({
               )}
             </div>
           </div>
-          
+
           {/* Refresh Button */}
           <div className="flex justify-center">
             <button
@@ -198,9 +185,8 @@ export default function Filter({
                           setActiveFilter(type);
                           setShowPostTypeDropdown(false);
                         }}
-                        className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors ${
-                          activeFilter === type ? 'bg-gray-100 font-medium' : ''
-                        }`}
+                        className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors ${activeFilter === type ? 'bg-gray-100 font-medium' : ''
+                          }`}
                       >
                         {type}
                       </button>
@@ -216,7 +202,7 @@ export default function Filter({
                   className="px-6 py-3 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black transition-colors flex items-center space-x-2 min-w-48"
                 >
                   <MdFilterList />
-                  <span>{campusFilter ? `Campus: ${campuses.find(c => c.id.toString() === campusFilter.toString())?.name || campusFilter}` : "All Campuses"}</span>
+                  <span>{campusFilter ? `Campus: ${campuses.find(c => c.campusID.toString() === campusFilter.toString())?.campusName || campusFilter}` : "All Campuses"}</span>
                   <FaChevronDown className={`transition-transform ${showCampusDropdown ? 'rotate-180' : ''}`} />
                 </button>
                 {showCampusDropdown && (
@@ -234,12 +220,12 @@ export default function Filter({
                       <button
                         key={campus.id}
                         onClick={() => {
-                          setCampusFilter(campus.id.toString());
+                          setCampusFilter(campus.campusID.toString());
                           setShowCampusDropdown(false);
                         }}
                         className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors"
                       >
-                        {campus.name} {campus.location && `- ${campus.location}`}
+                        {campus.campusName}
                       </button>
                     ))}
                   </div>
@@ -253,7 +239,7 @@ export default function Filter({
                   className="px-6 py-3 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black transition-colors flex items-center space-x-2 min-w-48"
                 >
                   <MdFilterList />
-                  <span>{categoryFilter ? `Category: ${categories.find(c => c.id.toString() === categoryFilter.toString())?.category || categoryFilter}` : "All Categories"}</span>
+                  <span>{categoryFilter ? `Category: ${categories.find(c => c.category_id.toString() === categoryFilter.toString())?.category || categoryFilter}` : "All Categories"}</span>
                   <FaChevronDown className={`transition-transform ${showCategoryDropdown ? 'rotate-180' : ''}`} />
                 </button>
                 {showCategoryDropdown && (
@@ -269,9 +255,9 @@ export default function Filter({
                     </button>
                     {categories.map((category) => (
                       <button
-                        key={category.id}
+                        key={category.category_id}
                         onClick={() => {
-                          setCategoryFilter(category.id.toString());
+                          setCategoryFilter(category.category_id.toString());
                           setShowCategoryDropdown(false);
                         }}
                         className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors"
