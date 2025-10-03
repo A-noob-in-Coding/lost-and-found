@@ -86,6 +86,18 @@ export const authService = {
       throw error.response?.data || { message: "Failed to register" };
     }
   },
+  changePassword: async (email, password) => {
+    try {
+      const response = await API.post("/api/users/changePassword", {
+        email,
+        password,
+      });
+      return response.data;
+    } catch (error) {
+      // rethrow with backend error message if available
+      throw error.response?.data || { message: "Failed to reset password" };
+    }
+  },
 };
 
 
