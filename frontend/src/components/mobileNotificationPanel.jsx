@@ -4,7 +4,7 @@ import { useAuth } from '../context/authContext';
 import toast from 'react-hot-toast';
 import ConfirmationModal from './confirmationModal.jsx';
 
-const MobileNotificationPanel = ({ isOpen, onClose }) => {
+const MobileNotificationPanel = ({ isOpen, onClose, onNotificationCountUpdate }) => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
@@ -69,6 +69,12 @@ const MobileNotificationPanel = ({ isOpen, onClose }) => {
     try {
       await notificationService.deleteNotification(notificationToDelete.id);
       setNotifications(prev => prev.filter(n => n.id !== notificationToDelete.id));
+      
+      // Update parent component's notification count
+      if (onNotificationCountUpdate) {
+        onNotificationCountUpdate(prev => Math.max(0, prev - 1));
+      }
+      
       toast.success('Notification removed');
     } catch (error) {
       console.error('Error deleting notification:', error);
@@ -102,6 +108,12 @@ const MobileNotificationPanel = ({ isOpen, onClose }) => {
       }
       
       setNotifications([]);
+      
+      // Update parent component's notification count to 0
+      if (onNotificationCountUpdate) {
+        onNotificationCountUpdate(0);
+      }
+      
       toast.success('All notifications deleted successfully');
     } catch (error) {
       console.error('Error deleting all notifications:', error);
@@ -151,9 +163,11 @@ const MobileNotificationPanel = ({ isOpen, onClose }) => {
               {notifications.length > 0 && (
                 <button
                   onClick={handleDeleteAll}
-                  className="text-sm text-red-500 hover:text-red-600 font-medium transition-colors px-2 py-1 rounded"
+                  className="text-sm text-red-500 hover:text-red-600 font-medium transition-colors px-2 py-1 rounded flex items-center space-x-1"
+                  title="Delete all notifications"
                 >
-                  Delete All
+                  <i className="fas fa-trash text-sm"></i>
+                  <span>Delete All</span>
                 </button>
               )}
               <button

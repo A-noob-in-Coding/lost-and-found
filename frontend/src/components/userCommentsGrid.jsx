@@ -1,12 +1,15 @@
 import { useState, useMemo } from "react";
 import { commentService } from "../services/commentService";
 import { useAuth } from "../context/authContext";
+import ConfirmationModal from "./confirmationModal";
 import toast from "react-hot-toast";
 
 export default function UserCommentsGrid({ userComments, onCommentDeleted }) {
   const { user } = useAuth();
   const [expandedComments, setExpandedComments] = useState({});
   const [deletingComments, setDeletingComments] = useState({});
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState(null);
 
   const toggleComment = (commentId) => {
     setExpandedComments(prev => ({
@@ -16,11 +19,14 @@ export default function UserCommentsGrid({ userComments, onCommentDeleted }) {
   };
 
   const handleDeleteComment = async (comment) => {
-    if (!window.confirm('Are you sure you want to delete this comment?')) {
-      return;
-    }
+    setCommentToDelete(comment);
+    setShowDeleteConfirm(true);
+  };
 
-    setDeletingComments(prev => ({ ...prev, [comment.id]: true }));
+  const confirmDeleteComment = async () => {
+    if (!commentToDelete) return;
+
+    setDeletingComments(prev => ({ ...prev, [commentToDelete.id]: true }));
 
     try {
       // Check if user exists before proceeding
@@ -30,7 +36,7 @@ export default function UserCommentsGrid({ userComments, onCommentDeleted }) {
       }
 
       // Get the postType from comment object (handle different field names)
-      const postType = comment.posttype || comment.postType;
+      const postType = commentToDelete.posttype || commentToDelete.postType;
       
       if (!postType) {
         toast.error('Cannot determine post type for comment deletion');
@@ -38,12 +44,12 @@ export default function UserCommentsGrid({ userComments, onCommentDeleted }) {
       }
 
       // Use the service instead of hardcoded API
-      await commentService.deleteCommentByText(user.rollno, comment.comment, postType);
+      await commentService.deleteCommentByText(user.rollno, commentToDelete.comment, postType);
 
       toast.success('Comment deleted successfully');
       
       if (onCommentDeleted) {
-        onCommentDeleted(comment.id);
+        onCommentDeleted(commentToDelete.id);
       }
       
       // Refresh the page to ensure clean state
@@ -52,8 +58,15 @@ export default function UserCommentsGrid({ userComments, onCommentDeleted }) {
       console.error('Error deleting comment:', error);
       toast.error(error.message || 'Failed to delete comment');
     } finally {
-      setDeletingComments(prev => ({ ...prev, [comment.id]: false }));
+      setDeletingComments(prev => ({ ...prev, [commentToDelete.id]: false }));
+      setShowDeleteConfirm(false);
+      setCommentToDelete(null);
     }
+  };
+
+  const cancelDeleteComment = () => {
+    setShowDeleteConfirm(false);
+    setCommentToDelete(null);
   };
 
   // Group comments by post
@@ -162,7 +175,7 @@ export default function UserCommentsGrid({ userComments, onCommentDeleted }) {
                   <button
                     onClick={() => handleDeleteComment(comment)}
                     disabled={deletingComments[comment.id]}
-                    className="text-gray-400 hover:text-red-600 transition-colors p-1 rounded-md hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-red-500 hover:text-red-600 transition-colors p-1 rounded-md hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Delete comment"
                   >
                     {deletingComments[comment.id] ? (
@@ -190,6 +203,18 @@ export default function UserCommentsGrid({ userComments, onCommentDeleted }) {
           </div>
         </div>
       ))}
+      
+      {/* Delete Comment Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteConfirm}
+        onClose={cancelDeleteComment}
+        onConfirm={confirmDeleteComment}
+        title="Delete Comment"
+        message={`Are you sure you want to delete this comment? This action cannot be undone.${commentToDelete?.comment ? `\n\nComment: "${commentToDelete.comment.substring(0, 100)}${commentToDelete.comment.length > 100 ? '...' : ''}"` : ''}`}
+        confirmText="Delete Comment"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 }
