@@ -14,36 +14,51 @@ export const Register = () => {
     imageFile: null
   });
 
-
   return (
     <div className="min-h-screen bg-white text-black">
-      <div className="max-w-full w-full bg-white shadow-lg  overflow-hidden border border-gray-200">
-        <div className="p-6">
-          {/* Back Button */}
-          <div className="flex justify-start mb-4">
-            <button
-              onClick={() => navigate("/")}
-              className="flex items-center text-gray-600 hover:text-black transition-colors duration-200"
-            >
-              <i className="fas fa-arrow-left mr-2"></i>
-              <span className="text-sm">Back to Preview</span>
-            </button>
-          </div>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className={`${showOtpPage ? 'max-w-md' : 'max-w-4xl'} w-full bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-200`}>
+          <div className="p-8">
+            {/* Back Button */}
+            <div className="flex justify-start mb-4">
+              <button
+                onClick={() => navigate("/")}
+                className="flex items-center text-gray-600 hover:text-black transition-colors duration-200"
+              >
+                <i className="fas fa-arrow-left mr-2"></i>
+                <span className="text-sm">Back to Preview</span>
+              </button>
+            </div>
+            
+            <div className="flex justify-center mb-8">
+              <img 
+                src="/lf_logo.png" 
+                alt="Lost & Found Logo" 
+                className="h-16 w-16 rounded-full"
+              />
+            </div>
+            <h1 className="text-3xl font-bold text-center mb-2 tracking-tight">
+              FAST Lost & Found
+            </h1>
+            <p className="text-gray-500 text-center mb-8">
+              Join our community
+            </p>
 
-          {!showOtpPage ? (
-            <RegisterForm
-              setShowOtpPage={setShowOtpPage}
-              formData={formData}
-              setFormData={setFormData}
-            />
-          ) : (
-            <OtpPage
-              setShowOtpPage={setShowOtpPage}
-              formData={formData}
-            />
-          )}
-          <div className="mt-6 pt-4 border-t border-gray-200 text-center text-xs text-gray-500">
-            © 2025 FAST NUCES Lost & Found System
+            {!showOtpPage ? (
+              <RegisterForm
+                setShowOtpPage={setShowOtpPage}
+                formData={formData}
+                setFormData={setFormData}
+              />
+            ) : (
+              <OtpPage
+                setShowOtpPage={setShowOtpPage}
+                formData={formData}
+              />
+            )}
+            <div className="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
+              © 2025 FAST NUCES Lost & Found System
+            </div>
           </div>
         </div>
       </div>

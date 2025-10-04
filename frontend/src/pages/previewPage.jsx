@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../utilities/footer.jsx";
+import { postService } from "../services/postService.js";
+import { dummyPosts, transformApiDataToPreviewFormat } from "../data/dummyData.js";
+import toast from 'react-hot-toast';
 
 const PreviewPage = () => {
   const navigate = useNavigate();
@@ -8,7 +11,63 @@ const PreviewPage = () => {
   // Animation states for counters
   const [itemsCount, setItemsCount] = useState(0);
   const [usersCount, setUsersCount] = useState(0);
-  const [recoveryRate, setRecoveryRate] = useState(0);
+  const [commentsCount, setCommentsCount] = useState(0);
+  const [recentItems, setRecentItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  // Fetch statistics from API
+  const fetchStatistics = async () => {
+    try {
+      setStatsLoading(true);
+      const stats = await postService.getStatistics();
+      
+      // Animate counters with real data
+      const timer1 = animateCounter(0, stats.totalPosts, 2000, setItemsCount);
+      const timer2 = animateCounter(0, stats.totalUsers, 2500, setUsersCount);
+      const timer3 = animateCounter(0, stats.totalComments, 2200, setCommentsCount);
+      
+      // Store timers for cleanup
+      return [timer1, timer2, timer3];
+    } catch (error) {
+      console.error('Error fetching statistics:', error);
+      toast.error('Failed to load statistics');
+      // Fallback to default animation values
+      const timer1 = animateCounter(0, 500, 2000, setItemsCount);
+      const timer2 = animateCounter(0, 2000, 2500, setUsersCount);
+      const timer3 = animateCounter(0, 150, 2200, setCommentsCount);
+      return [timer1, timer2, timer3];
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  // Fetch recent posts from API
+  const fetchRecentPosts = async () => {
+    try {
+      setIsLoading(true);
+      const apiPosts = await postService.getRecent6Posts();
+      
+      // Transform API data to match preview format
+      const transformedPosts = apiPosts.map(transformApiDataToPreviewFormat);
+      
+      // If we have less than 6 posts, fill with dummy data
+      if (transformedPosts.length < 6) {
+        const neededDummyCount = 6 - transformedPosts.length;
+        const dummyDataToAdd = dummyPosts.slice(0, neededDummyCount);
+        setRecentItems([...transformedPosts, ...dummyDataToAdd]);
+      } else {
+        setRecentItems(transformedPosts);
+      }
+    } catch (error) {
+      console.error('Error fetching recent posts:', error);
+      toast.error('Failed to load recent posts');
+      // Fallback to dummy data if API fails
+      setRecentItems(dummyPosts);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Animated counter function
   const animateCounter = (start, end, duration, setter) => {
@@ -28,89 +87,26 @@ const PreviewPage = () => {
     return timer;
   };
 
-  // Start animations when component mounts
+  // Start animations and fetch data when component mounts
   useEffect(() => {
-    const timer1 = animateCounter(0, 500, 2000, setItemsCount);
-    const timer2 = animateCounter(0, 2000, 2500, setUsersCount);
-    const timer3 = animateCounter(0, 85, 2000, setRecoveryRate);
+    let timers = [];
+    
+    const loadData = async () => {
+      // Fetch statistics and start animations
+      const statTimers = await fetchStatistics();
+      timers = statTimers;
+      
+      // Fetch recent posts
+      await fetchRecentPosts();
+    };
+    
+    loadData();
 
     // Cleanup timers on unmount
     return () => {
-      clearInterval(timer1);
-      clearInterval(timer2);
-      clearInterval(timer3);
+      timers.forEach(timer => clearInterval(timer));
     };
   }, []);
-
-  // Sample items data matching the screenshots
-  const sampleItems = [
-    {
-      id: 1,
-      title: "Black Leather Wallet",
-      description: "Found near the main library entrance",
-      location: "Main Library",
-      campus: "Lahore Campus",
-      time: "2 hours ago",
-      type: "Found",
-      image: "/fast_nuces.png",
-      badge: "Found"
-    },
-    {
-      id: 2,
-      title: "Keys with University Keychain",
-      description: "Lost somewhere in the cafeteria area",
-      location: "Cafeteria",
-      campus: "Karachi Campus",
-      time: "4 hours ago",
-      type: "Lost",
-      image: "/icon.jpg",
-      badge: "Lost"
-    },
-    {
-      id: 3,
-      title: "Blue Notebook",
-      description: "Found in Computer Science Department",
-      location: "CS Department",
-      campus: "Islamabad Campus",
-      time: "6 hours ago",
-      type: "Found",
-      image: "/fast_nuces.png",
-      badge: "Found"
-    },
-    {
-      id: 4,
-      title: "Black Backpack",
-      description: "Lost near the parking area",
-      location: "Parking Area",
-      campus: "Lahore Campus",
-      time: "8 hours ago",
-      type: "Lost",
-      image: "/icon.jpg",
-      badge: "Lost"
-    },
-    {
-      id: 5,
-      title: "White Earphones",
-      description: "Found in the gymnasium locker room",
-      location: "Gymnasium",
-      campus: "Peshawar Campus",
-      time: "12 hours ago",
-      type: "Found",
-      image: "/fast_nuces.png",
-      badge: "Found"
-    },
-    {
-      id: 6,
-      title: "Red Water Bottle",
-      description: "Lost during the morning lecture",
-      location: "Lecture Hall 1",
-      campus: "Chiniot-Faisalabad Campus",
-      time: "1 day ago",
-      type: "Lost",
-      image: "/icon.jpg",
-      badge: "Lost"
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -159,18 +155,26 @@ const PreviewPage = () => {
           </p>
           
           {/* Items Grid */}
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-4 lg:gap-6">
-            {sampleItems.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => navigate("/login")}
-                className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden hover:scale-105 transform cursor-pointer w-[77%] sm:w-[49.5%] lg:w-[30%] max-w-xs sm:max-w-sm"
-              >
+          {isLoading ? (
+            <div className="flex justify-center items-center py-16">
+              <div className="text-center">
+                <i className="fas fa-spinner fa-spin text-2xl text-gray-400 mb-4"></i>
+                <p className="text-gray-500">Loading recent items...</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-4 lg:gap-6">
+              {recentItems.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => navigate("/login")}
+                  className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden hover:scale-105 transform cursor-pointer w-[77%] sm:w-[49.5%] lg:w-[30%] max-w-xs sm:max-w-sm"
+                >
                 {/* Item Badge */}
                 <div className="relative">
                   <div className="h-34 sm:h-26 lg:h-35 xl:h-44 overflow-hidden rounded-t-lg sm:rounded-t-xl lg:rounded-t-2xl">
                     <img
-                      src={item.image}
+                      src={item.image || "/no_prev_img.png"}
                       alt={item.title}
                       className="w-full h-full object-cover"
                     />
@@ -207,7 +211,8 @@ const PreviewPage = () => {
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+          )}
 
           {/* View All Items Button */}
           <div className="text-center mt-8 sm:mt-10">
@@ -226,16 +231,34 @@ const PreviewPage = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             <div className="bg-black text-white rounded-2xl p-4 sm:p-6 text-center">
-              <div className="text-2xl sm:text-3xl font-bold mb-2">{itemsCount}+</div>
-              <div className="text-gray-300 text-xs sm:text-sm">Items Recovered</div>
+              <div className="text-2xl sm:text-3xl font-bold mb-2">
+                {statsLoading ? (
+                  <i className="fas fa-spinner fa-spin"></i>
+                ) : (
+                  itemsCount
+                )}
+              </div>
+              <div className="text-gray-300 text-xs sm:text-sm">Total Posts</div>
             </div>
             <div className="bg-black text-white rounded-2xl p-4 sm:p-6 text-center">
-              <div className="text-2xl sm:text-3xl font-bold mb-2">{usersCount.toLocaleString()}+</div>
+              <div className="text-2xl sm:text-3xl font-bold mb-2">
+                {statsLoading ? (
+                  <i className="fas fa-spinner fa-spin"></i>
+                ) : (
+                  usersCount.toLocaleString()
+                )}
+              </div>
               <div className="text-gray-300 text-xs sm:text-sm">Active Users</div>
             </div>
             <div className="bg-black text-white rounded-2xl p-4 sm:p-6 text-center">
-              <div className="text-2xl sm:text-3xl font-bold mb-2">{recoveryRate}%</div>
-              <div className="text-gray-300 text-xs sm:text-sm">Recovery Rate</div>
+              <div className="text-2xl sm:text-3xl font-bold mb-2">
+                {statsLoading ? (
+                  <i className="fas fa-spinner fa-spin"></i>
+                ) : (
+                  commentsCount
+                )}
+              </div>
+              <div className="text-gray-300 text-xs sm:text-sm">Comments</div>
             </div>
           </div>
         </div>

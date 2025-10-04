@@ -1,14 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import CommentForm from "./commentForm";
 import { useAuth } from "../context/authContext";
+import { notificationService } from "../services/notificationService.js";
 import toast from 'react-hot-toast';
 import { useUtil } from "../context/utilContext";
 import { authService } from "../services/authService";
-import { notificationService } from "../services/notificationService";
 
 export default function ContentGrid({ filteredItems }) {
   const { campuses } = useUtil()
-  const [expandedComments, setExpandedComments] = useState(null);
+  const [selectedItemForComments, setSelectedItemForComments] = useState(null);
   const [loadingStates, setLoadingStates] = useState({});
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
   const { user } = useAuth();
@@ -18,13 +18,32 @@ export default function ContentGrid({ filteredItems }) {
     [campuses]
   );
 
-  const toggleComments = (itemId) => {
-    if (expandedComments === itemId) {
-      setExpandedComments(null);
-    } else {
-      setExpandedComments(itemId);
-    }
+  const toggleComments = (item) => {
+    setSelectedItemForComments(item);
   };
+
+  const closeCommentsPanel = () => {
+    setSelectedItemForComments(null);
+  };
+
+  // Close panel on Escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && selectedItemForComments) {
+        closeCommentsPanel();
+      }
+    };
+
+    if (selectedItemForComments) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden'; // Prevent background scroll
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedItemForComments]);
 
   const toggleDescription = (itemId) => {
     setExpandedDescriptions(prev => ({
@@ -58,36 +77,32 @@ export default function ContentGrid({ filteredItems }) {
         await authService.getUserByRollNumber(receiverRollno)
 
       if (action === "Found" && type === "Lost") {
+        // Send found notification using service
         try {
-          await notificationService.sendFoundNotification(
-            senderEmail,
-            receiverEmail,
-            itemTitle
-          );
-          toast.success("Owner notified that you found their item!");
-        } catch (err) {
-          if (err.response?.status === 400) {
-            toast.error(err.response.data.message || "Sender and receiver cannot be same.");
+          await notificationService.sendFoundItemNotification(senderEmail, receiverEmail, itemTitle);
+          toast.success('Owner notified that you found their item!');
+        } catch (error) {
+          if (error.response?.status === 400) {
+            toast.error(error.response.data.message || 'Sender and receiver cannot be same.');
           } else {
-            toast.error("Failed to send notification. Please try again.");
-          }
-        }
-      } else if (action === "Claim" && type === "Found") {
-        try {
-          await notificationService.sendClaimNotification(
-            senderEmail,
-            receiverEmail,
-            itemTitle
-          );
-          toast.success("Finder notified that you claimed this item!");
-        } catch (err) {
-          if (err.response?.status === 400) {
-            toast.error(err.response.data.message || "Sender and receiver cannot be same.");
-          } else {
-            toast.error("Failed to send notification. Please try again.");
+            toast.error('Failed to send notification. Please try again.');
           }
         }
       }
+      else if (action === "Claim" && type === "Found") {
+        // Send claim notification using service
+        try {
+          await notificationService.sendClaimItemNotification(senderEmail, receiverEmail, itemTitle);
+          toast.success('Finder notified that you claimed this item!');
+        } catch (error) {
+          if (error.response?.status === 400) {
+            toast.error(error.response.data.message || 'Sender and receiver cannot be same.');
+          } else {
+            toast.error('Failed to send notification. Please try again.');
+          }
+        }
+      }
+      setShowDropdown(null);
     } catch (error) {
       console.error("Error sending notification:", error);
       toast.error("An error occurred while sending the notification.");
@@ -105,17 +120,11 @@ export default function ContentGrid({ filteredItems }) {
             className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-black/10 relative flex flex-col h-full"
           >
             <div className="aspect-square overflow-hidden rounded-t-xl">
-              {item.image ? (
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-full object-cover object-top"
-                />
-              ) : (
-                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-400">No image available</span>
-                </div>
-              )}
+              <img
+                src={item.image || "/no_prev_img.png"}
+                alt={item.title}
+                className="w-full h-full object-cover object-top"
+              />
             </div>
             <div className="p-4 flex-1 flex flex-col">
               <div className="flex items-center justify-between mb-3">
@@ -198,72 +207,164 @@ export default function ContentGrid({ filteredItems }) {
               {/* Comment section */}
               <div className="mt-4 pt-3 border-t border-gray-100">
                 <button
-                  onClick={() => toggleComments(item.id)}
+                  onClick={() => toggleComments(item)}
                   className="flex items-center text-sm text-gray-500 hover:text-gray-700"
                 >
-                  <i
-                    className={`fas ${expandedComments === item.id
-                      ? "fa-comment-slash"
-                      : "fa-comment"
-                      } mr-2`}
-                  ></i>
-                  {expandedComments === item.id
-                    ? "Hide Comments"
-                    : `Comments (${item.comments?.length || 0})`}
+                  <i className="fas fa-comment mr-2"></i>
+                  Comments ({item.comments?.length || 0})
                 </button>
-
-                {expandedComments === item.id && (
-                  <div className="mt-3 space-y-3">
-                    {/* Comments list */}
-                    {item.comments && item.comments.length > 0 ? (
-                      item.comments.map((comment) => (
-                        <div
-                          key={comment.id}
-                          className="bg-gray-50 rounded-lg p-3"
-                        >
-                          <div className="flex items-start">
-                            <div className="w-6 h-6 rounded-full overflow-hidden mr-2">
-                              {comment.user?.avatar ? (
-                                <img
-                                  src={comment.user.avatar}
-                                  alt={comment.user.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                  <i className="fas fa-user text-gray-400 text-xs"></i>
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between">
-                                <div className="text-xs font-medium">
-                                  {comment.user.name}
-                                </div>
-                                <div className="text-xs text-gray-400">
-                                  {new Date(comment.date).toLocaleString()}
-                                </div>
-                              </div>
-                              <div className="text-sm mt-1">
-                                {comment.text}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-sm text-gray-400 text-center py-2">
-                        No comments yet
-                      </div>
-                    )}
-                    <CommentForm item={item} />
-                  </div>
-                )}
               </div>
             </div>
           </div>
         ))}
       </div>
+      
+      {/* Instagram-style Comments Panel */}
+      {selectedItemForComments && (
+        <div 
+          className="fixed inset-0 bg-white/20 backdrop-blur-md flex items-center justify-center z-50 p-2 md:p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              closeCommentsPanel();
+            }
+          }}
+        >
+          <div className="bg-white rounded-xl max-w-6xl w-full max-h-[95vh] md:max-h-[90vh] flex flex-col md:flex-row overflow-hidden">
+            {/* Left side - Post (Top on mobile, Left on desktop) */}
+            <div className="w-full md:w-1/2 h-64 md:h-auto bg-gray-100 flex items-center justify-center">
+              <img
+                src={selectedItemForComments.image || "/no_prev_img.png"}
+                alt={selectedItemForComments.title}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+            
+            {/* Right side - Comments (Bottom on mobile, Right on desktop) */}
+            <div className="w-full md:w-1/2 flex flex-col flex-1">
+              {/* Header */}
+              <div className="p-3 md:p-4 border-b border-gray-200 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden">
+                    {selectedItemForComments.user?.avatar ? (
+                      <img
+                        src={selectedItemForComments.user.avatar}
+                        alt={selectedItemForComments.user.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <i className="fas fa-user text-gray-400 text-xs md:text-sm"></i>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-sm md:text-base">{selectedItemForComments.user.name}</div>
+                    <div className="text-xs md:text-sm text-gray-500">{selectedItemForComments.user.rollNumber}</div>
+                  </div>
+                </div>
+                <button
+                  onClick={closeCommentsPanel}
+                  className="p-1.5 md:p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <i className="fas fa-times text-gray-500 text-sm md:text-base"></i>
+                </button>
+              </div>
+              
+              {/* Post Details */}
+              <div className="p-3 md:p-4 border-b border-gray-200">
+                <h3 className="font-semibold text-base md:text-lg mb-2">{selectedItemForComments.title}</h3>
+                <div className="flex items-center text-gray-600 text-xs md:text-sm mb-2">
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mr-3 ${
+                    selectedItemForComments.type === "Lost"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-green-100 text-green-800"
+                  }`}>
+                    <i className={`fas ${selectedItemForComments.type === "Lost" ? "fa-search" : "fa-hand-holding"} mr-1`}></i>
+                    {selectedItemForComments.type}
+                  </span>
+                  <i className="fas fa-university mr-1"></i>
+                  <span className="truncate">{campusMap[selectedItemForComments.campusID] || 'Campus not specified'}</span>
+                </div>
+                <div className="flex items-center text-gray-600 text-xs md:text-sm mb-2">
+                  <i className="fas fa-map-marker-alt mr-2"></i>
+                  <span className="truncate">{selectedItemForComments.location}</span>
+                </div>
+                <p className="text-xs md:text-sm text-gray-700 mb-3 line-clamp-2 md:line-clamp-none">{selectedItemForComments.description}</p>
+                <div className="text-xs text-gray-500">
+                  {new Date(selectedItemForComments.date).toLocaleString()}
+                </div>
+              </div>
+              
+              {/* Comments Section */}
+              <div className="flex-1 overflow-y-auto p-3 md:p-4 min-h-0">
+                <div className="space-y-3 md:space-y-4">
+                  {selectedItemForComments.comments && selectedItemForComments.comments.length > 0 ? (
+                    selectedItemForComments.comments.map((comment) => (
+                      <div key={comment.id} className="flex items-start space-x-2 md:space-x-3">
+                        <div className="w-6 h-6 md:w-8 md:h-8 rounded-full overflow-hidden flex-shrink-0">
+                          {comment.user?.avatar ? (
+                            <img
+                              src={comment.user.avatar}
+                              alt={comment.user.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                              <i className="fas fa-user text-gray-400 text-xs"></i>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="font-medium text-xs md:text-sm truncate">{comment.user.name}</span>
+                            <span className="text-xs text-gray-500 flex-shrink-0">
+                              {new Date(comment.date).toLocaleString()}
+                            </span>
+                          </div>
+                          <p className="text-xs md:text-sm text-gray-700 break-words">{comment.text}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-6 md:py-8">
+                      <i className="fas fa-comments text-gray-300 text-2xl md:text-3xl mb-3"></i>
+                      <p className="text-gray-500 text-sm md:text-base">No comments yet</p>
+                      <p className="text-gray-400 text-xs md:text-sm">Be the first to comment!</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Comment Form */}
+              <div className="p-3 md:p-4 border-t border-gray-200">
+                <CommentForm item={selectedItemForComments} />
+              </div>
+              
+              {/* Action Button */}
+              <div className="p-3 md:p-4 border-t border-gray-200">
+                <button
+                  disabled={loadingStates[selectedItemForComments.id]}
+                  className="w-full py-2.5 md:py-3 bg-black hover:bg-gray-900 text-white rounded-lg font-medium text-sm md:text-base transition-colors flex items-center justify-center"
+                  onClick={() => handleAction(
+                    selectedItemForComments.type === "Lost" ? "Found" : "Claim",
+                    selectedItemForComments.type,
+                    selectedItemForComments
+                  )}
+                >
+                  {loadingStates[selectedItemForComments.id] ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    selectedItemForComments.type === "Lost" ? "Found This Item" : "Claim This Item"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

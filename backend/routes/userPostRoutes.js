@@ -9,6 +9,8 @@ import {
   getPostData,
   getPostsByRollNo,
   getUnverifiedPostsByRollNo,
+  getRecent6Posts,
+  getStatistics,
 } from "../controllers/postController.js";
 import upload from "../config/mutler.js";
 
@@ -30,4 +32,6 @@ router.delete("/found/:postId", userDeleteFoundPost);
 router.get('/getPostData',getPostData)
 router.get('/rollno/:rollno', getPostsByRollNo);
 router.get('/unverified/rollno/:rollno', getUnverifiedPostsByRollNo);
+router.get('/recent6', getRecent6Posts);
+router.get('/statistics', getStatistics);
 export default router;

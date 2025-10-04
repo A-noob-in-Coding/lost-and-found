@@ -1,17 +1,28 @@
 import React, { useState, useEffect, useRef } from "react";
 import ChangePassword from "../components/changePassword";
+import UserPostsGrid from "../components/userPostsGrid";
+import UserCommentsGrid from "../components/userCommentsGrid";
 import { useAuth } from "../context/authContext";
 import { useUtil } from "../context/utilContext";
+import { postService } from "../services/postService";
+import { commentService } from "../services/commentService";
 import Footer from "../utilities/footer";
 import { useNavigate } from "react-router-dom";
 import { MdEdit, MdAddAPhoto } from "react-icons/md";
 import { ClipLoader } from "react-spinners";
+import toast from "react-hot-toast";
 
 const ProfilePage = () => {
   const { campuses } = useUtil()
   const [isloading, setisloading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
   const [username, setUsername] = useState("");
+  const [userPosts, setUserPosts] = useState([]);
+  const [userComments, setUserComments] = useState([]);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('posts'); // 'posts' or 'comments'
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { user, logout, updateUsername, updateProfileImage, updateCampus } = useAuth();
   const navigate = useNavigate();
   const [profileImage, setProfileImage] = useState("");
@@ -19,6 +30,7 @@ const ProfilePage = () => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingCampus, setIsEditingCampus] = useState(false);
   const [selectedCampusId, setSelectedCampusId] = useState("");
+  const [showEditProfile, setShowEditProfile] = useState(false);
   const fileInputRef = useRef(null);
 
   const resizeImage = (imageUrl) => {
@@ -105,6 +117,44 @@ const ProfilePage = () => {
     navigate("/login");
   };
 
+  const handlePostDeleted = (deletedPostId) => {
+    setUserPosts(prevPosts => prevPosts.filter(post => post.id !== deletedPostId));
+  };
+
+  const handleCommentDeleted = (deletedCommentId) => {
+    setUserComments(prevComments => prevComments.filter(comment => comment.id !== deletedCommentId));
+  };
+
+  const fetchUserPosts = async () => {
+    if (!user?.rollno) return;
+    
+    try {
+      setPostsLoading(true);
+      const posts = await postService.getUserPosts(user.rollno);
+      setUserPosts(posts);
+    } catch (error) {
+      console.error('Error fetching user posts:', error);
+      toast.error('Failed to load your posts');
+    } finally {
+      setPostsLoading(false);
+    }
+  };
+
+  const fetchUserComments = async () => {
+    if (!user?.rollno) return;
+    
+    try {
+      setCommentsLoading(true);
+      const comments = await commentService.getUserComments(user.rollno);
+      setUserComments(comments);
+    } catch (error) {
+      console.error('Error fetching user comments:', error);
+      toast.error('Failed to load your comments');
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
   const handleProfileImageClick = () => {
     fileInputRef.current.click();
   };
@@ -162,11 +212,26 @@ const ProfilePage = () => {
           setProfileImage(user.image_url); // Fallback to original image
         }
       }
-      setUsername(user?.name || ""); setSelectedCampusId(user?.campus_id || "");
+      setUsername(user?.name || ""); 
+      setSelectedCampusId(user?.campus_id || "");
     };
 
     loadAndResizeImage();
+    fetchUserPosts(); // Fetch user posts when component mounts or user changes
+    fetchUserComments(); // Fetch user comments when component mounts or user changes
   }, [user]); // Make sure user is included in the dependency array
+
+  // Close mobile menu when screen size changes
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) { // md breakpoint
+        setShowMobileMenu(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -179,196 +244,160 @@ const ProfilePage = () => {
               alt="Lost & Found Logo"
               className="h-10 w-10 rounded-full"
             />
-            <h1 className="text-2xl font-bold text-black">FAST Lost & Found</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-black">FAST Lost & Found</h1>
           </div>
-          <div className="flex-shrink-0 ml-auto mr-0">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-4 flex-shrink-0 ml-auto mr-0">
             <button
               onClick={() => navigate("/feed")}
-              className="bg-black text-white px-10 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
+              className="bg-black text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
             >
               Back to Feed
             </button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="p-2 rounded-md text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"
+            >
+              <i className="fas fa-bars text-xl"></i>
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Menu */}
+        {showMobileMenu && (
+          <div className="md:hidden bg-white border-t border-gray-100">
+            <div className="px-4 py-3 space-y-2">
+              <button
+                onClick={() => {
+                  navigate("/feed");
+                  setShowMobileMenu(false);
+                }}
+                className="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <i className="fas fa-home mr-3"></i>
+                Back to Feed
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Profile Section */}
-      <section className="py-16 bg-white">
+      <section className="py-8 bg-white">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+          {/* Profile Header */}
+          <div className="flex flex-col items-center text-center mb-8">
             {/* Profile Image */}
-            <div className="flex justify-center mb-8">
-              <div className="w-[128px] h-[128px] rounded-full overflow-hidden border-4 border-gray-200 shadow-md relative group">
-                {imageLoading ? (
-                  <div className="flex items-center justify-center w-full h-full bg-gray-200">
-                    <ClipLoader color="#000000" loading={true} size={40} />
+            <div className="w-[128px] h-[128px] rounded-full overflow-hidden border-4 border-gray-200 shadow-md relative group mb-6">
+              {imageLoading ? (
+                <div className="flex items-center justify-center w-full h-full bg-gray-200">
+                  <ClipLoader color="#000000" loading={true} size={40} />
+                </div>
+              ) : (
+                <>
+                  <img
+                    src={profileImage || "https://via.placeholder.com/100"}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                  <div
+                    className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full"
+                    onClick={handleProfileImageClick}
+                  >
+                    <MdAddAPhoto className="text-white text-3xl" />
                   </div>
-                ) : (
-                  <>
-                    <img
-                      src={profileImage || "https://via.placeholder.com/100"}
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
-                    <div
-                      className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full"
-                      onClick={handleProfileImageClick}
-                    >
-                      <MdAddAPhoto className="text-white text-3xl" />
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      ref={fileInputRef}
-                      className="hidden"
-                    />
-                  </>
-                )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    ref={fileInputRef}
+                    className="hidden"
+                  />
+                </>
+              )}
+            </div>
+
+            {/* Profile Name */}
+            <h2 className="text-2xl font-bold text-black mb-4">{username || user?.name}</h2>
+
+            {/* Stats */}
+            <div className="flex items-center justify-center space-x-8 mb-6">
+              <div className="text-center bg-gray-50 rounded-lg px-6 py-4 min-w-[80px]">
+                <div className="text-2xl font-bold text-black">{userPosts.length}</div>
+                <div className="text-sm text-gray-600">posts</div>
+              </div>
+              <div className="text-center bg-gray-50 rounded-lg px-6 py-4 min-w-[80px]">
+                <div className="text-2xl font-bold text-black">{userComments.length}</div>
+                <div className="text-sm text-gray-600">comments</div>
               </div>
             </div>
 
-            {/* User Information Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="bg-gray-50 rounded-2xl p-6 ">
-                <p className="text-sm text-gray-500 mb-2 font-medium">Roll Number</p>
-                <p className="text-lg font-semibold text-black">{user?.rollno}</p>
-              </div>
+            {/* Edit Profile Button */}
+            <button
+              onClick={() => setShowEditProfile(true)}
+              className="px-8 py-2 bg-gray-100 text-black font-medium rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Edit profile
+            </button>
+          </div>
 
-              <div className="bg-gray-50 rounded-2xl p-6 ">
-                <div className="flex justify-between items-center mb-2">
-                  <p className="text-sm text-gray-500 font-medium">Full Name</p>
-                  <button
-                    onClick={() => setIsEditingName((prev) => !prev)}
-                    className="text-xl text-black hover:text-gray-600 transition-colors"
-                  >
-                    <MdEdit />
-                  </button>
-                </div>
-
-                {isEditingName ? (
-                  <div className="flex items-center">
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      onBlur={() => setIsEditingName(false)}
-                      className="text-lg font-semibold w-full border border-gray-300 bg-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black transition"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          setisloading(true);
-                          handleNameSave(e);
-                        }
-                      }}
-                      autoFocus
-                    />
-                    {isloading && (
-                      <ClipLoader color="#000000" loading={isloading} size={20} className="ml-2" />
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-lg font-semibold text-black">{username}</p>
-                )}
-              </div>
-
-              <div className="bg-gray-50 rounded-2xl p-6 ">
-                <div className="flex justify-between items-center mb-2">
-                  <p className="text-sm text-gray-500 font-medium">Campus</p>
-                  <button
-                    onClick={() => setIsEditingCampus((prev) => !prev)}
-                    className="text-xl text-black hover:text-gray-600 transition-colors"
-                  >
-                    <MdEdit />
-                  </button>
-                </div>
-
-                {isEditingCampus ? (
-                  <div className="flex items-center">
-                    <select
-                      value={selectedCampusId}
-                      onChange={(e) => {
-                        const selectedId = e.target.value;
-                        const selectedName =
-                          e.target.options[e.target.selectedIndex].text;
-                        if (selectedId) {
-                          handleCampusSave(selectedId, selectedName);
-                        }
-                      }} onBlur={() => setIsEditingCampus(false)}
-                      className="text-lg font-semibold w-full border border-gray-300 bg-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black transition appearance-none"
-                      autoFocus
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                        backgroundPosition: 'right 0.5rem center',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: '1.5em 1.5em',
-                        paddingRight: '2.5rem'
-                      }}
-                    >
-                      <option value="">Select Campus</option>
-                      {campuses.map((campus) => (
-                        <option key={campus.campusID} value={campus.campusID}>
-                          {campus.campusName}
-                        </option>
-                      ))}
-                    </select>
-                    {isloading && (
-                      <ClipLoader color="#000000" loading={isloading} size={20} className="ml-2" />
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-lg font-semibold text-black">
-                    {user.campusName}
-                  </p>
-                )}
-              </div>
-
-              <div className="bg-gray-50 rounded-2xl p-6 ">
-                <p className="text-sm text-gray-500 mb-2 font-medium">Email Address</p>
-                <p className="text-lg font-semibold text-black">{user?.email}</p>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Tab Toggle for Mobile */}
+          <div className="flex justify-center mb-8">
+            <div className="bg-white rounded-xl p-1 shadow-sm border border-gray-200">
               <button
-                className="px-8 py-3 bg-black text-white font-semibold rounded-full hover:bg-gray-800 transition-all duration-300 hover:scale-105 transform shadow-md"
-                onClick={() => {
-                  localStorage.setItem('otpVerified', 'true');
-                  setShowChangePassword(true);
-                }}
+                onClick={() => setActiveTab('posts')}
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  activeTab === 'posts'
+                    ? 'bg-black text-white shadow-sm'
+                    : 'text-gray-600 hover:text-black hover:bg-gray-50'
+                }`}
               >
-                Change Password
+                <i className="fas fa-th-large mr-2"></i>
+                Posts
               </button>
               <button
-                className="px-8 py-3 text-white font-semibold rounded-full hover:bg-red-700 transition-all duration-300 hover:scale-105 transform shadow-md"
-                style={{ background: "#e50914" }}
-                onClick={() => handleLogout()}
+                onClick={() => setActiveTab('comments')}
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  activeTab === 'comments'
+                    ? 'bg-black text-white shadow-sm'
+                    : 'text-gray-600 hover:text-black hover:bg-gray-50'
+                }`}
               >
-                Log Out
+                <i className="fas fa-comments mr-2"></i>
+                Comments
               </button>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Account Statistics Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <h3 className="text-3xl font-bold text-center mb-12 text-black">Account Statistics</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-black text-white rounded-2xl p-8 text-center">
-              <div className="text-4xl font-bold mb-2">0</div>
-              <div className="text-gray-300 text-sm">Posts Created</div>
-            </div>
-            <div className="bg-black text-white rounded-2xl p-8 text-center">
-              <div className="text-4xl font-bold mb-2">0</div>
-              <div className="text-gray-300 text-sm">Items Recovered</div>
-            </div>
-            <div className="bg-black text-white rounded-2xl p-8 text-center">
-              <div className="text-4xl font-bold mb-2">0</div>
-              <div className="text-gray-300 text-sm">Total Comments</div>
-            </div>
-          </div>
+          
+          {/* Content based on active tab */}
+          {activeTab === 'posts' ? (
+            postsLoading ? (
+              <div className="flex justify-center items-center py-16">
+                <ClipLoader color="#000000" loading={true} size={40} />
+              </div>
+            ) : (
+              <UserPostsGrid 
+                userPosts={userPosts} 
+                onPostDeleted={handlePostDeleted}
+              />
+            )
+          ) : (
+            commentsLoading ? (
+              <div className="flex justify-center items-center py-16">
+                <ClipLoader color="#000000" loading={true} size={40} />
+              </div>
+            ) : (
+              <UserCommentsGrid 
+                userComments={userComments}
+                onCommentDeleted={handleCommentDeleted}
+              />
+            )
+          )}
         </div>
       </section>
 
@@ -396,9 +425,170 @@ const ProfilePage = () => {
         </div>
       </section>
 
+      {/* Edit Profile Modal */}
+      {showEditProfile && (
+        <div className="fixed inset-0 flex items-center justify-center z-20 bg-white bg-opacity-95">
+          <div className="bg-white rounded-xl shadow-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-black">Edit Profile</h2>
+              <button
+                onClick={() => setShowEditProfile(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <i className="fas fa-times text-xl"></i>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              {/* Profile Image Section */}
+              <div className="flex justify-center mb-8">
+                <div className="w-[128px] h-[128px] rounded-full overflow-hidden border-4 border-gray-200 shadow-md relative group">
+                  {imageLoading ? (
+                    <div className="flex items-center justify-center w-full h-full bg-gray-200">
+                      <ClipLoader color="#000000" loading={true} size={40} />
+                    </div>
+                  ) : (
+                    <>
+                      <img
+                        src={profileImage || "https://via.placeholder.com/100"}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                      <div
+                        className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full"
+                        onClick={handleProfileImageClick}
+                      >
+                        <MdAddAPhoto className="text-white text-3xl" />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* User Information Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8">
+                <div className="bg-gray-50 rounded-2xl p-4 md:p-6">
+                  <p className="text-sm text-gray-500 mb-2 font-medium">Roll Number</p>
+                  <p className="text-base md:text-lg font-semibold text-black break-words">{user?.rollno}</p>
+                </div>
+
+                <div className="bg-gray-50 rounded-2xl p-4 md:p-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm text-gray-500 font-medium">Full Name</p>
+                    <button
+                      onClick={() => setIsEditingName((prev) => !prev)}
+                      className="text-lg md:text-xl text-black hover:text-gray-600 transition-colors p-1"
+                    >
+                      <MdEdit />
+                    </button>
+                  </div>
+
+                  {isEditingName ? (
+                    <div className="flex items-center">
+                      <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        onBlur={() => setIsEditingName(false)}
+                        className="text-base md:text-lg font-semibold w-full border border-gray-300 bg-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition text-gray-900"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            setisloading(true);
+                            handleNameSave(e);
+                          }
+                        }}
+                        autoFocus
+                        placeholder="Enter your name"
+                      />
+                      {isloading && (
+                        <ClipLoader color="#000000" loading={isloading} size={20} className="ml-2" />
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-base md:text-lg font-semibold text-black break-words">{username}</p>
+                  )}
+                </div>
+
+                <div className="bg-gray-50 rounded-2xl p-4 md:p-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm text-gray-500 font-medium">Campus</p>
+                    <button
+                      onClick={() => setIsEditingCampus((prev) => !prev)}
+                      className="text-lg md:text-xl text-black hover:text-gray-600 transition-colors p-1"
+                    >
+                      <MdEdit />
+                    </button>
+                  </div>
+
+                  {isEditingCampus ? (
+                    <div className="flex items-center">
+                      <select
+                        value={selectedCampusId}
+                        onChange={(e) => {
+                          const selectedId = e.target.value;
+                          const selectedName =
+                            e.target.options[e.target.selectedIndex].text;
+                          if (selectedId) {
+                            handleCampusSave(selectedId, selectedName);
+                          }
+                        }} onBlur={() => setIsEditingCampus(false)}
+                        className="text-base md:text-lg font-semibold w-full border border-gray-300 bg-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition appearance-none text-gray-900"
+                        autoFocus
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                          backgroundPosition: 'right 0.5rem center',
+                          backgroundRepeat: 'no-repeat',
+                          backgroundSize: '1.5em 1.5em',
+                          paddingRight: '2.5rem'
+                        }}
+                      >
+                        <option value="">Select Campus</option>
+                        {campuses.map((campus) => (
+                          <option key={campus.campusID} value={campus.campusID}>
+                            {campus.campusName}
+                          </option>
+                        ))}
+                      </select>
+                      {isloading && (
+                        <ClipLoader color="#000000" loading={isloading} size={20} className="ml-2" />
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-base md:text-lg font-semibold text-black break-words">
+                      {user.campusName}
+                    </p>
+                  )}
+                </div>
+
+                <div className="bg-gray-50 rounded-2xl p-4 md:p-6">
+                  <p className="text-sm text-gray-500 mb-2 font-medium">Email Address</p>
+                  <p className="text-base md:text-lg font-semibold text-black break-all">{user?.email}</p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-center">
+                <button
+                  className="px-8 py-3 bg-black text-white font-semibold rounded-full hover:bg-gray-800 transition-all duration-300 hover:scale-105 transform shadow-md"
+                  onClick={() => {
+                    localStorage.setItem('otpVerified', 'true');
+                    setShowChangePassword(true);
+                    setShowEditProfile(false);
+                  }}
+                >
+                  Change Password
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Change Password Modal */}
       {showForgotPassword && (
-        <div className="fixed inset-0 flex items-center justify-center z-20 bg-white bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center z-20 bg-white bg-opacity-30 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
             <ChangePassword setShowChangePassword={setShowChangePassword} />
           </div>

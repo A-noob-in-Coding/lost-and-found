@@ -23,6 +23,26 @@ const AdminPage = () => {
   const [loginError, setLoginError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Global refresh function for all data
+  const handleRefresh = async () => {
+    switch (activeTab) {
+      case 'posts':
+        await fetchPosts();
+        toast.success('Posts refreshed');
+        break;
+      case 'comments':
+        await fetchComments();
+        toast.success('Comments refreshed');
+        break;
+      case 'categories':
+        await fetchCategories();
+        toast.success('Categories refreshed');
+        break;
+      default:
+        break;
+    }
+  };
+
   const loginAdmin = async (user, pass) => {
     try {
       setIsLoading(true);
@@ -228,45 +248,66 @@ const AdminPage = () => {
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Admin Login</h2>
-          <form onSubmit={handleLoginSubmit} className="space-y-4">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="bg-white/95 backdrop-blur-sm p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
+          {/* Logo and Title */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <img
+                src="/lf_logo.png"
+                alt="Lost & Found Logo"
+                className="h-16 w-16 rounded-full shadow-lg"
+              />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Admin Login</h2>
+            <p className="text-sm text-gray-600">Access the admin dashboard</p>
+          </div>
+          
+          <form onSubmit={handleLoginSubmit} className="space-y-6">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">Username</label>
               <input
                 type="text"
                 id="username"
                 name="username"
                 value={loginData.username}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                 placeholder="Enter username"
                 disabled={isLoading}
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">Password</label>
               <input
                 type="password"
                 id="password"
                 name="password"
                 value={loginData.password}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                 placeholder="Enter password"
                 disabled={isLoading}
               />
             </div>
             {loginError && (
-              <div className="text-red-600 text-sm mt-2">{loginError}</div>
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                {loginError}
+              </div>
             )}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-black text-white py-3 px-4 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 font-medium shadow-lg"
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? (
+                <span className="flex items-center justify-center">
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  Signing in...
+                </span>
+              ) : (
+                'Sign In'
+              )}
             </button>
           </form>
         </div>
@@ -375,6 +416,20 @@ const AdminPage = () => {
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* Refresh Button */}
+          <div className="flex justify-center">
+            <button
+              onClick={handleRefresh}
+              disabled={postsLoading || commentsLoading || categoriesLoading}
+              className="flex items-center space-x-2 bg-black text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i className={`fas fa-sync-alt ${(postsLoading || commentsLoading || categoriesLoading) ? 'fa-spin' : ''}`}></i>
+              <span className="text-sm font-medium">
+                {(postsLoading || commentsLoading || categoriesLoading) ? 'Refreshing...' : 'Refresh'}
+              </span>
+            </button>
           </div>
         </div>
       </section>

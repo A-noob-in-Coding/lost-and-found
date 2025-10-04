@@ -9,6 +9,7 @@ import {
   updateFoundPost,
   deleteFoundPost,
   getPostData,
+  getRecent6Posts,
 } from "../controllers/postController.js";
 
 const postRouter = express.Router();
@@ -25,5 +26,6 @@ postRouter.get("/found", getFoundPost);
 postRouter.put("/found/:postId", updateFoundPost);
 postRouter.delete("/found/:postId", deleteFoundPost);
 postRouter.get('/getPostsData',getPostData);
+postRouter.get('/recent6', getRecent6Posts);
 
 export default postRouter;

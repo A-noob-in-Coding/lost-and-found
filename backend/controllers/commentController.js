@@ -1,4 +1,4 @@
-import { addFoundCommentService, addLostCommentService, deleteFoundCommentService, deleteLostCommentService, getAllFoundCommentsService, getAllLostCommentsService, verifyFoundCommentService, verifyLostCommentService, getAdminAllCommentsService, deleteAdminFoundCommentService, deleteAdminLostCommentService, deleteUserCommentByTextService} from "../service/commentService.js"
+import { addFoundCommentService, addLostCommentService, deleteFoundCommentService, deleteLostCommentService, getAllFoundCommentsService, getAllLostCommentsService, verifyFoundCommentService, verifyLostCommentService, getAdminAllCommentsService, deleteAdminFoundCommentService, deleteAdminLostCommentService, deleteUserCommentByTextService, getUserCommentsService} from "../service/commentService.js"
 
 export const addLostComment = async(req,res) =>{
   const {lpostId,rollNo,comment} = req.body
@@ -182,6 +182,22 @@ export const deleteUserCommentByText = async (req, res) => {
     if (error.message === 'Comment not found') {
       return res.status(404).json({ message: error.message });
     }
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getUserComments = async (req, res) => {
+  try {
+    const { rollno } = req.params;
+
+    if (!rollno) {
+      return res.status(400).json({ message: "Roll number is required" });
+    }
+
+    const comments = await getUserCommentsService(rollno);
+    return res.status(200).json(comments);
+  } catch (error) {
+    console.error("Error in getUserComments controller:", error.message);
     return res.status(500).json({ message: "Internal server error" });
   }
 };

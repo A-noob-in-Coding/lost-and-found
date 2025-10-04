@@ -153,7 +153,7 @@ export default function Filter({
           {/* Refresh Button */}
           <div className="flex justify-center">
             <button
-              className="px-8 py-3 rounded-full text-sm font-bold whitespace-nowrap cursor-pointer flex items-center gap-2 bg-gray-600 text-white hover:bg-black transition-all duration-200"
+              className="px-8 py-3 rounded-full text-sm font-bold whitespace-nowrap cursor-pointer flex items-center gap-2 bg-black text-white hover:bg-gray-800 transition-all duration-200"
               onClick={handleRefresh}
             >
               <MdRefresh size={18} />
@@ -273,7 +273,7 @@ export default function Filter({
             {/* Refresh Button */}
             <div>
               <button
-                className="px-6 py-3 rounded-full text-sm font-bold whitespace-nowrap cursor-pointer flex items-center gap-2 bg-gray-600 text-white hover:bg-black transition-all duration-200"
+                className="px-6 py-3 rounded-full text-sm font-bold whitespace-nowrap cursor-pointer flex items-center gap-2 bg-black text-white hover:bg-gray-800 transition-all duration-200"
                 onClick={handleRefresh}
               >
                 <MdRefresh size={16} />

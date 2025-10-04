@@ -386,24 +386,47 @@ export const getPostDataService = async () => {
 
 export const getPostsByRollNoService = async (rollno) => {
   try {
-    // Simple query to get just the post IDs for a specific roll number
-    const getPostIdsQuery = `
-      SELECT lpost_id AS post_id, 'Lost' AS post_type 
-      FROM lostpost 
-      WHERE rollno = $1
+    const getPostsQuery = `
+      SELECT
+        lp.lpost_id AS id,
+        lp."campusID",
+        'Lost' AS type,
+        i.title,
+        i.category_id,
+        i.description,
+        i.location,
+        to_char(lp.created_at, 'YYYY-MM-DD HH24:MI:SS') AS date,
+        i.image_url AS image,
+        lp.is_verified AS isVerified
+      FROM lostpost lp
+      JOIN item i ON lp.item_id = i.item_id
+      WHERE lp.rollno = $1
       
       UNION ALL
       
-      SELECT f_post_id AS post_id, 'Found' AS post_type 
-      FROM foundpost 
-      WHERE rollno = $1
+      SELECT
+        fp.f_post_id AS id,
+        fp."campusID",
+        'Found' AS type,
+        i.title,
+        i.category_id,
+        i.description,
+        i.location,
+        to_char(fp.created_at, 'YYYY-MM-DD HH24:MI:SS') AS date,
+        i.image_url AS image,
+        fp.is_verified AS isVerified
+      FROM foundpost fp
+      JOIN item i ON fp.item_id = i.item_id
+      WHERE fp.rollno = $1
+      
+      ORDER BY date DESC
     `;
 
-    const { rows } = await pool.query(getPostIdsQuery, [rollno]);
+    const { rows } = await pool.query(getPostsQuery, [rollno]);
     return rows;
   } catch (error) {
-    console.error("Error fetching post IDs by roll number:", error);
-    throw new Error("Failed to fetch post IDs by roll number: " + error.message);
+    console.error("Error fetching posts by roll number:", error);
+    throw new Error("Failed to fetch posts by roll number: " + error.message);
   }
 };
 
@@ -456,5 +479,94 @@ export const getUnverifiedPostsByRollNoService = async (rollno) => {
   } catch (error) {
     console.error("Error fetching unverified posts by roll number:", error);
     throw new Error("Failed to fetch unverified posts by roll number: " + error.message);
+  }
+};
+
+export const getRecent6PostsService = async () => {
+  try {
+    const query = `
+      SELECT
+        lp.lpost_id AS id,
+        lp."campusID",
+        'Lost' AS type,
+        i.title,
+        i.description,
+        i.location,
+        to_char(lp.created_at, 'YYYY-MM-DD HH24:MI:SS') AS date,
+        i.image_url AS image,
+        c."campusName" AS campus,
+        u.name AS userName
+      FROM lostpost lp
+      JOIN "User" u ON lp.rollno = u.rollno
+      JOIN item i ON lp.item_id = i.item_id
+      JOIN campus c ON lp."campusID" = c."campusID"
+      WHERE lp.is_verified = true
+
+      UNION ALL
+
+      SELECT
+        fp.f_post_id AS id,
+        fp."campusID",
+        'Found' AS type,
+        i.title,
+        i.description,
+        i.location,
+        to_char(fp.created_at, 'YYYY-MM-DD HH24:MI:SS') AS date,
+        i.image_url AS image,
+        c."campusName" AS campus,
+        u.name AS userName
+      FROM foundpost fp
+      JOIN "User" u ON fp.rollno = u.rollno
+      JOIN item i ON fp.item_id = i.item_id
+      JOIN campus c ON fp."campusID" = c."campusID"
+      WHERE fp.is_verified = true
+
+      ORDER BY date DESC
+      LIMIT 6
+    `;
+
+    const { rows } = await pool.query(query);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching recent 6 posts:", error);
+    throw new Error("Failed to fetch recent 6 posts: " + error.message);
+  }
+};
+
+export const getStatisticsService = async () => {
+  try {
+    // Get total verified posts (lost + found)
+    const totalPostsQuery = `
+      SELECT 
+        (SELECT COUNT(*) FROM lostpost WHERE is_verified = true) +
+        (SELECT COUNT(*) FROM foundpost WHERE is_verified = true) AS total_posts
+    `;
+
+    // Get total users
+    const totalUsersQuery = `
+      SELECT COUNT(*) AS total_users FROM "User"
+    `;
+
+    // Get total verified comments (lost + found)
+    const totalCommentsQuery = `
+      SELECT 
+        (SELECT COUNT(*) FROM lostpostcomment WHERE is_verified = true) +
+        (SELECT COUNT(*) FROM foundpostcomment WHERE is_verified = true) AS total_comments
+    `;
+
+    const [postsResult, usersResult, commentsResult] = await Promise.all([
+      pool.query(totalPostsQuery),
+      pool.query(totalUsersQuery),
+      pool.query(totalCommentsQuery)
+    ]);
+
+    return {
+      totalPosts: parseInt(postsResult.rows[0].total_posts),
+      totalUsers: parseInt(usersResult.rows[0].total_users),
+      totalComments: parseInt(commentsResult.rows[0].total_comments)
+    };
+  } catch (error) {
+    console.error("Error fetching statistics:", error);
+    throw new Error("Failed to fetch statistics: " + error.message);
   }
 };

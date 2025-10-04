@@ -171,3 +171,45 @@ export const deleteUserCommentByTextService = async (rollNo, commentText, type) 
     throw new Error(error.message);
   }
 };
+
+export const getUserCommentsService = async (rollno) => {
+  try {
+    const query = `
+      SELECT 
+        lc.l_comment_id AS id,
+        lc.comment,
+        lc.is_verified AS isVerified,
+        to_char(lc.created_at, 'YYYY-MM-DD HH24:MI:SS') AS date,
+        'Lost' AS postType,
+        i.title AS postTitle,
+        lp.lpost_id AS postId
+      FROM lostpostcomment lc
+      JOIN lostpost lp ON lc.l_post_id = lp.lpost_id
+      JOIN item i ON lp.item_id = i.item_id
+      WHERE lc.rollno = $1
+      
+      UNION ALL
+      
+      SELECT 
+        fc.f_comment_id AS id,
+        fc.comment,
+        fc.is_verified AS isVerified,
+        to_char(fc.created_at, 'YYYY-MM-DD HH24:MI:SS') AS date,
+        'Found' AS postType,
+        i.title AS postTitle,
+        fp.f_post_id AS postId
+      FROM foundpostcomment fc
+      JOIN foundpost fp ON fc.f_post_id = fp.f_post_id
+      JOIN item i ON fp.item_id = i.item_id
+      WHERE fc.rollno = $1
+      
+      ORDER BY date DESC
+    `;
+
+    const result = await pool.query(query, [rollno]);
+    return result.rows;
+  } catch (error) {
+    console.log(`Error fetching user comments: ${error.message}`);
+    throw new Error(error.message);
+  }
+};

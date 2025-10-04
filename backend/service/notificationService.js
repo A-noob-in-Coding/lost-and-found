@@ -2,6 +2,55 @@
 import pool from '../config/db.js';
 import nodemailer from 'nodemailer';
 
+// Function to store notification in database
+export const storeNotification = async (senderEmail, receiverEmail) => {
+  try {
+    const query = 'INSERT INTO notification (sender, receiver) VALUES ($1, $2) RETURNING *';
+    const result = await pool.query(query, [senderEmail, receiverEmail]);
+    console.log('Notification stored in database:', result.rows[0]);
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error storing notification:', error);
+    throw new Error(`Failed to store notification: ${error.message}`);
+  }
+};
+
+// Function to get notifications for a user
+export const getNotificationsByReceiver = async (receiverEmail) => {
+  try {
+    const query = 'SELECT * FROM notification WHERE receiver = $1 ORDER BY id DESC';
+    const result = await pool.query(query, [receiverEmail]);
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    throw new Error(`Failed to fetch notifications: ${error.message}`);
+  }
+};
+
+// Function to get notification count for a user
+export const getNotificationCount = async (receiverEmail) => {
+  try {
+    const query = 'SELECT COUNT(*) FROM notification WHERE receiver = $1';
+    const result = await pool.query(query, [receiverEmail]);
+    return parseInt(result.rows[0].count);
+  } catch (error) {
+    console.error('Error getting notification count:', error);
+    throw new Error(`Failed to get notification count: ${error.message}`);
+  }
+};
+
+// Function to delete a notification
+export const deleteNotification = async (notificationId) => {
+  try {
+    const query = 'DELETE FROM notification WHERE id = $1 RETURNING *';
+    const result = await pool.query(query, [notificationId]);
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error deleting notification:', error);
+    throw new Error(`Failed to delete notification: ${error.message}`);
+  }
+};
+
 // Function to send email notification
 export const sendEmailNotification = async (recipientEmail, subject, htmlContent) => {
   try {
