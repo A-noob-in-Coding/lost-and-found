@@ -229,13 +229,13 @@ export default function ContentGrid({ filteredItems }) {
             }
           }}
         >
-          <div className="bg-white rounded-xl max-w-6xl w-full max-h-[95vh] md:max-h-[90vh] flex flex-col md:flex-row overflow-hidden">
+          <div className="bg-white rounded-2xl w-[90vw] h-[90vh] max-w-7xl flex flex-col md:flex-row overflow-hidden shadow-2xl">
             {/* Left side - Post (Top on mobile, Left on desktop) */}
-            <div className="w-full md:w-1/2 h-64 md:h-auto bg-gray-100 flex items-center justify-center">
+            <div className="w-full md:w-1/2 h-64 md:h-full bg-[#E5E7EB] relative overflow-hidden">
               <img
                 src={selectedItemForComments.image || "/no_prev_img.png"}
                 alt={selectedItemForComments.title}
-                className="max-w-full max-h-full object-contain"
+                className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
             
