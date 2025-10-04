@@ -17,7 +17,7 @@ export const Register = () => {
   return (
     <div className="min-h-screen bg-white text-black">
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-4xl w-full bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-200">
+        <div className={`${showOtpPage ? 'max-w-md' : 'max-w-4xl'} w-full bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-200`}>
           <div className="p-8">
             {/* Back Button */}
             <div className="flex justify-start mb-4">

@@ -41,6 +41,20 @@ export default function OtpPage({
     run();
   }, [mode, formData]);
 
+  const handleChange = (element, index) => {
+    if (isNaN(element.value)) return false;
+
+    setOtp([...otp.map((d, idx) => (idx === index ? element.value : d))]);
+
+    // Move focus to next input if current field is filled
+    if (element.value !== "" && index < 5) {
+      const nextInput = element.nextSibling;
+      if (nextInput) {
+        nextInput.focus();
+      }
+    }
+  };
+
   const handleKeyDown = (e, index) => {
     // Navigate to previous input on backspace if current field is empty
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
@@ -157,72 +171,76 @@ export default function OtpPage({
   };
 
   return (
-    <div className="p-6 w-full">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-semibold text-black">
-          {mode === "register" ? "Verify Registration" : "Verify Reset Password"}
-        </h3>
-        <button
-          onClick={() => setShowOtpPage(false)}
-          className="text-black hover:text-gray-800"
-        >
-          <FaTimes />
-        </button>
-      </div>
+    <div className="flex justify-center w-full">
+      <div className="max-w-md w-full">
+        <div className="p-6">
+          <div className="relative mb-6">
+            <h3 className="text-xl font-semibold text-black text-center">
+              {mode === "register" ? "Verify Registration" : "Verify Reset Password"}
+            </h3>
+            <button
+              onClick={() => setShowOtpPage(false)}
+              className="absolute top-0 right-0 text-black hover:text-gray-800"
+            >
+              <FaTimes />
+            </button>
+          </div>
 
-      <p className="text-gray-600 mb-6 text-center">
-        Enter the 6-digit OTP sent to{" "}
-        <span className="font-medium">{email}</span>
-      </p>
+          <p className="text-gray-600 mb-6 text-center">
+            Enter the 6-digit OTP sent to{" "}
+            <span className="font-medium">{email}</span>
+          </p>
 
-      <div className="flex justify-center items-center gap-3 mb-6">
-        {otp.map((data, index) => (
-          <input
-            key={index}
-            type="text"
-            maxLength="1"
-            value={data}
-            onChange={(e) => handleChange(e.target, index)}
-            onKeyDown={(e) => handleKeyDown(e, index)}
-            onPaste={index === 0 ? handlePaste : null}
-            className="w-10 h-12 text-center text-xl font-semibold bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
-          />
-        ))}
-      </div>
+          <div className="flex justify-center items-center gap-3 mb-6">
+            {otp.map((data, index) => (
+              <input
+                key={index}
+                type="text"
+                maxLength="1"
+                value={data}
+                onChange={(e) => handleChange(e.target, index)}
+                onKeyDown={(e) => handleKeyDown(e, index)}
+                onPaste={index === 0 ? handlePaste : null}
+                className="w-10 h-12 text-center text-xl font-semibold bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
+              />
+            ))}
+          </div>
 
-      <button
-        className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-300 cursor-pointer flex items-center justify-center space-x-2 shadow-md hover:shadow-lg"
-        onClick={handleSubmit}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <>
-            <i className="fas fa-spinner fa-spin mr-2"></i>
-            <span>Verifying...</span>
-          </>
-        ) : (
-          "Verify OTP"
-        )}
-      </button>
+          <button
+            className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-300 cursor-pointer flex items-center justify-center space-x-2 shadow-md hover:shadow-lg"
+            onClick={handleSubmit}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <i className="fas fa-spinner fa-spin mr-2"></i>
+                <span>Verifying...</span>
+              </>
+            ) : (
+              "Verify OTP"
+            )}
+          </button>
 
-      <div className="mt-4 text-center">
-        <button
-          className="text-sm text-gray-500 hover:text-black transition-colors flex items-center justify-center mx-auto"
-          onClick={handleResendOtp}
-          disabled={isResending}
-        >
-          {isResending ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span>Resending...</span>
-            </>
-          ) : (
-            "Didn't receive code? Resend OTP"
-          )}
-        </button>
+          <div className="mt-4 text-center">
+            <button
+              className="text-sm text-gray-500 hover:text-black transition-colors flex items-center justify-center mx-auto"
+              onClick={handleResendOtp}
+              disabled={isResending}
+            >
+              {isResending ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Resending...</span>
+                </>
+              ) : (
+                "Didn't receive code? Resend OTP"
+              )}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

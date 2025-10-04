@@ -5,7 +5,6 @@ import { notificationService } from "../services/notificationService.js";
 import toast from 'react-hot-toast';
 import { useUtil } from "../context/utilContext";
 import { authService } from "../services/authService";
-import { notificationService } from "../services/notificationService";
 
 export default function ContentGrid({ filteredItems }) {
   const { campuses } = useUtil()
