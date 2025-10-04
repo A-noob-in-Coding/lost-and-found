@@ -14,7 +14,7 @@ export default function HowItWorks() {
   const steps = [
     {
       title: "Create an Account",
-      description: "Sign up using your FAST NUCES email address and student ID to join our community.",
+      description: "Sign up using your FAST NUCES email address to join our community.",
       icon: "fa-user-plus"
     },
     {
@@ -83,7 +83,7 @@ export default function HowItWorks() {
           <div className="flex-shrink-0 ml-auto mr-0">
             {/* Desktop Home Button - Hidden on mobile */}
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/feed")}
               className="hidden md:block bg-black text-white px-10 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
             >
               Home
@@ -151,26 +151,6 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      {/* Success Stories Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4">
-          <h3 className="text-3xl font-bold text-center mb-12 text-black">Success Stories</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
-              <p className="text-gray-600 italic mb-4 leading-relaxed">
-                "I lost my laptop in the CS lab and was panicking about my assignments. Within hours of posting on the platform, someone had found it and messaged me. The process was so simple!"
-              </p>
-              <p className="font-semibold text-black">— Aisha K., Computer Science</p>
-            </div>
-            <div className="bg-gray-50 rounded-2xl p-6 border-l-4 border-black">
-              <p className="text-gray-600 italic mb-4 leading-relaxed">
-                "Found someone's wallet in the cafeteria and wasn't sure what to do. Posted it on Lost & Found and connected with the owner within minutes. They were so relieved!"
-              </p>
-              <p className="font-semibold text-black">— Hassan T., Electrical Engineering</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Statistics Section */}
       <section className="py-16 bg-gray-50">

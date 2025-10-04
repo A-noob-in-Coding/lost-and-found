@@ -54,7 +54,7 @@ export default function AboutUs() {
           <div className="flex-shrink-0 ml-auto mr-0">
             {/* Desktop Home Button - Hidden on mobile */}
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/feed")}
               className="hidden md:block bg-black text-white px-10 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
             >
               Home
@@ -97,17 +97,67 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* Story Section */}
+      {/* The Story Behind Our Solution */}
       <section className="py-16 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h3 className="text-3xl font-bold text-black mb-8">Our Story</h3>
-          <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
-            <p className="text-gray-600 leading-relaxed mb-6">
-              As students of FAST NUCES, we experienced firsthand the frustration of losing items on campus and the inefficient process of trying to recover them. The existing solutions were fragmented - lost items were reported on different WhatsApp groups, Facebook pages, and notice boards around campus.
+        <div className="max-w-6xl mx-auto px-4">
+          <h3 className="text-3xl font-bold text-center mb-6 text-black">The Story Behind Our Solution</h3>
+          <p className="text-lg text-gray-600 text-center mb-12 max-w-4xl mx-auto">
+            Our platform was born from real frustrations experienced by FAST NUCES students dealing with lost and found items.
+          </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Ahmad's Perspective */}
+            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-2xl p-8 border-l-4 border-red-500">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-red-500 text-white rounded-full flex items-center justify-center mr-4">
+                  <i className="fas fa-envelope text-lg"></i>
+                </div>
+                <h4 className="text-xl font-bold text-black">Ahmad's Email Struggle</h4>
+              </div>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                "I was constantly receiving unorganized emails from the university about lost and found items. The emails had no appealing UI, were scattered across multiple messages, and required a lot of time to process and understand."
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                "The worst part? Email responses took 1-2 days, which meant by the time someone replied, items might already be gone or the situation had changed completely."
+              </p>
+              <div className="mt-4 text-sm text-red-700 font-medium">
+                — Muhammad Ahmad Butt, Software Engineering
+              </div>
+            </div>
+
+            {/* Abdur's Perspective */}
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 border-l-4 border-green-500">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center mr-4">
+                  <i className="fab fa-whatsapp text-lg"></i>
+                </div>
+                <h4 className="text-xl font-bold text-black">Abdur's WhatsApp Limitation</h4>
+              </div>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                "I found WhatsApp groups to be better than emails for quick communication, but they still weren't the complete solution. Messages would get buried, there was no proper organization, and it was hard to track items systematically."
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                "That's when we realized we needed a dedicated platform - something that combined the speed of WhatsApp with proper organization and tracking capabilities."
+              </p>
+              <div className="mt-4 text-sm text-green-700 font-medium">
+                — Abd ur Rehman, Software Engineering
+              </div>
+            </div>
+          </div>
+
+          {/* Solution Section */}
+          <div className="mt-12 bg-gradient-to-r from-black to-gray-800 text-white rounded-2xl p-8 text-center">
+            <h4 className="text-2xl font-bold mb-4">Our Solution</h4>
+            <p className="text-gray-200 leading-relaxed max-w-4xl mx-auto">
+              We combined our experiences to create a dedicated Lost & Found platform that offers instant communication, 
+              organized item tracking, appealing user interface, and proper categorization - solving the problems we 
+              faced with both email systems and WhatsApp groups.
             </p>
-            <p className="text-gray-600 leading-relaxed">
-              In 2025, we decided to solve this problem by creating a centralized digital platform specifically designed for our campus community. Our platform makes it easy to report lost items, post found items, and connect the two parties quickly and securely.
-            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-4">
+              <span className="bg-white/20 px-4 py-2 rounded-full text-sm">Instant Communication</span>
+              <span className="bg-white/20 px-4 py-2 rounded-full text-sm">Organized Tracking</span>
+              <span className="bg-white/20 px-4 py-2 rounded-full text-sm">Beautiful UI</span>
+              <span className="bg-white/20 px-4 py-2 rounded-full text-sm">Smart Categories</span>
+            </div>
           </div>
         </div>
       </section>
@@ -189,25 +239,7 @@ export default function AboutUs() {
           </div>
         </div>
       </section>      {/* Statistics Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <h3 className="text-3xl font-bold text-center mb-12 text-black">Our Impact</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-black text-white rounded-2xl p-8 text-center">
-              <div className="text-4xl font-bold mb-2">500+</div>
-              <div className="text-gray-300 text-sm">Items Recovered</div>
-            </div>
-            <div className="bg-black text-white rounded-2xl p-8 text-center">
-              <div className="text-4xl font-bold mb-2">2,000+</div>
-              <div className="text-gray-300 text-sm">Active Users</div>
-            </div>
-            <div className="bg-black text-white rounded-2xl p-8 text-center">
-              <div className="text-4xl font-bold mb-2">85%</div>
-              <div className="text-gray-300 text-sm">Recovery Rate</div>
-            </div>
-          </div>
-        </div>
-      </section>
+    
 
       {/* Values Section */}
       <section className="py-16 bg-white">

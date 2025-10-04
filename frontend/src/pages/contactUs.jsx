@@ -53,13 +53,13 @@ export default function ContactUs() {
     {
       title: "Email Support",
       description: "Get in touch with our support team",
-      contact: "support@fastlostfound.com",
+      contact: "lostandfound.fastnuces@gmail.com",
       icon: "fa-envelope"
     },
     {
       title: "Campus Office",
       description: "Visit us during business hours",
-      contact: "Student Services Center, FAST NUCES",
+      contact: "Student Center, FAST NUCES",
       icon: "fa-map-marker-alt"
     },
     {
@@ -91,7 +91,7 @@ export default function ContactUs() {
           <div className="flex-shrink-0 ml-auto mr-0">
             {/* Desktop Home Button - Hidden on mobile */}
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/feed")}
               className="hidden md:block bg-black text-white px-10 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300 hover:scale-110 transform"
             >
               Home
