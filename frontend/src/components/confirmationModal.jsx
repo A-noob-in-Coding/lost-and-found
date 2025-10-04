@@ -1,106 +1,102 @@
-import React from 'react';
+import { useEffect } from 'react';
 
-const ConfirmationModal = ({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  title = "Confirm Action", 
-  message = "Are you sure you want to proceed?", 
-  confirmText = "Confirm", 
+export default function ConfirmationModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  confirmText = "Confirm",
   cancelText = "Cancel",
-  type = "danger" // danger, warning, info
-}) => {
+  type = "default" // "danger", "warning", "default"
+}) {
+  // Close modal on Escape key press
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
-  const getIconAndColor = () => {
+  // Define styles based on type
+  const getTypeStyles = () => {
     switch (type) {
       case 'danger':
         return {
-          icon: 'fas fa-exclamation-triangle',
+          iconBg: 'bg-red-100',
           iconColor: 'text-red-600',
-          confirmButtonColor: 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+          icon: 'fa-exclamation-triangle',
+          confirmBg: 'bg-red-600 hover:bg-red-700'
         };
       case 'warning':
         return {
-          icon: 'fas fa-exclamation-circle',
-          iconColor: 'text-yellow-600',
-          confirmButtonColor: 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500'
-        };
-      case 'info':
-        return {
-          icon: 'fas fa-info-circle',
-          iconColor: 'text-blue-600',
-          confirmButtonColor: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+          iconBg: 'bg-red-100',
+          iconColor: 'text-red-600',
+          icon: 'fa-exclamation-triangle',
+          confirmBg: 'bg-red-600 hover:bg-red-700'
         };
       default:
         return {
-          icon: 'fas fa-exclamation-triangle',
-          iconColor: 'text-red-600',
-          confirmButtonColor: 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+          iconBg: 'bg-blue-100',
+          iconColor: 'text-blue-600',
+          icon: 'fa-question-circle',
+          confirmBg: 'bg-blue-600 hover:bg-blue-700'
         };
     }
   };
 
-  const { icon, iconColor, confirmButtonColor } = getIconAndColor();
-
-  const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  const styles = getTypeStyles();
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={handleBackdropClick}
-    >
-      {/* Backdrop with enhanced blur effect */}
-      <div 
-       className="absolute inset-0 bg-white/20 backdrop-blur-md"
-        style={{ backdropFilter: 'blur(20px)' }}
-      ></div>
-      
-      {/* Modal Content */}
-      <div 
-        className="relative bg-white bg-opacity-95 backdrop-blur-sm rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 scale-100"
-        style={{ backdropFilter: 'blur(10px)' }}
-      >
-        {/* Modal Header */}
-        <div className="flex flex-col items-center justify-center pt-8 px-6">
-          {/* Icon */}
-          <div className={`w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4`}>
-            <i className={`${icon} ${iconColor} text-2xl`}></i>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50">
+      <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl max-w-md w-full mx-auto transform transition-all border border-white/20">
+        {/* Icon */}
+        <div className="flex items-center justify-center pt-6 pb-2">
+          <div className={`${styles.iconBg} rounded-full p-3`}>
+            <i className={`fas ${styles.icon} ${styles.iconColor} text-xl`}></i>
           </div>
-          
-          {/* Title */}
-          <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
-            {title}
-          </h3>
-          
-          {/* Message */}
-          <p className="text-gray-600 text-center text-sm leading-relaxed">
-            {message}
-          </p>
         </div>
 
-        {/* Modal Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 p-6 pt-8">
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
-          >
-            {cancelText}
-          </button>
-          <button
-            onClick={onConfirm}
-            className={`flex-1 px-4 py-3 text-white ${confirmButtonColor} rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2`}
-          >
-            {confirmText}
-          </button>
+        {/* Content */}
+        <div className="px-6 pb-6">
+          <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
+            {title}
+          </h3>
+          <p className="text-sm text-gray-600 text-center mb-6">
+            {message}
+          </p>
+
+          {/* Actions */}
+          <div className="flex space-x-3">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+            >
+              {cancelText}
+            </button>
+            <button
+              onClick={onConfirm}
+              className={`flex-1 px-4 py-3 ${styles.confirmBg} text-white rounded-xl font-medium transition-colors`}
+            >
+              {confirmText}
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default ConfirmationModal;
+}

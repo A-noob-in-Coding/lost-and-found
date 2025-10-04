@@ -3,32 +3,21 @@ import CommentForm from "./commentForm";
 import { useAuth } from "../context/authContext";
 import { notificationService } from "../services/notificationService.js";
 import toast from 'react-hot-toast';
-import { FaCheck, FaEllipsisV, FaTrash } from "react-icons/fa";
 import { useUtil } from "../context/utilContext";
-export default function ContentGrid({ filteredItems, onDeletePost }) {
+import { authService } from "../services/authService";
+import { notificationService } from "../services/notificationService";
+
+export default function ContentGrid({ filteredItems }) {
   const { campuses } = useUtil()
-  const [showDropdown, setShowDropdown] = useState(null);
   const [expandedComments, setExpandedComments] = useState(null);
-  const [commentText, setCommentText] = useState("");
   const [loadingStates, setLoadingStates] = useState({});
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const filters = ["All", "Lost", "Found", "My Posts"];
-  const [selectedFilter, setSelectedFilter] = useState("All");
-  const [items, setItems] = useState(filteredItems);
-  const [showFilters, setShowFilters] = useState(false);
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
   const { user } = useAuth();
+
   const campusMap = useMemo(
     () => Object.fromEntries(campuses.map(c => [c.campusID, c.campusName])),
     [campuses]
   );
-  const toggleDropdown = (itemId) => {
-    if (showDropdown === itemId) {
-      setShowDropdown(null);
-    } else {
-      setShowDropdown(itemId);
-    }
-  };
 
   const toggleComments = (itemId) => {
     if (expandedComments === itemId) {
@@ -51,59 +40,23 @@ export default function ContentGrid({ filteredItems, onDeletePost }) {
       [itemId]: isLoading
     }));
   };
-
-  const handleDeletePost = async (postId, postType) => {
-    setItemLoading(postId, true);
-    try {
-      if (onDeletePost) {
-        await onDeletePost(postId, postType);
-      } else {
-        const endpoint = `http://localhost:5000/api/user/posts/${postType.toLowerCase()}/${postId}`;
-        const response = await fetch(endpoint, {
-          method: 'DELETE'
-        });
-
-        if (response.ok) {
-          toast.success("Post deleted successfully!");
-          // Refresh the page to update the post list
-          window.location.reload();
-        } else {
-          const errorData = await response.json();
-          toast.error(errorData.message || "Failed to delete post");
-        }
-      }
-    } catch (error) {
-      console.error("Error deleting post:", error);
-      toast.error("An error occurred while deleting the post");
-    } finally {
-      setItemLoading(postId, false);
-    }
-  };
+  // this is claim/found action
 
   const handleAction = async (action, type, item) => {
     setItemLoading(item.id, true);
     try {
-      // Check if user exists before proceeding
       if (!user || !user.email) {
-        toast.error('Please log in to perform this action');
+        toast.error("Please log in to perform this action");
         setItemLoading(item.id, false);
         return;
       }
 
-      // Get current user's email from auth context
       const senderEmail = user.email;
       const itemTitle = item.title;
-
-      // Get receiver's email by making a request to the backend to fetch it by roll number
       const receiverRollno = item.user.rollNumber;
 
-      const userResponse = await fetch(`http://localhost:5000/api/users/${receiverRollno}`);
-      if (!userResponse.ok) {
-        throw new Error('Failed to fetch receiver\'s information');
-      }
-
-      const userData = await userResponse.json();
-      const receiverEmail = userData.email;
+      const { email: receiverEmail } =
+        await authService.getUserByRollNumber(receiverRollno)
 
       if (action === "Found" && type === "Lost") {
         // Send found notification using service
@@ -133,51 +86,10 @@ export default function ContentGrid({ filteredItems, onDeletePost }) {
       }
       setShowDropdown(null);
     } catch (error) {
-      console.error('Error sending notification:', error);
-      toast.error('An error occurred while sending the notification.');
+      console.error("Error sending notification:", error);
+      toast.error("An error occurred while sending the notification.");
     } finally {
       setItemLoading(item.id, false);
-    }
-  };
-
-  const handleFilterClick = (filter) => {
-    setSelectedFilter(filter);
-    setShowFilters(false);
-  };
-
-  const handleDeleteComment = async (comment, type) => {
-    try {
-      // Check if user exists before proceeding
-      if (!user || !user.rollno) {
-        toast.error('Please log in to delete comments');
-        return;
-      }
-
-      const response = await fetch('http://localhost:5000/comment/user/deletebytext', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          rollNo: user.rollno,
-          comment: comment.text,
-          type: type.toLowerCase()
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.error(errorData.message || 'Failed to delete comment');
-        return;
-      }
-
-      toast.success('Comment deleted successfully');
-
-      // Refresh the comments by refreshing the page
-      window.location.reload();
-    } catch (error) {
-      console.error('Error deleting comment:', error);
-      toast.error('An error occurred while deleting the comment');
     }
   };
 
@@ -189,14 +101,6 @@ export default function ContentGrid({ filteredItems, onDeletePost }) {
             key={item.id}
             className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-black/10 relative flex flex-col h-full"
           >
-            {item.isOwnPost && (
-              <span
-                className="absolute top-2 right-2 z-10 text-xs font-semibold px-3 py-1 rounded text-white"
-                style={{ backgroundColor: item.isVerified === false ? '#ef4444' : '#10b981' }}
-              >
-                {item.isVerified ? 'Verified' : 'Unverified'}
-              </span>
-            )}
             <div className="aspect-square overflow-hidden rounded-t-xl">
               <img
                 src={item.image || "/no_prev_img.png"}
@@ -228,14 +132,6 @@ export default function ContentGrid({ filteredItems, onDeletePost }) {
                       <span>{item.user.rollNumber}</span>
                       <span className="mx-1">•</span>
                       <span>{new Date(item.date).toLocaleString()}</span>
-                      {item.isOwnPost && (
-                        <>
-                          <span className="mx-1">•</span>
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded ${item.isVerified === false ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-                            {item.isVerified === false ? 'Unverified' : 'Verified'}
-                          </span>
-                        </>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -268,32 +164,24 @@ export default function ContentGrid({ filteredItems, onDeletePost }) {
                 </div>
               </div>
 
-              <div>
-
-              </div>
-              {/* Button section - now consistently at the bottom */}                <div className="mt-auto">
+              {/* Button section - consistently at the bottom */}
+              <div className="mt-auto">
                 <button
                   disabled={loadingStates[item.id]}
-                  className={`w-full py-2 ${item.isOwnPost ? 'bg-black' : 'bg-black hover:bg-gray-900'} text-white rounded-lg font-medium text-sm transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center`}
-                  onClick={() =>
-                    item.isOwnPost
-                      ? handleDeletePost(item.id, item.post_type || item.type)
-                      : handleAction(
-                        item.type === "Lost" ? "Found" : "Claim",
-                        item.type,
-                        item
-                      )
-                  }
+                  className="w-full py-2 bg-black hover:bg-gray-900 text-white rounded-lg font-medium text-sm transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center"
+                  onClick={() => handleAction(
+                    item.type === "Lost" ? "Found" : "Claim",
+                    item.type,
+                    item
+                  )}
                 >
                   {loadingStates[item.id] ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      {item.isOwnPost ? "Deleting..." : (item.type === "Lost" ? "Processing..." : "Processing...")}
+                      Processing...
                     </>
                   ) : (
-                    item.isOwnPost
-                      ? "Delete This Item"
-                      : (item.type === "Lost" ? "Found This Item" : "Claim This Item")
+                    item.type === "Lost" ? "Found This Item" : "Claim This Item"
                   )}
                 </button>
               </div>
@@ -338,31 +226,20 @@ export default function ContentGrid({ filteredItems, onDeletePost }) {
                                 </div>
                               )}
                             </div>
-                            <div className="flex-1">                                <div className="flex items-center justify-between">
-                              <div className="text-xs font-medium">
-                                {comment.user.name}
-                              </div>
-                              <div className="flex items-center gap-2">
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <div className="text-xs font-medium">
+                                  {comment.user.name}
+                                </div>
                                 <div className="text-xs text-gray-400">
                                   {new Date(comment.date).toLocaleString()}
                                 </div>
-                                {user && user.rollno && comment.user.name === user.name && (
-                                  <button style={{ marginLeft: "10px" }}
-                                    onClick={() => handleDeleteComment(comment, item.type)}
-                                    className="text-red-500 hover:text-red-700 transition-colors"
-                                    title="Delete comment"
-                                  >
-                                    <FaTrash size={12} />
-                                  </button>
-                                )}
                               </div>
-                            </div>
                               <div className="text-sm mt-1">
                                 {comment.text}
                               </div>
                             </div>
                           </div>
-
                         </div>
                       ))
                     ) : (
